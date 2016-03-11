@@ -36,8 +36,9 @@ def PTM(atoms, structures=None, alloys=False, cutoff=10.0):
         nearest = np.argsort(sqdist)[:14]
         positions = np.zeros((15,3))
         positions[1:] = relative_positions[nearest]
-        struct, alloy, rmsd, rot, nb_permut = ptmmodule.index_structure(positions)
-        result[i] = struct
+        data = ptmmodule.index_structure(positions)
+        #struct, alloy, rmsd, rot, nb_permut = xxx
+        result[i] = data[0]
     return result
 
 if __name__ == "__main__":
