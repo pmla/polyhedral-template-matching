@@ -96,16 +96,17 @@ def run(pos, nbrs):
 		nearest = np.argsort(sqdist)[:14]
 		positions = np.zeros((15,3))
 		positions[1:] = relative_positions[nearest]
-		(struct, alloy, rmsd, scale, rot, F, F_res, P, U) = ptmmodule.index_structure(positions)
-		if struct == 2:
-			vm, r = calc_fcc_strain(F, F_res, P, U, positions[:13])
-			strains[i] = vm
+		(struct, alloy, rmsd, scale, rot, F, F_res, P, U) = ptmmodule.index_structure(positions, calculate_strains=1)
+		#(struct, alloy, rmsd, scale, rot) = ptmmodule.index_structure(positions)
+		#if struct == 2:
+		#	vm, r = calc_fcc_strain(F, F_res, P, U, positions[:13])
+		#	strains[i] = vm
 		result[i] = struct
 
+	return result
 	indices = np.where(result == 2)[0]
 	plt.hist(strains[indices], bins=200)
 	plt.show()
-	return result
 
 def go():
 	dat_pos = open('../FeCu_positions.dat', 'rb').read()

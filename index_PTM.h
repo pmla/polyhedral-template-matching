@@ -1,6 +1,7 @@
 #ifndef INDEX_PTM_H
 #define INDEX_PTM_H
 
+#include <stdint.h>
 
 #define PTM_CHECK_SC	(1 << 0)
 #define PTM_CHECK_FCC	(1 << 1)

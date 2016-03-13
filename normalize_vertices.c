@@ -1,4 +1,4 @@
-#include <cmath>
+#include <math.h>
 
 
 double normalize_vertices(int num, double *points, double (*normalized)[3])
@@ -17,16 +17,12 @@ double normalize_vertices(int num, double *points, double (*normalized)[3])
 	sum[2] /= num;
 
 	//subtract barycentre
-	for (int i=1;i<num;i++)
+	for (int i=0;i<num;i++)
 	{
-		normalized[(i-1)][0] = points[i*3 + 0] - sum[0];
-		normalized[(i-1)][1] = points[i*3 + 1] - sum[1];
-		normalized[(i-1)][2] = points[i*3 + 2] - sum[2];
+		normalized[i][0] = points[i*3 + 0] - sum[0];
+		normalized[i][1] = points[i*3 + 1] - sum[1];
+		normalized[i][2] = points[i*3 + 2] - sum[2];
 	}
-
-	normalized[num - 1][0] = points[0] - sum[0];
-	normalized[num - 1][1] = points[1] - sum[1];
-	normalized[num - 1][2] = points[2] - sum[2];
 
 	//calculate mean length
 	double scale = 0.0;

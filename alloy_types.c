@@ -1,4 +1,3 @@
-#include <cstdint>
 #include "index_PTM.h"
 
 int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)

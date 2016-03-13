@@ -1,21 +1,24 @@
-#include <cmath>
-#include <cstdint>
-#include "deformation_gradient.hpp"
+#include <stdint.h>
+#include "deformation_gradient.h"
 
 
 //sc
-const double k_sc = 0.42857142857130609004;
-const double penrose_sc[7][3] = {	{0, 0, -k_sc},
+#define k_sc 0.42857142857130609004
+const double penrose_sc[7][3] = {	
+					{0, 0, 0},
+					{0, 0, -k_sc},
 					{0, 0, k_sc},
 					{0, -k_sc, 0},
 					{0, k_sc, 0},
 					{-k_sc, 0, 0},
 					{k_sc, 0, 0},
-					{0, 0, 0}};
+				};
 
 //fcc
-const double k_fcc = 0.16317848796621717278;
-const double penrose_fcc[13][3] = {	{0, k_fcc, k_fcc},
+#define k_fcc 0.16317848796621717278
+const double penrose_fcc[13][3] = {
+					{0, 0, 0},
+					{0, k_fcc, k_fcc},
 					{0, -k_fcc, -k_fcc},
 					{0, k_fcc, -k_fcc},
 					{0, -k_fcc, k_fcc},
@@ -27,11 +30,13 @@ const double penrose_fcc[13][3] = {	{0, k_fcc, k_fcc},
 					{-k_fcc, -k_fcc, 0},
 					{k_fcc, -k_fcc, 0},
 					{-k_fcc, k_fcc, -0},
-					{0, 0, 0}};
+				};
 
 //hcp
-const double k_hcp = 0.16317848796621717278;
-const double penrose_hcp[13][3] = {	{k_hcp, 0, k_hcp},
+#define k_hcp 0.16317848796621717278
+const double penrose_hcp[13][3] = {
+					{0, 0, 0},
+					{k_hcp, 0, k_hcp},
 					{-k_hcp/3, -4*k_hcp/3, -k_hcp/3},
 					{k_hcp, k_hcp, 0},
 					{-k_hcp/3, -k_hcp/3, -4*k_hcp/3},
@@ -43,12 +48,15 @@ const double penrose_hcp[13][3] = {	{k_hcp, 0, k_hcp},
 					{k_hcp, -k_hcp, 0},
 					{-k_hcp, 0, k_hcp},
 					{0, -k_hcp, k_hcp},
-					{0, 0, 0}};
+				};
 
 //ico
-const double k_ico = 0.12132256433512358940;
-const double phi = (1.0 + sqrt(5)) / 2;
-const double penrose_ico[13][3] = {	{0, k_ico, phi*k_ico},
+#define k_ico 0.12132256433512358940
+#define phi 1.61803398874989490253
+//((1.0 + sqrt(5)) / 2)
+const double penrose_ico[13][3] = {
+					{0, 0, 0},
+					{0, k_ico, phi*k_ico},
 					{0, -k_ico, -phi*k_ico},
 					{0, k_ico, -phi*k_ico},
 					{0, -k_ico, phi*k_ico},
@@ -60,11 +68,13 @@ const double penrose_ico[13][3] = {	{0, k_ico, phi*k_ico},
 					{phi*k_ico, 0, k_ico},
 					{phi*k_ico, 0, -k_ico},
 					{-phi*k_ico, 0, k_ico},
-					{0, 0, 0}};
+				};
 
 //bcc
-const double k_bcc = 0.10773502691899843053;
-const double penrose_bcc[15][3] = {	{-k_bcc, -k_bcc, -k_bcc},
+#define k_bcc 0.10773502691899843053
+const double penrose_bcc[15][3] = {
+					{0, 0, 0},
+					{-k_bcc, -k_bcc, -k_bcc},
 					{k_bcc, k_bcc, k_bcc},
 					{k_bcc, -k_bcc, -k_bcc},
 					{-k_bcc, k_bcc, k_bcc},
@@ -78,7 +88,7 @@ const double penrose_bcc[15][3] = {	{-k_bcc, -k_bcc, -k_bcc},
 					{0, 2*k_bcc, 0},
 					{-2*k_bcc, 0, 0},
 					{2*k_bcc, 0, -0},
-					{0, 0, 0}};
+				};
 
 void calculate_deformation_gradient(int num_points, const double (*ideal_points)[3], int8_t* mapping, double (*normalized)[3], const double (*penrose)[3], double* F, double* res)
 {

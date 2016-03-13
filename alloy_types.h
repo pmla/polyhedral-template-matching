@@ -1,7 +1,7 @@
-#ifndef ALLOY_TYPES_HPP
-#define ALLOY_TYPES_HPP
+#ifndef ALLOY_TYPES_H
+#define ALLOY_TYPES_H
 
-#include <cstdint>
+#include <stdint.h>
 
 int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers);
 

@@ -1,5 +1,7 @@
-#ifndef DEFORMATION_GRADIENT_HPP
-#define DEFORMATION_GRADIENT_HPP
+#ifndef DEFORMATION_GRADIENT_H
+#define DEFORMATION_GRADIENT_H
+
+#include <stdint.h>
 
 void calculate_deformation_gradient(int num_points, const double (*ideal_points)[3], int8_t* mapping, double (*normalized)[3], const double (*penrose)[3], double* F, double* res);
 

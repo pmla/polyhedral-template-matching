@@ -1,11 +1,14 @@
 #include <Python.h>
 #include <ndarraytypes.h>
+#include <stdbool.h>
 #include "index_PTM.h"
 
 
 #define MIN_NBRS 6
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 static PyObject* error(PyObject* type, char* msg)
 {
@@ -18,9 +21,10 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	PyArrayObject* obj_pos = NULL;
 	PyArrayObject* obj_num = NULL;
 	PyObject* obj_types = NULL;
+	PyObject* obj_strains = NULL;
 
-	static char* argnames[] = {"rel", "numbers", "structures", NULL};
-	if (!PyArg_ParseTupleAndKeywords(args, kw, "O|OO", argnames, &obj_pos, &obj_num, &obj_types))
+	static char* argnames[] = {"rel", "numbers", "structures", "calculate_strains", NULL};
+	if (!PyArg_ParseTupleAndKeywords(args, kw, "O|OOO", argnames, &obj_pos, &obj_num, &obj_types, &obj_strains))
 		return NULL;
 
 	int num_nbrs = 15;
@@ -35,12 +39,6 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	bool check_alloys = obj_num != NULL;
 	if (check_alloys)
 	{
-		//if (PyArray_NDIM(obj_num) != 1			//one-dimensional
-		//	|| PyArray_DIM(obj_num, 0) != num_nbrs	//need 14 nearest neighbours + central atom
-		//	|| PyArray_TYPE(obj_num) != NPY_INT	//array of ints
-		//	|| !PyArray_ISCARRAY_RO(obj_num))	//contiguous etc.
-		//	return error(PyExc_TypeError, "numbers array must be 14x1 integer array");
-
 		if (PyArray_NDIM(obj_num) != 1)			//one-dimensional
 			return error(PyExc_TypeError, "numbers array must be 1-dimensional");
 
@@ -95,6 +93,16 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 		}
 	}
 
+	bool calculate_strains = false;
+	if (obj_strains != NULL)
+	{
+		int ret = PyObject_IsTrue(obj_strains);
+		if (ret == -1)
+			return NULL;
+
+		calculate_strains = ret == 1;
+	}
+
 	double* pos = (double*)PyArray_DATA(obj_pos);
 	if (pos == NULL)
 		return NULL;
@@ -110,47 +118,29 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	int32_t type, alloy_type;
 	double scale, rmsd;
 	double q[4], F[9], lstsq_residual[3], U[9], P[9];
-	index_PTM(num_nbrs, pos, numbers, flags, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P);
-	if (type == PTM_MATCH_NONE)
-		return Py_BuildValue("iidd()()()()()", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY);
 
-	return Py_BuildValue("iidd(dddd)(ddddddddd)(ddd)(ddddddddd)(ddddddddd)",
-											type, alloy_type, rmsd, scale,
-											q[0], q[1], q[2], q[3],
-											F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8],
-											lstsq_residual[0], lstsq_residual[1], lstsq_residual[2],
-											P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8],
-											U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8]);
+	if (calculate_strains)
+	{
+		index_PTM(num_nbrs, pos, numbers, flags, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P);
+		if (type == PTM_MATCH_NONE)
+			return Py_BuildValue("iidd()()()()()", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY);
 
-
-	/*if (res->type == PTM_MATCH_SC)
-		return Py_BuildValue("iidd(dddd)(ddddddddd)(ddd)(ddddddddd)(ddddddddd)(iiiiiii)",
-											res->type, res->alloy_type, res->rmsd, res->scale,
-											q[0], q[1], q[2], q[3],
-											F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8],
-											residual[0], residual[1], residual[2],
-											P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8],
-											U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8],
-											b[0], b[1], b[2], b[3], b[4], b[5], b[6]);
-
-	else if (res->type == PTM_MATCH_FCC || res->type == PTM_MATCH_HCP || res->type == PTM_MATCH_ICO)
-		return Py_BuildValue("iidd(dddd)(ddddddddd)(ddd)(ddddddddd)(ddddddddd)(iiiiiiiiiiiii)",
-											res->type, res->alloy_type, res->rmsd, res->scale,
-											q[0], q[1], q[2], q[3],
-											F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8],
-											residual[0], residual[1], residual[2],
-											P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8],
-											U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8],
-											b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12]);
+		return Py_BuildValue("iidd(dddd)(ddddddddd)(ddd)(ddddddddd)(ddddddddd)",
+												type, alloy_type, rmsd, scale,
+												q[0], q[1], q[2], q[3],
+												F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8],
+												lstsq_residual[0], lstsq_residual[1], lstsq_residual[2],
+												P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8],
+												U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8]);
+	}
 	else
-		return Py_BuildValue("iidd(dddd)(ddddddddd)(ddd)(ddddddddd)(ddddddddd)(iiiiiiiiiiiiiii)",
-											res->type, res->alloy_type, res->rmsd, res->scale,
-											q[0], q[1], q[2], q[3],
-											F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8],
-											residual[0], residual[1], residual[2],
-											P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8],
-											U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8],
-											b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14]);*/
+	{
+		index_PTM(num_nbrs, pos, numbers, flags, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL);
+		if (type == PTM_MATCH_NONE)
+			return Py_BuildValue("iidd()", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY);
+
+		return Py_BuildValue("iidd(dddd)", type, alloy_type, rmsd, scale, q[0], q[1], q[2], q[3]);
+	}
 }
 
 static PyMethodDef PTMModuleMethods[] =
@@ -165,4 +155,7 @@ PyMODINIT_FUNC initptmmodule(void)
 	initialize_PTM();
 }
 
+#ifdef __cplusplus
 }
+#endif
+

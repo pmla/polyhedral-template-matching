@@ -1,15 +1,13 @@
-#time g++ -std=c++11 -g -O1 -Wall -Wextra main.cpp index_PTM.cpp convex_hull.cpp graph_data.cpp graph_tools.cpp qcprot.c nauty25r9/nauty.c nauty25r9/nautil.c nauty25r9/naugraph.c nauty25r9/schreier.c nauty25r9/naurng.c  -lCGAL -lgmp -frounding-math -Inauty25r9 -Wno-missing-field-initializers -Wno-sign-compare -Wno-write-strings -Wno-unused-parameter
+CXX = gcc
 
-CXX = g++-4.9
+C_SRC_FILES = ptmmodule.c canonical.c graph_data.c convex_hull_incremental.c index_PTM.c\
+	alloy_types.c qcprot.c deformation_gradient.c normalize_vertices.c quat.c\
+	svdpolar/polar_decomposition.c\
+	#selftest.c
 
-CPP_SRC_FILES = ptmmodule.cpp canonical.cpp graph_data.cpp convex_hull.cpp index_PTM.cpp\
-	alloy_types.cpp qcprot.cpp deformation_gradient.cpp normalize_vertices.cpp quat.cpp\
-	svdpolar/polar_decomposition.cpp\
-	#selftest.cpp
+HEADER_FILES = $(wildcard *.h)
 
-HEADER_FILES = $(wildcard *.h) $(wildcard *.hpp)
-
-CPP_OBJECT_FILES = $(CPP_SRC_FILES:%.cpp=%.o)
+C_OBJECT_FILES = $(C_SRC_FILES:%.c=%.o)
 
 PYTHONMODULE = ptmmodule.so
 
@@ -24,7 +22,7 @@ PYTHONINCLDIR = $(PYTHONPREFIX)/include/python$(PYTHONVERSION)
 PYTHONLIBDIR = $(PYTHONEXECPREFIX)/lib/python$(PYTHONVERSION)/config
 PYTHONLIB = python$(PYTHONVERSION)
 
-CXXFLAGS = -std=c++11 -fPIC -g -O2 -Wall -Wextra -Wno-missing-field-initializers -Wno-sign-compare -Wno-write-strings -Wno-unused-parameter 
+CXXFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra
 
 ifeq ($(shell uname),Darwin)
 MAKESHARED = -bundle -undefined dynamic_lookup
@@ -33,12 +31,12 @@ MAKESHARED = -shared
 endif
 
 # Rule for linking module
-$(PYTHONMODULE): $(CPP_OBJECT_FILES)
-	$(CXX) $(MAKESHARED) -fPIC -g -O2 -o $(PYTHONMODULE) $(CPP_OBJECT_FILES) -z defs -L$(PYTHONLIBDIR) -l$(PYTHONLIB)
+$(PYTHONMODULE): $(C_OBJECT_FILES)
+	$(CXX) $(MAKESHARED) -fPIC -g -O2 -o $(PYTHONMODULE) $(C_OBJECT_FILES) -z defs -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
 
 # Lazy again: all object files depend on all header files
 %.o: $(HEADER_FILES)
 
-# Rule for compiling CPP source
-%.o: %.cpp
+# Rule for compiling C source
+%.o: %.c
 	$(CXX) -c $(CXXFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<

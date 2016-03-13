@@ -1,3 +1,6 @@
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+
 //###########################################################
 // Compute the Givens half-angle, construct the Givens quaternion and the rotation sine/cosine (for the full angle)
 //###########################################################
@@ -8,8 +11,8 @@ ENABLE_SCALAR_IMPLEMENTATION(Ssh.ui=Ssh.ui&SANPIVOT.ui;)
 
 ENABLE_SCALAR_IMPLEMENTATION(Stmp5.f=0.;)
 ENABLE_SCALAR_IMPLEMENTATION(Sch.f=Stmp5.f-SAPIVOT.f;)
-ENABLE_SCALAR_IMPLEMENTATION(Sch.f=std::max(Sch.f,SAPIVOT.f);)
-ENABLE_SCALAR_IMPLEMENTATION(Sch.f=std::max(Sch.f,Ssmall_number.f);)
+ENABLE_SCALAR_IMPLEMENTATION(Sch.f=MAX(Sch.f,SAPIVOT.f);)
+ENABLE_SCALAR_IMPLEMENTATION(Sch.f=MAX(Sch.f,Ssmall_number.f);)
 ENABLE_SCALAR_IMPLEMENTATION(Stmp5.ui=(SAPIVOT.f>=Stmp5.f)?0xffffffff:0;)
 
 ENABLE_SCALAR_IMPLEMENTATION(Stmp1.f=Sch.f*Sch.f;)

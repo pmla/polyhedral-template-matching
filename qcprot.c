@@ -1,7 +1,7 @@
 /*******************************************************************************
  *  -/_|:|_|_\- 
  *
- *  File:		   qcprot.cpp
+ *  File:		   qcprot.c
  *  Version:		1.4
  *
  *  Function:	   Rapid calculation of the least-squares rotation using a 
@@ -26,6 +26,7 @@
  *
  *				  pliu24@its.jnj.com
  * 
+ *  Modified by PM Larsen for use in Polyhedral Template Matching
  *
  *	If you use this QCP rotation calculation method in a publication, please
  *	reference:
@@ -82,9 +83,11 @@
  *					Also changed some functions to static
  *	2011/07/08	  put in fabs() to fix taking sqrt of small neg numbers, fp error
  *	2012/07/26	  minor changes to comments and main.c, more info (v.1.4)
+ *
+ *      2016/02/20        modified for use in Polyhedral Template Matching.  InnerProduct function now takes permutation array.
  *  
  ******************************************************************************/
-#include "qcprot.hpp"
+#include "qcprot.h"
 
 int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int len, double minScore)
 {

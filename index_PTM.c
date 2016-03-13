@@ -1,19 +1,24 @@
-#include <cassert>
-#include <cstring>
-#include <cfloat>
-#include <fstream>
-#include <algorithm>
-#include "reference_templates.hpp"
-#include "convex_hull.hpp"
-#include "canonical.hpp"
-#include "graph_data.hpp"
-#include "deformation_gradient.hpp"
-#include "alloy_types.hpp"
-#include "qcprot.hpp"
-#include "quat.hpp"
-#include "normalize_vertices.hpp"
-#include "svdpolar/polar_decomposition.hpp"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <float.h>
+#include <assert.h>
+#include "reference_templates.h"
+#include "convex_hull_incremental.h"
+#include "canonical.h"
+#include "graph_data.h"
+#include "deformation_gradient.h"
+#include "alloy_types.h"
+#include "qcprot.h"
+#include "quat.h"
+#include "normalize_vertices.h"
+#include "svdpolar/polar_decomposition.h"
 #include "index_PTM.h"
+
+
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 
 typedef struct
@@ -61,7 +66,7 @@ static int graph_degree(int num_facets, int8_t facets[][3], int num_nodes, int8_
 
 	int8_t max_degree = 0;
 	for (int i = 0;i<num_nodes;i++)
-		max_degree = std::max(max_degree, degree[i]);
+		max_degree = MAX(max_degree, degree[i]);
 
 	return max_degree;
 }
@@ -72,7 +77,7 @@ static void make_facets_clockwise(int num_facets, int8_t (*facets)[3], const dou
 	double origin[3] = {0, 0, 0};
 
 	for (int i = 0;i<num_facets;i++)
-		add_facet((double*)points, facets[i][0], facets[i][1], facets[i][2], facets[i], plane_normal, origin);
+		add_facet(points, facets[i][0], facets[i][1], facets[i][2], facets[i], plane_normal, origin);
 }
 
 static void initialize_graphs(refdata_t* s)
@@ -83,7 +88,7 @@ static void initialize_graphs(refdata_t* s)
 		int _max_degree = graph_degree(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree);
 		assert(_max_degree <= s->max_degree);
 
-		make_facets_clockwise(s->num_facets, s->graphs[i].facets, s->points);
+		make_facets_clockwise(s->num_facets, s->graphs[i].facets, &s->points[1]);
 		s->graphs[i].hash = canonical_form(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree, s->graphs[i].canonical_labelling);
 	}
 }
@@ -119,10 +124,10 @@ static void check_graphs(	refdata_t* s,
 		{
 			graph_t* gref = &s->graphs[i];
 
-			for (int j = 0;j<(int)gref->automorphisms.size();j++)
+			for (int j = 0;j<gref->num_automorphisms;j++)
 			{
 				for (int k=0;k<num_points;k++)
-					forward_mapping[gref->automorphisms[j][k]] = inverse_labelling[ gref->canonical_labelling[k] ];
+					forward_mapping[automorphisms[gref->automorphism_index + j][k]] = inverse_labelling[ gref->canonical_labelling[k] ];
 
 				double A0[9], q[4], rmsd;
 				double E0 = InnerProduct(A0, num_points, ideal_points, normalized, forward_mapping);
@@ -142,14 +147,11 @@ static void check_graphs(	refdata_t* s,
 	}
 }
 
-static void match_general(refdata_t* s, double* points, result_t* res)
+static void match_general(refdata_t* s, double (*ch_points)[3], double* points, convexhull_t* ch, result_t* res)
 {
-	double normalized[s->num_nbrs + 1][3];
-	double scale = normalize_vertices(s->num_nbrs + 1, points, normalized);
-
 	int8_t degree[s->num_nbrs];
 	int8_t facets[s->num_facets][3];
-	bool ok = get_convex_hull(s->num_nbrs + 1, (double*)normalized, s->num_facets, facets);
+	bool ok = ch->ok = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, s->num_facets, ch, facets);
 	if (!ok)
 		return;
 
@@ -162,29 +164,32 @@ static void match_general(refdata_t* s, double* points, result_t* res)
 			if (degree[i] != 4)
 				return;
 
+	double normalized[s->num_nbrs + 1][3];
+	double scale = normalize_vertices(s->num_nbrs + 1, points, normalized);
+
 	int8_t canonical_labelling[s->num_nbrs + 1];
 	uint64_t hash = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling);
 	check_graphs(s, hash, canonical_labelling, scale, normalized, res);
 }
 
-static void match_fcc_hcp_ico(double* points, int32_t flags, result_t* res)
+static void match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t flags, convexhull_t* ch, result_t* res)
 {
 	int num_nbrs = structure_fcc.num_nbrs;
 	int num_facets = structure_fcc.num_facets;
 	int max_degree = structure_fcc.max_degree;
 
-	double normalized[num_nbrs + 1][3];
-	double scale = normalize_vertices(num_nbrs + 1, points, normalized);
-
 	int8_t degree[num_nbrs];
 	int8_t facets[num_facets][3];
-	bool ok = get_convex_hull(num_nbrs + 1, (double*)normalized, num_facets, facets);
+	bool ok = ch->ok = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, num_facets, ch, facets);
 	if (!ok)
 		return;
 
 	int _max_degree = graph_degree(num_facets, facets, num_nbrs, degree);
 	if (_max_degree > max_degree)
 		return;
+
+	double normalized[num_nbrs + 1][3];
+	double scale = normalize_vertices(num_nbrs + 1, points, normalized);
 
 	int8_t canonical_labelling[num_nbrs + 1];
 	uint64_t hash = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling);
@@ -205,7 +210,12 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
 		assert(num_points >= structure_fcc.num_nbrs + 1);
 
-	
+
+	convexhull_t ch;
+	ch.ok = false;
+	double ch_points[15][3];
+	normalize_vertices(num_points, points, ch_points);
+
 	result_t res;
 	res.ref_struct = NULL;
 	res.rmsd = DBL_MAX;
@@ -213,13 +223,13 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 	*p_alloy_type = PTM_ALLOY_NONE;
 
 	if (flags & PTM_CHECK_SC)
-		match_general(&structure_sc, points, &res);
+		match_general(&structure_sc, ch_points, points, &ch, &res);
 
 	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
-		match_fcc_hcp_ico(points, flags, &res);
+		match_fcc_hcp_ico(ch_points, points, flags, &ch, &res);
 
 	if (flags & PTM_CHECK_BCC)
-		match_general(&structure_bcc, points, &res);
+		match_general(&structure_bcc, ch_points, points, &ch, &res);
 
 	refdata_t* ref = res.ref_struct;
 	if (ref != NULL)
@@ -232,8 +242,13 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 		if (ref->type == PTM_MATCH_SC || ref->type == PTM_MATCH_FCC || ref->type == PTM_MATCH_BCC)
 			rotate_quaternion_into_cubic_fundamental_zone(res.q);
 
-		calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res.mapping, res.normalized, ref->penrose, F, F_res);
-		left_sided_polar_decomposition_3x3(F, P, U);
+		if (F != NULL && F_res != NULL)
+		{
+			calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res.mapping, res.normalized, ref->penrose, F, F_res);
+
+			if (P != NULL && U != NULL)
+				left_sided_polar_decomposition_3x3(F, P, U);
+		}
 	}
 
 	*p_rmsd = res.rmsd;

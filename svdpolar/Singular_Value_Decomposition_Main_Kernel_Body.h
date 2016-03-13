@@ -118,7 +118,7 @@
 #define VTMP2 Vtmp2
 #define VTMP3 Vtmp3
 
-#include "Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.hpp"
+#include "Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.h"
 
 #undef SS11
 #undef SS21
@@ -174,7 +174,7 @@
 #define VTMP2 Vtmp3
 #define VTMP3 Vtmp1
 
-#include "Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.hpp"
+#include "Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.h"
 
 #undef SS11
 #undef SS21
@@ -230,7 +230,7 @@
 #define VTMP2 Vtmp1
 #define VTMP3 Vtmp2
 
-#include "Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.hpp"
+#include "Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.h"
 
 #undef SS11
 #undef SS21
@@ -734,7 +734,7 @@ V[8] = Sv33.f;
 #define VU31 Vu31
 #define VU32 Vu32
 
-#include "Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.hpp"
+#include "Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.h"
     
 #undef SAPIVOT
 #undef SANPIVOT
@@ -798,7 +798,7 @@ V[8] = Sv33.f;
 #define VU31 Vu31
 #define VU32 Vu33
 
-#include "Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.hpp"
+#include "Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.h"
     
 #undef SAPIVOT
 #undef SANPIVOT
@@ -862,7 +862,7 @@ V[8] = Sv33.f;
 #define VU31 Vu32
 #define VU32 Vu33
 
-#include "Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.hpp"
+#include "Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.h"
     
 #undef SAPIVOT
 #undef SANPIVOT
