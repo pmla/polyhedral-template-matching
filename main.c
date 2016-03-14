@@ -87,7 +87,7 @@ int main()
 	int counts[6] = {0};
 
 	double rmsd_sum = 0.0;
-	//for (int j=0;j<10;j++)
+	for (int j=0;j<10;j++)
 	for (int i=0;i<num_atoms;i++)
 	{
 		double nbr[max_nbrs+1][3];
