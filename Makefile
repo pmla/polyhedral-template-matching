@@ -22,7 +22,7 @@ PYTHONINCLDIR = $(PYTHONPREFIX)/include/python$(PYTHONVERSION)
 PYTHONLIBDIR = $(PYTHONEXECPREFIX)/lib/python$(PYTHONVERSION)/config
 PYTHONLIB = python$(PYTHONVERSION)
 
-CXXFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra -z defs
+CXXFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra
 
 ifeq ($(shell uname),Darwin)
 MAKESHARED = -bundle -undefined dynamic_lookup
