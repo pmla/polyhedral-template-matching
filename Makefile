@@ -1,11 +1,13 @@
-CXX = gcc
+CC = gcc
 
-C_SRC_FILES = ptmmodule.c canonical.c graph_data.c convex_hull_incremental.c index_PTM.c\
-	alloy_types.c qcprot.c deformation_gradient.c normalize_vertices.c quat.c\
-	svdpolar/polar_decomposition.c\
-	#selftest.c
+C_SRC_FILES = ptmmodule.c canonical.c graph_data.c convex_hull_incremental.c \
+	index_PTM.c alloy_types.c qcprot.c deformation_gradient.c \
+	normalize_vertices.c quat.c svdpolar/polar_decomposition.c
 
-HEADER_FILES = $(wildcard *.h)
+HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
+	deformation_gradient.h graph_data.h index_PTM.h \
+	normalize_vertices.h qcprot.h quat.h reference_templates.h \
+	svdpolar/polar_decomposition.h
 
 C_OBJECT_FILES = $(C_SRC_FILES:%.c=%.o)
 
@@ -22,7 +24,7 @@ PYTHONINCLDIR = $(PYTHONPREFIX)/include/python$(PYTHONVERSION)
 PYTHONLIBDIR = $(PYTHONEXECPREFIX)/lib/python$(PYTHONVERSION)/config
 PYTHONLIB = python$(PYTHONVERSION)
 
-CXXFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra
+CFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra
 
 ifeq ($(shell uname),Darwin)
 MAKESHARED = -bundle -undefined dynamic_lookup
@@ -32,11 +34,17 @@ endif
 
 # Rule for linking module
 $(PYTHONMODULE): $(C_OBJECT_FILES)
-	$(CXX) $(MAKESHARED) -fPIC -g -O2 -o $(PYTHONMODULE) $(C_OBJECT_FILES) -z defs -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
+	$(CC) $(MAKESHARED) -fPIC -g -O2 -o $(PYTHONMODULE) $(C_OBJECT_FILES) -z defs -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
 
 # Lazy again: all object files depend on all header files
 %.o: $(HEADER_FILES)
 
 # Rule for compiling C source
 %.o: %.c
-	$(CXX) -c $(CXXFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
+	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
+
+clean:
+	-rm *.o ptmmodule.so
+
+cleanall: clean
+	rm -r build
