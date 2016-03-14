@@ -9,9 +9,11 @@ from setuptools.command.build_ext import build_ext as _build_ext
 from glob import glob
 import os
 
-c_src_files = glob('*.c')
-cpp_src_files = glob('*.cpp') + glob('svdpolar/*.cpp')
-extra_compile_args = ['-std=c++11']
+c_src_files = glob('*.c') + glob('svdpolar/*.c')
+cpp_src_files = []
+for f in ['main.c', 'selftest.c']:
+    c_src_files.remove(f)
+extra_compile_args = ['-std=c99']
 
 name = 'ptmmodule'
 
