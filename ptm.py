@@ -2,6 +2,10 @@
 
 This module runs Polyhedral Template Matching on an Atoms object from ASE/Asap.
 It requires that both ASE and Asap are installed.
+
+This module can also be used as inspiration for how to use Polyhedral Template
+Matching in other codes.
+
 """
 
 import asap3
