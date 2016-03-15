@@ -11,7 +11,7 @@ HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
 	normalize_vertices.h qcprot.h quat.h reference_templates.h \
 	svdpolar/polar_decomposition.h
 
-OBJDIR = obj
+OBJDIR = .
 
 C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
 C_OBJECT_SVDPOLAR_FILES = $(C_SRC_SVDPOLAR_FILES:%.c=$(OBJDIR)/%.o) 
