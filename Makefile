@@ -41,7 +41,7 @@ all: $(OBJDIR) $(OBJDIR)/$(PYTHONMODULE)
 
 # Rule for linking module
 $(OBJDIR)/$(PYTHONMODULE): $(C_OBJECT_FILES) $(C_OBJECT_SVDPOLAR_FILES)
-	$(CC) $(MAKESHARED) -fPIC -g -O2 -o $@ $^ -z defs -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
+	$(CC) $(MAKESHARED) -fPIC -g -O2 -o $@ $^ -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
 
 $(OBJDIR):
 	mkdir $(OBJDIR)
