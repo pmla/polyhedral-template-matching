@@ -37,7 +37,7 @@ int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 		return PTM_ALLOY_L12_AU;
 
 	for (int i=0;i<len;i++)
-		temp[i] = numbers[mapping[i] + 1];
+		temp[i] = numbers[mapping[i + 1]];
 
 	if (num_au == 4)
 	{

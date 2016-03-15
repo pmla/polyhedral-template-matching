@@ -1,5 +1,6 @@
 #include <Python.h>
 #include <ndarraytypes.h>
+#include <arrayobject.h>
 #include <stdbool.h>
 #include "index_PTM.h"
 
@@ -30,11 +31,11 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	int num_nbrs = 15;
 
 	if (PyArray_NDIM(obj_pos) != 2			//two-dimensional
-		|| PyArray_DIM(obj_pos, 0) != num_nbrs	//need 14 nearest neighbours + central atom
+		|| PyArray_DIM(obj_pos, 0) != num_nbrs	//need 15 nearest neighbours + central atom
 		|| PyArray_DIM(obj_pos, 1) != 3		//second dim is 3
 		|| PyArray_TYPE(obj_pos) != NPY_DOUBLE	//array of double
 		|| !PyArray_ISCARRAY_RO(obj_pos))	//contiguous etc.
-		return error(PyExc_TypeError, "neighbour array must be 14x3 double array");
+		return error(PyExc_TypeError, "neighbour array must be 15x3 double array");
 
 	bool check_alloys = obj_num != NULL;
 	if (check_alloys)
@@ -45,10 +46,10 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 		if (PyArray_DIM(obj_num, 0) != num_nbrs)	//need 14 nearest neighbours + central atom
 			return error(PyExc_TypeError, "numbers array must be contain 15 elements");
 
-		if (PyArray_TYPE(obj_num) != NPY_INT)	//array of ints
+		if (PyArray_TYPE(obj_num) != NPY_INT)		//array of ints
 			return error(PyExc_TypeError, "numbers array must be have dtype NPY_INT");
 
-		if (!PyArray_ISCARRAY_RO(obj_num))	//contiguous etc.
+		if (!PyArray_ISCARRAY_RO(obj_num))		//contiguous etc.
 			return error(PyExc_TypeError, "numbers array must be contiguous array");
 	}
 
@@ -119,27 +120,49 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	double scale, rmsd;
 	double q[4], F[9], lstsq_residual[3], U[9], P[9];
 
+	npy_intp dims_3[2] = {3};
+	npy_intp dims_4[2] = {4};
+	npy_intp dims_3_3[2] = {3, 3};
+
+
 	if (calculate_strains)
 	{
 		index_PTM(num_nbrs, pos, numbers, flags, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P);
 		if (type == PTM_MATCH_NONE)
-			return Py_BuildValue("iidd()()()()()", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY);
+			return Py_BuildValue("iiddOOOOO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None, Py_None, Py_None, Py_None, Py_None);
 
-		return Py_BuildValue("iidd(dddd)(ddddddddd)(ddd)(ddddddddd)(ddddddddd)",
-												type, alloy_type, rmsd, scale,
-												q[0], q[1], q[2], q[3],
-												F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8],
-												lstsq_residual[0], lstsq_residual[1], lstsq_residual[2],
-												P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8],
-												U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8]);
+		PyObject* arr_q = PyArray_SimpleNew(1, dims_4, NPY_DOUBLE);
+		PyObject* arr_res = PyArray_SimpleNew(1, dims_3, NPY_DOUBLE);
+		PyObject* arr_F = PyArray_SimpleNew(2, dims_3_3, NPY_DOUBLE);
+		PyObject* arr_P = PyArray_SimpleNew(2, dims_3_3, NPY_DOUBLE);
+		PyObject* arr_U = PyArray_SimpleNew(2, dims_3_3, NPY_DOUBLE);
+
+		memcpy(PyArray_DATA((PyArrayObject*)arr_res), lstsq_residual, 3 * sizeof(double));
+		memcpy(PyArray_DATA((PyArrayObject*)arr_F), F, 9 * sizeof(double));
+		memcpy(PyArray_DATA((PyArrayObject*)arr_P), P, 9 * sizeof(double));
+		memcpy(PyArray_DATA((PyArrayObject*)arr_U), U, 9 * sizeof(double));
+		memcpy(PyArray_DATA((PyArrayObject*)arr_q), q, 4 * sizeof(double));
+
+		PyObject* result = Py_BuildValue("iiddOOOOO", type, alloy_type, rmsd, scale, arr_q, arr_F, arr_res, arr_P, arr_U);
+
+		Py_DECREF(arr_q);
+		Py_DECREF(arr_res);
+		Py_DECREF(arr_F);
+		Py_DECREF(arr_P);
+		Py_DECREF(arr_U);
+		return result;
 	}
 	else
 	{
 		index_PTM(num_nbrs, pos, numbers, flags, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL);
 		if (type == PTM_MATCH_NONE)
-			return Py_BuildValue("iidd()", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY);
+			return Py_BuildValue("iiddO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None);
 
-		return Py_BuildValue("iidd(dddd)", type, alloy_type, rmsd, scale, q[0], q[1], q[2], q[3]);
+		PyObject* arr_q = PyArray_SimpleNew(1, dims_4, NPY_DOUBLE);
+		memcpy(PyArray_DATA((PyArrayObject*)arr_q), q, 4 * sizeof(double));
+		PyObject* result = Py_BuildValue("iiddO", type, alloy_type, rmsd, scale, arr_q);
+		Py_DECREF(arr_q);
+		return result;
 	}
 }
 
@@ -152,6 +175,7 @@ static PyMethodDef PTMModuleMethods[] =
 PyMODINIT_FUNC initptmmodule(void)
 {
 	(void) Py_InitModule("ptmmodule", PTMModuleMethods);
+	import_array();
 	initialize_PTM();
 }
 
