@@ -2,14 +2,19 @@ CC = gcc
 
 C_SRC_FILES = ptmmodule.c canonical.c graph_data.c convex_hull_incremental.c \
 	index_PTM.c alloy_types.c qcprot.c deformation_gradient.c \
-	normalize_vertices.c quat.c svdpolar/polar_decomposition.c
+	normalize_vertices.c quat.c
+
+C_SRC_SVDPOLAR_FILES = polar_decomposition.c
 
 HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
 	deformation_gradient.h graph_data.h index_PTM.h \
 	normalize_vertices.h qcprot.h quat.h reference_templates.h \
 	svdpolar/polar_decomposition.h
 
-C_OBJECT_FILES = $(C_SRC_FILES:%.c=%.o)
+OBJDIR = .
+
+C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
+C_OBJECT_SVDPOLAR_FILES = $(C_SRC_SVDPOLAR_FILES:%.c=$(OBJDIR)/%.o) 
 
 PYTHONMODULE = ptmmodule.so
 
@@ -32,19 +37,27 @@ else
 MAKESHARED = -shared
 endif
 
+all: $(OBJDIR) $(OBJDIR)/$(PYTHONMODULE)
+
 # Rule for linking module
-$(PYTHONMODULE): $(C_OBJECT_FILES)
-	$(CC) $(MAKESHARED) -fPIC -g -O2 -o $(PYTHONMODULE) $(C_OBJECT_FILES) -z defs -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
+$(OBJDIR)/$(PYTHONMODULE): $(C_OBJECT_FILES) $(C_OBJECT_SVDPOLAR_FILES)
+	$(CC) $(MAKESHARED) -fPIC -g -O2 -o $@ $^ -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
+
+$(OBJDIR):
+	mkdir $(OBJDIR)
 
 # Lazy again: all object files depend on all header files
-%.o: $(HEADER_FILES)
+$(OBJDIR)/%.o: $(HEADER_FILES)
 
 # Rule for compiling C source
-%.o: %.c
+$(OBJDIR)/%.o: svdpolar/%.c
+	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
+
+$(OBJDIR)/%.o: %.c
 	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
 
 clean:
-	-rm *.o ptmmodule.so
+	rm -f $(OBJDIR)/*.o $(OBJDIR)/ptmmodule.so
 
 cleanall: clean
-	rm -r build
+	rm -rf build
