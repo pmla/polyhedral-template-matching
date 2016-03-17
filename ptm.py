@@ -84,7 +84,6 @@ def PTM(atoms, target_structures=None, calculate_strains=False, cutoff=10.0):
         z = np.zeros(15, np.int32)
         z[0] = z_all[i]
         z[1:] = z_all[indices[nearest]]
-        print z.dtype
         data = ptmmodule.index_structure(positions, z, 
                                          calculate_strains=calculate_strains)
         # data = (struct, alloy, rmsd, scale, rotation)
