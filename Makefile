@@ -2,7 +2,7 @@ CC = gcc
 
 C_SRC_FILES = canonical.c graph_data.c convex_hull_incremental.c \
 	index_PTM.c alloy_types.c qcprot.c deformation_gradient.c \
-	normalize_vertices.c quat.c
+	normalize_vertices.c quat.c unittest.c
 
 C_SRC_MODULE_FILE = ptmmodule.c 
 
@@ -11,7 +11,7 @@ C_SRC_SVDPOLAR_FILES = polar_decomposition.c
 HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
 	deformation_gradient.h graph_data.h index_PTM.h \
 	normalize_vertices.h qcprot.h quat.h reference_templates.h \
-	svdpolar/polar_decomposition.h
+	svdpolar/polar_decomposition.h unittest.h
 
 OBJDIR = .
 
