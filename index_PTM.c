@@ -39,7 +39,6 @@ typedef struct
 	double scale;
 	double q[4];		//rotation in quaternion form (rigid body transformation)
 	int8_t mapping[15];
-	double normalized[15][3];
 	refdata_t* ref_struct;
 } result_t;
 
@@ -106,20 +105,36 @@ int initialize_PTM()
 static void check_graphs(	refdata_t* s,
 				uint64_t hash,
 				int8_t* canonical_labelling,
-				double scale,
 				double (*normalized)[3],
 				result_t* res)
 {
 	int num_points = s->num_nbrs + 1;
 	const double (*ideal_points)[3] = s->points;
 	int8_t inverse_labelling[num_points];
-	int8_t forward_mapping[num_points];
+	int8_t mapping[num_points];
 
 	for (int i=0; i<num_points; i++)
 		inverse_labelling[ canonical_labelling[i] ] = i;
 
+	double G1 = 0, G2 = 0;
+	for (int i=0;i<num_points;i++)
+	{
+		double x1 = ideal_points[i][0];
+		double y1 = ideal_points[i][1];
+		double z1 = ideal_points[i][2];
+
+		double x2 = normalized[i][0];
+		double y2 = normalized[i][1];
+		double z2 = normalized[i][2];
+
+		G1 += x1 * x1 + y1 * y1 + z1 * z1;
+		G2 += x2 * x2 + y2 * y2 + z2 * z2;
+	}
+	double E0 = (G1 + G2) / 2;
+
 	for (int i = 0;i<s->num_graphs;i++)
 	{
+//printf("graph hash: %lx\n", s->graphs[i].hash);
 		if (hash == s->graphs[i].hash)
 		{
 			graph_t* gref = &s->graphs[i];
@@ -127,11 +142,30 @@ static void check_graphs(	refdata_t* s,
 			for (int j = 0;j<gref->num_automorphisms;j++)
 			{
 				for (int k=0;k<num_points;k++)
-					forward_mapping[automorphisms[gref->automorphism_index + j][k]] = inverse_labelling[ gref->canonical_labelling[k] ];
+					mapping[automorphisms[gref->automorphism_index + j][k]] = inverse_labelling[ gref->canonical_labelling[k] ];
 
 				double A0[9], q[4], rmsd;
-				double E0 = InnerProduct(A0, num_points, ideal_points, normalized, forward_mapping);
-				FastCalcRMSDAndRotation(q, A0, &rmsd, E0, num_points, -1);
+				InnerProduct(A0, num_points, ideal_points, normalized, mapping);
+
+				double rot[9];
+				FastCalcRMSDAndRotation(q, A0, &rmsd, E0, num_points, -1, rot);
+
+				double k0 = 0;
+				for (int ii=0;ii<num_points;ii++)
+				{
+					for (int jj=0;jj<3;jj++)
+					{
+						double v = 0.0;
+						for (int kk=0;kk<3;kk++)
+							v += rot[jj*3+kk] * ideal_points[ii][kk];
+
+						k0 += v * normalized[mapping[ii]][jj];
+					}
+				}
+
+				double scale = k0 / G2;
+				rmsd = sqrt(fabs(G1 - scale*k0) / num_points);
+//printf("got one: %f\n", rmsd);
 
 				if (rmsd < res->rmsd)
 				{
@@ -139,40 +173,52 @@ static void check_graphs(	refdata_t* s,
 					res->scale = scale;
 					res->ref_struct = s;
 					memcpy(res->q, q, 4 * sizeof(double));
-					memcpy(res->mapping, forward_mapping, sizeof(int8_t) * num_points);
-					memcpy(res->normalized, normalized, 3 * sizeof(double) * num_points);
+					memcpy(res->mapping, mapping, sizeof(int8_t) * num_points);
 				}
 			}
 		}
 	}
 }
 
-static void match_general(refdata_t* s, double (*ch_points)[3], double* points, convexhull_t* ch, result_t* res)
+static int match_general(refdata_t* s, double (*ch_points)[3], double* points, convexhull_t* ch, result_t* res)
 {
 	int8_t degree[s->num_nbrs];
 	int8_t facets[s->num_facets][3];
-	bool ok = ch->ok = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, s->num_facets, ch, facets);
-	if (!ok)
-		return;
+	int ret = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, s->num_facets, ch, facets);
+	ch->ok = ret == 0;
+
+#ifdef DEBUG
+	printf("s->type: %d\tret: %d\n", s->type, ret);
+#endif
+	if (ret != 0)
+		return ret;
 
 	int max_degree = graph_degree(s->num_facets, facets, s->num_nbrs, degree);
 	if (max_degree > s->max_degree)
-		return;
+		return -7;
 
 	if (s->type == PTM_MATCH_SC)
 		for (int i = 0;i<s->num_nbrs;i++)
 			if (degree[i] != 4)
-				return;
+				return -8;
 
 	double normalized[s->num_nbrs + 1][3];
-	double scale = normalize_vertices(s->num_nbrs + 1, points, normalized);
+	subtract_barycentre(s->num_nbrs + 1, points, normalized);
 
 	int8_t canonical_labelling[s->num_nbrs + 1];
 	uint64_t hash = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling);
-	check_graphs(s, hash, canonical_labelling, scale, normalized, res);
+#ifdef DEBUG
+	printf("hash: %lx\n", hash);
+	printf("degree:\t");
+	for (int i = 0;i<s->num_nbrs;i++)
+		printf("%2d ", degree[i]);
+	printf("\n");
+#endif
+	check_graphs(s, hash, canonical_labelling, normalized, res);
+	return 0;
 }
 
-static void match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t flags, convexhull_t* ch, result_t* res)
+static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t flags, convexhull_t* ch, result_t* res)
 {
 	int num_nbrs = structure_fcc.num_nbrs;
 	int num_facets = structure_fcc.num_facets;
@@ -180,22 +226,35 @@ static void match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fl
 
 	int8_t degree[num_nbrs];
 	int8_t facets[num_facets][3];
-	bool ok = ch->ok = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, num_facets, ch, facets);
-	if (!ok)
-		return;
+	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, num_facets, ch, facets);
+	ch->ok = ret == 0;
+
+#ifdef DEBUG
+	printf("s->type: %d\tret: %d\n", 2, ret);
+#endif
+	if (ret != 0)
+		return ret;
 
 	int _max_degree = graph_degree(num_facets, facets, num_nbrs, degree);
 	if (_max_degree > max_degree)
-		return;
+		return -9;
 
 	double normalized[num_nbrs + 1][3];
-	double scale = normalize_vertices(num_nbrs + 1, points, normalized);
+	subtract_barycentre(num_nbrs + 1, points, normalized);
 
 	int8_t canonical_labelling[num_nbrs + 1];
 	uint64_t hash = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling);
-	if (flags & PTM_CHECK_FCC)	check_graphs(&structure_fcc, hash, canonical_labelling, scale, normalized, res);
-	if (flags & PTM_CHECK_HCP)	check_graphs(&structure_hcp, hash, canonical_labelling, scale, normalized, res);
-	if (flags & PTM_CHECK_ICO)	check_graphs(&structure_ico, hash, canonical_labelling, scale, normalized, res);
+#ifdef DEBUG
+	printf("hash: %lx\n", hash);
+	printf("degree:\t");
+	for (int i = 0;i<num_nbrs;i++)
+		printf("%2d ", degree[i]);
+	printf("\n");
+#endif
+	if (flags & PTM_CHECK_FCC)	check_graphs(&structure_fcc, hash, canonical_labelling, normalized, res);
+	if (flags & PTM_CHECK_HCP)	check_graphs(&structure_hcp, hash, canonical_labelling, normalized, res);
+	if (flags & PTM_CHECK_ICO)	check_graphs(&structure_ico, hash, canonical_labelling, normalized, res);
+	return 0;
 }
 
 void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
@@ -216,6 +275,12 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 	double ch_points[15][3];
 	normalize_vertices(num_points, points, ch_points);
 
+#ifdef DEBUG
+	for (int i = 0;i<num_points;i++)
+		printf("%.2f\t%.2f\t%.2f\n", points[i*3 + 0], points[i*3 + 1], points[i*3 + 2]);
+#endif
+
+	int ret = 0;
 	result_t res;
 	res.ref_struct = NULL;
 	res.rmsd = DBL_MAX;
@@ -223,28 +288,55 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 	*p_alloy_type = PTM_ALLOY_NONE;
 
 	if (flags & PTM_CHECK_SC)
-		match_general(&structure_sc, ch_points, points, &ch, &res);
+	{
+		ret = match_general(&structure_sc, ch_points, points, &ch, &res);
+#ifdef DEBUG
+		printf("match sc  ret: %d\t%p\n", ret, res.ref_struct);
+#endif
+	}
 
 	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
-		match_fcc_hcp_ico(ch_points, points, flags, &ch, &res);
+	{
+		ret = match_fcc_hcp_ico(ch_points, points, flags, &ch, &res);
+#ifdef DEBUG
+		printf("match fcc ret: %d\t%p\n", ret, res.ref_struct);
+#endif
+	}
 
 	if (flags & PTM_CHECK_BCC)
-		match_general(&structure_bcc, ch_points, points, &ch, &res);
+	{
+		ret = match_general(&structure_bcc, ch_points, points, &ch, &res);
+#ifdef DEBUG
+		printf("match bcc ret: %d\t%p\n", ret, res.ref_struct);
+#endif
+	}
 
 	refdata_t* ref = res.ref_struct;
 	if (ref != NULL)
 	{
 		*p_type = ref->type;
 
-		if (numbers != NULL && ref->type == PTM_MATCH_FCC)
-			*p_alloy_type = find_fcc_alloy_type(res.mapping, numbers);
+		if (numbers != NULL)
+		{
+			if (ref->type == PTM_MATCH_FCC)
+				*p_alloy_type = find_fcc_alloy_type(res.mapping, numbers);
+			else if (ref->type == PTM_MATCH_BCC)
+				*p_alloy_type = find_bcc_alloy_type(res.mapping, numbers);
+		}
 
 		if (ref->type == PTM_MATCH_SC || ref->type == PTM_MATCH_FCC || ref->type == PTM_MATCH_BCC)
 			rotate_quaternion_into_cubic_fundamental_zone(res.q);
 
 		if (F != NULL && F_res != NULL)
 		{
-			calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res.mapping, res.normalized, ref->penrose, F, F_res);
+			subtract_barycentre(ref->num_nbrs + 1, points, ch_points);
+			for (int i = 0;i<ref->num_nbrs + 1;i++)
+			{
+				ch_points[i][0] *= res.scale;
+				ch_points[i][1] *= res.scale;
+				ch_points[i][2] *= res.scale;
+			}
+			calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res.mapping, ch_points, ref->penrose, F, F_res);
 
 			if (P != NULL && U != NULL)
 				left_sided_polar_decomposition_3x3(F, P, U);

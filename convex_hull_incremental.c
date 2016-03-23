@@ -150,12 +150,12 @@ static bool find_fourth_point(int num_points, const double (*points)[3], int a, 
 	return max_dist > TOLERANCE;
 }
 
-static bool initial_simplex(int num_points, const double (*points)[3], int* initial_vertices)
+static int initial_simplex(int num_points, const double (*points)[3], int* initial_vertices)
 {
 	int min_index[3] = {0};
 	int max_index[3] = {0};
 	if (!calc_max_extent(num_points, points, min_index, max_index))
-		return false;
+		return -1;
 
 	int bi = -1;
 	double max_dist = 0.0;
@@ -177,16 +177,16 @@ static bool initial_simplex(int num_points, const double (*points)[3], int* init
 	int a = min_index[bi], b = max_index[bi], c = -1, d = -1;
 
 	if (!find_third_point(num_points, points, a, b, &c))
-		return false;
+		return -2;
 
 	if (!find_fourth_point(num_points, points, a, b, c, &d))
-		return false;
+		return -3;
 
 	initial_vertices[0] = a;
 	initial_vertices[1] = b;
 	initial_vertices[2] = c;
 	initial_vertices[3] = d;
-	return true;
+	return 0;
 }
 
 static bool visible(const double* w, const double* plane_point, const double* plane_normal)
@@ -215,12 +215,13 @@ void add_facet(const double (*points)[3], int a, int b, int c, int8_t* facet, do
 	}
 }
 
-static bool initialize_convex_hull(int num_points, const double (*points)[3], int8_t facets[][3], double plane_normal[][3], bool* processed, int* initial_vertices, double* barycentre)
+static int initialize_convex_hull(int num_points, const double (*points)[3], int8_t facets[][3], double plane_normal[][3], bool* processed, int* initial_vertices, double* barycentre)
 {
 	memset(processed, 0, 15 * sizeof(bool));
 	memset(barycentre, 0, 3 * sizeof(double));
-	if (!initial_simplex(num_points, points, initial_vertices))
-		return false;
+	int ret = initial_simplex(num_points, points, initial_vertices);
+	if (ret != 0)
+		return ret;
 
 	for (int i = 0;i<4;i++)
 	{
@@ -239,19 +240,21 @@ static bool initialize_convex_hull(int num_points, const double (*points)[3], in
 	add_facet(points, initial_vertices[0], initial_vertices[1], initial_vertices[3], facets[1], plane_normal[1], barycentre);
 	add_facet(points, initial_vertices[0], initial_vertices[2], initial_vertices[3], facets[2], plane_normal[2], barycentre);
 	add_facet(points, initial_vertices[1], initial_vertices[2], initial_vertices[3], facets[3], plane_normal[3], barycentre);
-	return true;
+	return 0;
 }
 
 int get_convex_hull(int num_points, const double (*points)[3], int num_expected_facets, convexhull_t* ch, int8_t simplex[][3])
 {
 	assert(num_points == 7 || num_points == 13 || num_points == 15);
 
+	int ret = 0;
 	int num_prev = ch->num_prev;
 	ch->num_prev = num_points;
 	if (!ch->ok || 0)
 	{
-		if (!initialize_convex_hull(num_points, points, ch->facets, ch->plane_normal, ch->processed, ch->initial_vertices, ch->barycentre))
-			return false;
+		ret = initialize_convex_hull(num_points, points, ch->facets, ch->plane_normal, ch->processed, ch->initial_vertices, ch->barycentre);
+		if (ret != 0)
+			return ret;
 
 		ch->num_facets = 4;
 		num_prev = 0;
@@ -333,7 +336,7 @@ int get_convex_hull(int num_points, const double (*points)[3], int num_expected_
 		for (int j = 0;j<num_to_add;j++)
 		{
 			if (ch->num_facets >= MAXF)
-				return false;
+				return -4;
 
 			add_facet(points, to_add[j][0], to_add[j][1], to_add[j][2], ch->facets[ch->num_facets], ch->plane_normal[ch->num_facets], ch->barycentre); ch->num_facets++;
 		}
@@ -341,7 +344,7 @@ int get_convex_hull(int num_points, const double (*points)[3], int num_expected_
 
 
 	if (ch->num_facets != num_expected_facets)
-		return false;			//incorrect number of facets in convex hull
+		return -5;			//incorrect number of facets in convex hull
 
 	for (int i=0;i<ch->num_facets;i++)
 	{
@@ -349,13 +352,13 @@ int get_convex_hull(int num_points, const double (*points)[3], int num_expected_
 		int b = ch->facets[i][1];
 		int c = ch->facets[i][2];
 		if (a == 0 || b == 0 || c == 0)
-			return false;		//central atom contained in convex hull
+			return -6;		//central atom contained in convex hull
 
 		simplex[i][0] = a - 1;
 		simplex[i][1] = b - 1;
 		simplex[i][2] = c - 1;
 	}
 
-	return true;
+	return ret;
 }
 

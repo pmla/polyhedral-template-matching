@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include "index_PTM.h"
+#include "unittest.h"
 
 #define MAX_NBRS 14
 
@@ -66,6 +67,13 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 
 int main()
 {
+	initialize_PTM();
+	uint64_t res = run_tests();
+	assert(res == 0);
+	//printf("=========================================================\n");
+	//printf("unit test result: %lu\n", res);
+	//return 0;
+
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;
 	double* positions = NULL;
@@ -80,7 +88,6 @@ int main()
 	const int max_nbrs = MAX_NBRS;
 	int num_atoms = fsize / (max_nbrs * sizeof(int32_t));
 
-	initialize_PTM();
 	int8_t* types = (int8_t*)calloc(sizeof(int8_t), num_atoms);
 	double* rmsds = (double*)calloc(sizeof(double), num_atoms);
 	double* quats = (double*)calloc(4 * sizeof(double), num_atoms);

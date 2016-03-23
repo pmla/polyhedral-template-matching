@@ -88,8 +88,9 @@
  *  
  ******************************************************************************/
 #include "qcprot.h"
+#include "quat.h"
 
-int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int len, double minScore)
+int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int len, double minScore, double* rot)
 {
 	double 	SyzSzymSyySzz2, Sxx2Syy2Szz2Syz2Szy2, Sxy2Sxz2Syx2Szx2,
 		   SxzpSzx, SyzpSzy, SxypSyx, SyzmSzy,
@@ -164,13 +165,33 @@ int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int l
 		if (rms < minScore)
 			return -1; // Don't bother with rotation. 
 
-	a11 = SxxpSyy + Szz-mxEigenV; a12 = SyzmSzy; a13 = - SxzmSzx; a14 = SxymSyx;
-	a21 = SyzmSzy; a22 = SxxmSyy - Szz-mxEigenV; a23 = SxypSyx; a24= SxzpSzx;
-	a31 = a13; a32 = a23; a33 = Syy-Sxx-Szz - mxEigenV; a34 = SyzpSzy;
-	a41 = a14; a42 = a24; a43 = a34; a44 = Szz - SxxpSyy - mxEigenV;
-	a3344_4334 = a33 * a44 - a43 * a34; a3244_4234 = a32 * a44-a42*a34;
-	a3243_4233 = a32 * a43 - a42 * a33; a3143_4133 = a31 * a43-a41*a33;
-	a3144_4134 = a31 * a44 - a41 * a34; a3142_4132 = a31 * a42-a41*a32;
+	a11 = SxxpSyy + Szz - mxEigenV;
+	a12 = SyzmSzy;
+	a13 = -SxzmSzx;
+	a14 = SxymSyx;
+
+	a21 = SyzmSzy;
+	a22 = SxxmSyy - Szz  -mxEigenV;
+	a23 = SxypSyx;
+	a24 = SxzpSzx;
+
+	a31 = a13;
+	a32 = a23;
+	a33 = Syy - Sxx - Szz - mxEigenV;
+	a34 = SyzpSzy;
+
+	a41 = a14;
+	a42 = a24;
+	a43 = a34;
+	a44 = Szz - SxxpSyy - mxEigenV;
+
+	a3344_4334 = a33 * a44 - a43 * a34;
+	a3244_4234 = a32 * a44-a42*a34;
+	a3243_4233 = a32 * a43 - a42 * a33;
+	a3143_4133 = a31 * a43-a41*a33;
+	a3144_4134 = a31 * a44 - a41 * a34;
+	a3142_4132 = a31 * a42-a41*a32;
+
 	q1 =  a22*a3344_4334-a23*a3244_4234+a24*a3243_4233;
 	q2 = -a21*a3344_4334+a23*a3144_4134-a24*a3143_4133;
 	q3 =  a21*a3244_4234-a22*a3144_4134+a24*a3142_4132;
@@ -235,39 +256,12 @@ int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int l
 	q[2] = q3;
 	q[3] = q4;
 
-	/*
-	double a2, x2, y2, z2;
-	double xy, az, zx, ay, yz, ax; 
-	a2 = q1 * q1;
-	x2 = q2 * q2;
-	y2 = q3 * q3;
-	z2 = q4 * q4;
-
-	xy = q2 * q3;
-	az = q1 * q4;
-	zx = q4 * q2;
-	ay = q1 * q3;
-	yz = q3 * q4;
-	ax = q1 * q2;
-
-	rot[0] = a2 + x2 - y2 - z2;
-	rot[1] = 2 * (xy + az);
-	rot[2] = 2 * (zx - ay);
-	rot[3] = 2 * (xy - az);
-	rot[4] = a2 - x2 + y2 - z2;
-	rot[5] = 2 * (yz + ax);
-	rot[6] = 2 * (zx + ay);
-	rot[7] = 2 * (yz - ax);
-	rot[8] = a2 - x2 - y2 + z2;
-	*/
-
+	quaternion_to_rotation_matrix(q, rot);
 	return 1;
 }
 
-double InnerProduct(double *A, int num, const double (*coords1)[3], double (*coords2)[3], int8_t* perm2)
+void InnerProduct(double *A, int num, const double (*coords1)[3], double (*coords2)[3], int8_t* perm2)
 {
-	double G1 = 0.0, G2 = 0.0;
-
 	A[0] = A[1] = A[2] = A[3] = A[4] = A[5] = A[6] = A[7] = A[8] = 0.0;
 
 	for (int i = 0; i < num; ++i)
@@ -279,9 +273,6 @@ double InnerProduct(double *A, int num, const double (*coords1)[3], double (*coo
 		double x2 = coords2[perm2[i]][0];
 		double y2 = coords2[perm2[i]][1];
 		double z2 = coords2[perm2[i]][2];
-
-		G1 += x1 * x1 + y1 * y1 + z1 * z1;
-		G2 += x2 * x2 + y2 * y2 + z2 * z2;
 
 		A[0] += x1 * x2;
 		A[1] += x1 * y2;
@@ -295,7 +286,5 @@ double InnerProduct(double *A, int num, const double (*coords1)[3], double (*coo
 		A[7] += z1 * y2;
 		A[8] += z1 * z2;  
 	}
-
-	return (G1 + G2) * 0.5;
 }
 

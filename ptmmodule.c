@@ -3,6 +3,7 @@
 #include <arrayobject.h>
 #include <stdbool.h>
 #include "index_PTM.h"
+#include "unittest.h"
 
 
 #define MIN_NBRS 6
@@ -46,8 +47,8 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 		if (PyArray_DIM(obj_num, 0) != num_nbrs)	//need 14 nearest neighbours + central atom
 			return error(PyExc_TypeError, "numbers array must be contain 15 elements");
 
-		if (PyArray_TYPE(obj_num) != NPY_INT32)		//array of ints
-			return error(PyExc_TypeError, "numbers array must be have dtype NPY_INT32");
+		if (PyArray_TYPE(obj_num) != NPY_INT)		//array of ints
+			return error(PyExc_TypeError, "numbers array must be have dtype NPY_INT");
 
 		if (!PyArray_ISCARRAY_RO(obj_num))		//contiguous etc.
 			return error(PyExc_TypeError, "numbers array must be contiguous array");
@@ -176,7 +177,11 @@ PyMODINIT_FUNC initptmmodule(void)
 {
 	(void) Py_InitModule("ptmmodule", PTMModuleMethods);
 	import_array();
+
 	initialize_PTM();
+	uint64_t res = run_tests();
+	if (res != 0)
+		return error(PyExc_RuntimeError, "PTM unit tests failed");
 }
 
 #ifdef __cplusplus

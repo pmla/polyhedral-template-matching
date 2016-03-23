@@ -88,8 +88,9 @@ def run(pos, nbrs):
 	num_atoms = len(pos)
 	result = np.zeros(num_atoms, int)
 	strains = np.zeros(num_atoms).astype(np.double)
+	rmsds = np.zeros(num_atoms).astype(np.double)
 
-	while 1:
+	if 1:
 		for i in range(num_atoms):
 
 			relative_positions = pos[nbrs[i]] - pos[i]
@@ -103,8 +104,14 @@ def run(pos, nbrs):
 			#	vm, r = calc_fcc_strain(F, F_res, P, U, positions[:13])
 			#	strains[i] = vm
 			result[i] = struct
+			rmsds[i] = rmsd
 
-	return result
+	indices = np.where(rmsds < 0.12)[0]
+	kept = np.bincount(result[indices])
+	kept[0] += num_atoms - len(indices)
+	print "rmsd < 0.12:", kept, sum(kept)
+
+	return result, rmsds
 	indices = np.where(result == 2)[0]
 	plt.hist(strains[indices], bins=200)
 	plt.show()
@@ -119,9 +126,12 @@ def go():
 	pos = np.array(struct.unpack(n * 3 * "d", dat_pos)).reshape((n, 3))
 	nbrs = np.array(struct.unpack(n * 14 * "i", dat_nbr)).reshape((n, 14))
 
-	ptm = run(pos, nbrs)
+	ptm, rmsds = run(pos, nbrs)
 	print ptm
 	print np.bincount(ptm)
+
+	np.save('structures', ptm)
+	np.save('rmsds', rmsds)
 
 if __name__ == "__main__":
 	go()

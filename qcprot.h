@@ -78,6 +78,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdint.h>
-int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int len, double minScore);
-double InnerProduct(double *A, int num, const double (*coords1)[3], double (*coords2)[3], int8_t* perm2);
+int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int len, double minScore, double* rot);
+void InnerProduct(double *A, int num, const double (*coords1)[3], double (*coords2)[3], int8_t* perm2);
 

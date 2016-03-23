@@ -22,6 +22,7 @@
 #define PTM_ALLOY_L10		2
 #define PTM_ALLOY_L12_CU	3
 #define PTM_ALLOY_L12_AU	4
+#define PTM_ALLOY_B2		5
 
 
 #ifdef __cplusplus
