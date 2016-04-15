@@ -2,7 +2,7 @@ CC = gcc
 
 C_SRC_FILES = canonical.c graph_data.c convex_hull_incremental.c \
 	index_PTM.c alloy_types.c qcprot.c deformation_gradient.c \
-	normalize_vertices.c quat.c unittest.c
+	normalize_vertices.c quat.c
 
 C_SRC_MODULE_FILE = ptmmodule.c 
 
@@ -11,7 +11,11 @@ C_SRC_SVDPOLAR_FILES = polar_decomposition.c
 HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
 	deformation_gradient.h graph_data.h index_PTM.h \
 	normalize_vertices.h qcprot.h quat.h reference_templates.h \
-	svdpolar/polar_decomposition.h unittest.h
+	svdpolar/polar_decomposition.h \
+	svdpolar/Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.h \
+	svdpolar/Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.h \
+	svdpolar/Singular_Value_Decomposition_Kernel_Declarations.h \
+	svdpolar/Singular_Value_Decomposition_Main_Kernel_Body.h
 
 OBJDIR = .
 
@@ -57,14 +61,11 @@ $(OBJDIR)/$(LIBRARY): $(C_OBJECT_FILES) $(C_OBJECT_SVDPOLAR_FILES)
 $(OBJDIR):
 	mkdir $(OBJDIR)
 
-# Lazy again: all object files depend on all header files
-$(OBJDIR)/%.o: $(HEADER_FILES)
-
 # Rule for compiling C source
-$(OBJDIR)/%.o: svdpolar/%.c
+$(OBJDIR)/%.o: svdpolar/%.c  $(HEADER_FILES)
 	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
 
-$(OBJDIR)/%.o: %.c
+$(OBJDIR)/%.o: %.c  $(HEADER_FILES)
 	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
 
 clean:
