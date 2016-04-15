@@ -179,9 +179,9 @@ PyMODINIT_FUNC initptmmodule(void)
 	import_array();
 
 	initialize_PTM();
-	uint64_t res = run_tests();
-	if (res != 0)
-		return error(PyExc_RuntimeError, "PTM unit tests failed");
+	//uint64_t res = run_tests();
+	//if (res != 0)
+	//	return error(PyExc_RuntimeError, "PTM unit tests failed");
 }
 
 #ifdef __cplusplus
