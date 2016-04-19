@@ -93,12 +93,8 @@ def run(pos, nbrs):
 	if 1:
 		for i in range(num_atoms):
 
-			relative_positions = pos[nbrs[i]] - pos[i]
-			sqdist = np.linalg.norm(relative_positions, axis=1)
-			nearest = np.argsort(sqdist)[:14]
-			positions = np.zeros((15,3))
-			positions[1:] = relative_positions[nearest]
-			(struct, alloy, rmsd, scale, rot, F, F_res, P, U) = ptmmodule.index_structure(positions, calculate_strains=1)
+			positions = np.concatenate(([pos[i]], pos[nbrs[i][:18]]))
+			(struct, alloy, rmsd, scale, rot, F, F_res, P, U) = ptmmodule.index_structure(positions, calculate_strains=1, topological_ordering=1)
 			#(struct, alloy, rmsd, scale, rot) = ptmmodule.index_structure(positions)
 			#if struct == 2:
 			#	vm, r = calc_fcc_strain(F, F_res, P, U, positions[:13])
@@ -124,7 +120,7 @@ def go():
 	print "num atoms:", n
 
 	pos = np.array(struct.unpack(n * 3 * "d", dat_pos)).reshape((n, 3))
-	nbrs = np.array(struct.unpack(n * 14 * "i", dat_nbr)).reshape((n, 14))
+	nbrs = np.array(struct.unpack(n * 24 * "i", dat_nbr)).reshape((n, 24))
 
 	ptm, rmsds = run(pos, nbrs)
 	print ptm

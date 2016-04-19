@@ -284,125 +284,128 @@ uint64_t run_tests()
 
 			for (int ia=0;ia<num_alloy_tests;ia++)
 			{
-				int32_t type, alloy_type;
-				double scale, rmsd;
-				double q[4], F[9], F_res[3], U[9], P[9];
-				if (num_alloy_tests == 1)
-					index_PTM(s->num_points, points[0], NULL, tocheck, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
-				else
-					index_PTM(s->num_points, points[0], alloytest[ia].numbers, tocheck, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
+				for (int itop=0;itop<=1;itop++)
+				{
+					bool topological = itop == 1;
+					int32_t type, alloy_type;
+					double scale, rmsd;
+					double q[4], F[9], F_res[3], U[9], P[9];
+					if (num_alloy_tests == 1)
+						index_PTM(s->num_points, points[0], NULL, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
+					else
+						index_PTM(s->num_points, points[0], alloytest[ia].numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
 
 #ifdef DEBUG
-				printf("type:\t\t%d\t(should be: %d)\n", type, s->type);
-				printf("alloy type:\t%d\n", alloy_type);
-				printf("scale:\t\t%f\n", scale);
-				printf("rmsd:\t\t%f\n", rmsd);
-				printf("quat: \t\t%.4f %.4f %.4f %.4f\n", q[0], q[1], q[2], q[3]);
-				printf("qpost:\t\t%.4f %.4f %.4f %.4f\n", qpost[0], qpost[1], qpost[2], qpost[3]);
-				//printf("rot: %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0], rot[1], rot[2], rot[3], rot[4], rot[5], rot[6], rot[7], rot[8]);
-				//printf("U:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8]);
-				//printf("P:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8]);
-				//printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0] - U[0], rot[1] - U[1], rot[2] - U[2], rot[3] - U[3], rot[4] - U[4], rot[5] - U[5], rot[6] - U[6], rot[7] - U[7], rot[8] - U[8]);
+					printf("type:\t\t%d\t(should be: %d)\n", type, s->type);
+					printf("alloy type:\t%d\n", alloy_type);
+					printf("scale:\t\t%f\n", scale);
+					printf("rmsd:\t\t%f\n", rmsd);
+					printf("quat: \t\t%.4f %.4f %.4f %.4f\n", q[0], q[1], q[2], q[3]);
+					printf("qpost:\t\t%.4f %.4f %.4f %.4f\n", qpost[0], qpost[1], qpost[2], qpost[3]);
+					//printf("rot: %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0], rot[1], rot[2], rot[3], rot[4], rot[5], rot[6], rot[7], rot[8]);
+					//printf("U:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8]);
+					//printf("P:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8]);
+					//printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0] - U[0], rot[1] - U[1], rot[2] - U[2], rot[3] - U[3], rot[4] - U[4], rot[5] - U[5], rot[6] - U[6], rot[7] - U[7], rot[8] - U[8]);
 #endif
-
-				if (type != s->type)
-				{
-					result |= bitmask;
-#ifdef DEBUG
-					printf("failed on type\n");
-#endif
-				}
-
-				if (num_alloy_tests > 1)
-				{
-					if ((s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC) && alloy_type != alloytest[ia].type)
+					if (type != s->type)
 					{
 						result |= bitmask;
 #ifdef DEBUG
-						printf("failed on alloy type\n");
-						printf("ia: %d\n", ia);
+						printf("failed on type\n");
 #endif
 					}
-				}
 
-				if (rmsd > tolerance)
-				{
-					result |= bitmask;
-#ifdef DEBUG
-					printf("failed on rmsd\n");
-#endif
-				}
-
-				if (fabs(scale - 1 / rescale) > tolerance)
-				{
-					result |= bitmask;
-#ifdef DEBUG
-					printf("failed on scale\n");
-#endif
-				}
-
-				for (int i=0;i<3;i++)
-				{
-					for (int j=0;j<3;j++)
+					if (num_alloy_tests > 1)
 					{
-						if (i == j && fabs(P[i*3 + j] - 1) > tolerance)
+						if ((s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC) && alloy_type != alloytest[ia].type)
 						{
 							result |= bitmask;
 #ifdef DEBUG
-							printf("failed on P matrix diagonal\n");
+							printf("failed on alloy type\n");
+							printf("ia: %d\n", ia);
 #endif
 						}
-						else if (i != j && fabs(P[i*3 + j]) > tolerance)
+					}
+
+					if (rmsd > tolerance)
+					{
+						result |= bitmask;
+#ifdef DEBUG
+						printf("failed on rmsd\n");
+#endif
+					}
+
+					if (fabs(scale - 1 / rescale) > tolerance)
+					{
+						result |= bitmask;
+#ifdef DEBUG
+						printf("failed on scale\n");
+#endif
+					}
+
+					for (int i=0;i<3;i++)
+					{
+						for (int j=0;j<3;j++)
+						{
+							if (i == j && fabs(P[i*3 + j] - 1) > tolerance)
+							{
+								result |= bitmask;
+#ifdef DEBUG
+								printf("failed on P matrix diagonal\n");
+#endif
+							}
+							else if (i != j && fabs(P[i*3 + j]) > tolerance)
+							{
+								result |= bitmask;
+#ifdef DEBUG
+								printf("failed on P matrix off-diagonal\n");
+#endif
+							}
+						}
+					}
+
+					if (!qtest[iq].fundamental || (s->type == PTM_MATCH_SC || s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC))
+					{
+						if (quat_misorientation(q, qpost) > tolerance)
 						{
 							result |= bitmask;
 #ifdef DEBUG
-							printf("failed on P matrix off-diagonal\n");
+							printf("failed on disorientation\n");
 #endif
 						}
 					}
-				}
 
-				if (!qtest[iq].fundamental || (s->type == PTM_MATCH_SC || s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC))
-				{
-					if (quat_misorientation(q, qpost) > tolerance)
+					if (s->type == PTM_MATCH_SC || s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC)
+					{
+						double qu[4];
+						rotation_matrix_to_quaternion(U, qu);
+						rotate_quaternion_into_cubic_fundamental_zone(qu);
+
+						if (quat_misorientation(qu, qpost) > tolerance)
+						{
+							result |= bitmask;
+#ifdef DEBUG
+							printf("failed on deformation gradient disorientation\n");
+#endif
+						}
+					}
+
+					double rmsd_approx = nearest_neighbour_rmsd(s->num_points, scale, q, points, s->points);
+					if (fabs(rmsd_approx) > tolerance)
 					{
 						result |= bitmask;
 #ifdef DEBUG
-						printf("failed on disorientation\n");
+						printf("failed on rmsd nearest neighbour\n");
 #endif
 					}
-				}
-
-				if (s->type == PTM_MATCH_SC || s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC)
-				{
-					double qu[4];
-					rotation_matrix_to_quaternion(U, qu);
-					rotate_quaternion_into_cubic_fundamental_zone(qu);
-
-					if (quat_misorientation(qu, qpost) > tolerance)
-					{
-						result |= bitmask;
-#ifdef DEBUG
-						printf("failed on deformation gradient disorientation\n");
-#endif
-					}
-				}
-
-				double rmsd_approx = nearest_neighbour_rmsd(s->num_points, scale, q, points, s->points);
-				if (fabs(rmsd_approx) > tolerance)
-				{
-					result |= bitmask;
-#ifdef DEBUG
-					printf("failed on rmsd nearest neighbour\n");
-#endif
-				}
 
 #ifdef DEBUG
-				printf("result: %lu\n", result);
-				printf("\n\n");
-				if (result != 0)
-					return result;
+					printf("result: %lu\n", result);
+					printf("\n\n");
+					if (result != 0)
+						return result;
 #endif
+				}
 			}
 		}
 	}

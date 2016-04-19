@@ -24,15 +24,16 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	PyArrayObject* obj_num = NULL;
 	PyObject* obj_types = NULL;
 	PyObject* obj_strains = NULL;
+	PyObject* obj_topological = NULL;
 
-	static char* argnames[] = {"rel", "numbers", "structures", "calculate_strains", NULL};
-	if (!PyArg_ParseTupleAndKeywords(args, kw, "O|OOO", argnames, &obj_pos, &obj_num, &obj_types, &obj_strains))
+	static char* argnames[] = {"rel", "numbers", "structures", "calculate_strains", "topological_ordering", NULL};
+	if (!PyArg_ParseTupleAndKeywords(args, kw, "O|OOOO", argnames, &obj_pos, &obj_num, &obj_types, &obj_strains, &obj_topological))
 		return NULL;
 
-	int num_nbrs = 15;
+	int num_points = 19;
 
 	if (PyArray_NDIM(obj_pos) != 2			//two-dimensional
-		|| PyArray_DIM(obj_pos, 0) != num_nbrs	//need 15 nearest neighbours + central atom
+		|| PyArray_DIM(obj_pos, 0) != num_points	//need 18 nearest neighbours + central atom
 		|| PyArray_DIM(obj_pos, 1) != 3		//second dim is 3
 		|| PyArray_TYPE(obj_pos) != NPY_DOUBLE	//array of double
 		|| !PyArray_ISCARRAY_RO(obj_pos))	//contiguous etc.
@@ -44,8 +45,8 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 		if (PyArray_NDIM(obj_num) != 1)			//one-dimensional
 			return error(PyExc_TypeError, "numbers array must be 1-dimensional");
 
-		if (PyArray_DIM(obj_num, 0) != num_nbrs)	//need 14 nearest neighbours + central atom
-			return error(PyExc_TypeError, "numbers array must be contain 15 elements");
+		if (PyArray_DIM(obj_num, 0) != num_points)	//need 18 nearest neighbours + central atom
+			return error(PyExc_TypeError, "numbers array must be contain 19 elements");
 
 		if (PyArray_TYPE(obj_num) != NPY_INT32)		//array of ints
 			return error(PyExc_TypeError, "numbers array must be have dtype NPY_INT32 (numpy.int32)");
@@ -61,15 +62,17 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	}
 	else
 	{
-		if (!PyTuple_Check(obj_types))
-			return error(PyExc_TypeError, "types must be a tuple of strings");
+		bool is_list = PyList_Check(obj_types);
+		bool is_tuple = PyTuple_Check(obj_types);
+		if (!is_list && !is_tuple)
+			return error(PyExc_TypeError, "types must be a list/tuple of strings");
 
 		int num_types = PyTuple_Size(obj_types);
 
 		int i = 0;
 		for (i=0;i<num_types;i++)
 		{
-			PyObject* obj_type = PyTuple_GetItem(obj_types, i);
+			PyObject* obj_type = is_list ? PyList_GetItem(obj_types, i) : PyTuple_GetItem(obj_types, i);
 			if (obj_type == NULL)
 				return NULL;
 
@@ -105,6 +108,16 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 		calculate_strains = ret == 1;
 	}
 
+	bool topological_ordering = false;
+	if (obj_topological != NULL)
+	{
+		int ret = PyObject_IsTrue(obj_topological);
+		if (ret == -1)
+			return NULL;
+
+		topological_ordering = ret == 1;
+	}
+
 	double* pos = (double*)PyArray_DATA(obj_pos);
 	if (pos == NULL)
 		return NULL;
@@ -128,7 +141,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 
 	if (calculate_strains)
 	{
-		index_PTM(num_nbrs, pos, numbers, flags, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P);
+		index_PTM(num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P);
 		if (type == PTM_MATCH_NONE)
 			return Py_BuildValue("iiddOOOOO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None, Py_None, Py_None, Py_None, Py_None);
 
@@ -155,7 +168,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	}
 	else
 	{
-		index_PTM(num_nbrs, pos, numbers, flags, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL);
+		index_PTM(num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL);
 		if (type == PTM_MATCH_NONE)
 			return Py_BuildValue("iiddO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None);
 

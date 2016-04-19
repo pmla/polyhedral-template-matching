@@ -14,6 +14,7 @@
 #include "quat.h"
 #include "normalize_vertices.h"
 #include "svdpolar/polar_decomposition.h"
+#include "neighbour_ordering.h"
 #include "index_PTM.h"
 
 
@@ -257,7 +258,7 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	return 0;
 }
 
-void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
+void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flags, bool topological_ordering,
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P)
 {
 	if (flags & PTM_CHECK_SC)
@@ -270,17 +271,44 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 		assert(num_points >= structure_fcc.num_nbrs + 1);
 
 
+	assert(num_points <= 19);
+
+	int ret = 0;
+	double ch_points[19][3];
+	int8_t ordering[19];
+	if (topological_ordering)
+	{
+		normalize_vertices(num_points, _points, ch_points);
+		ret = calculate_neighbour_ordering(num_points, (const double (*)[3])ch_points, ordering);
+		if (ret != 0)
+			return;
+	}
+	else
+	{
+		for (int i=0;i<num_points;i++)
+			ordering[i] = i;
+	}
+
+	double points[15][3];
+	int32_t numbers[19];
+	num_points = MIN(15, num_points);
+	for (int i=0;i<num_points;i++)
+	{
+		memcpy(points[i], &_points[3 * ordering[i]], 3 * sizeof(double));
+
+		if (_numbers != NULL)
+			numbers[i] = _numbers[ordering[i]];
+	}
+
 	convexhull_t ch;
 	ch.ok = false;
-	double ch_points[15][3];
-	normalize_vertices(num_points, points, ch_points);
+	normalize_vertices(num_points, (double*)points, ch_points);
 
 #ifdef DEBUG
 	for (int i = 0;i<num_points;i++)
-		printf("%.2f\t%.2f\t%.2f\n", points[i*3 + 0], points[i*3 + 1], points[i*3 + 2]);
+		printf("%.2f\t%.2f\t%.2f\n", _points[i*3 + 0], _points[i*3 + 1], _points[i*3 + 2]);
 #endif
 
-	int ret = 0;
 	result_t res;
 	res.ref_struct = NULL;
 	res.rmsd = DBL_MAX;
@@ -289,7 +317,7 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 
 	if (flags & PTM_CHECK_SC)
 	{
-		ret = match_general(&structure_sc, ch_points, points, &ch, &res);
+		ret = match_general(&structure_sc, ch_points, (double*)points, &ch, &res);
 #ifdef DEBUG
 		printf("match sc  ret: %d\t%p\n", ret, res.ref_struct);
 #endif
@@ -297,7 +325,7 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 
 	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
 	{
-		ret = match_fcc_hcp_ico(ch_points, points, flags, &ch, &res);
+		ret = match_fcc_hcp_ico(ch_points, (double*)points, flags, &ch, &res);
 #ifdef DEBUG
 		printf("match fcc ret: %d\t%p\n", ret, res.ref_struct);
 #endif
@@ -305,7 +333,7 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 
 	if (flags & PTM_CHECK_BCC)
 	{
-		ret = match_general(&structure_bcc, ch_points, points, &ch, &res);
+		ret = match_general(&structure_bcc, ch_points, (double*)points, &ch, &res);
 #ifdef DEBUG
 		printf("match bcc ret: %d\t%p\n", ret, res.ref_struct);
 #endif
@@ -329,7 +357,7 @@ void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,
 
 		if (F != NULL && F_res != NULL)
 		{
-			subtract_barycentre(ref->num_nbrs + 1, points, ch_points);
+			subtract_barycentre(ref->num_nbrs + 1, (double*)points, ch_points);
 			for (int i = 0;i<ref->num_nbrs + 1;i++)
 			{
 				ch_points[i][0] *= res.scale;

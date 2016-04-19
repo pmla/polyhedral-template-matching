@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +7,7 @@
 #include "index_PTM.h"
 #include "unittest.h"
 
-#define MAX_NBRS 14
+#define MAX_NBRS 24
 
 
 static int read_file(const char* path, uint8_t** p_buf, size_t* p_fsize)
@@ -60,7 +61,7 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 
 	for (int j=0;j<max_nbrs;j++)
 	{
-		int index = nbrs[i * max_nbrs + j];
+		int index = nbrs[i * MAX_NBRS + j];
 		memcpy(nbr[j+1], positions[index], 3 * sizeof(double));
 	}
 }
@@ -85,16 +86,18 @@ int main()
 	if (ret != 0)
 		return -1;
 
-	const int max_nbrs = MAX_NBRS;
-	int num_atoms = fsize / (max_nbrs * sizeof(int32_t));
+	int num_atoms = fsize / (MAX_NBRS * sizeof(int32_t));
+	const int max_nbrs = 18;
+	assert(num_atoms == 88737);
 
 	int8_t* types = (int8_t*)calloc(sizeof(int8_t), num_atoms);
 	double* rmsds = (double*)calloc(sizeof(double), num_atoms);
 	double* quats = (double*)calloc(4 * sizeof(double), num_atoms);
 	int counts[6] = {0};
 
+	bool topological_ordering = true;
 	double rmsd_sum = 0.0;
-	for (int j=0;j<10;j++)
+	//for (int j=0;j<10;j++)
 	for (int i=0;i<num_atoms;i++)
 	{
 		double nbr[max_nbrs+1][3];
@@ -103,7 +106,7 @@ int main()
 		int32_t type, alloy_type;
 		double scale, rmsd;
 		double q[4], F[9], F_res[3], U[9], P[9];
-		index_PTM(max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
+		index_PTM(max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
 
 		types[i] = type;
 		rmsds[i] = rmsd;
@@ -113,7 +116,7 @@ int main()
 		if (type != PTM_MATCH_NONE)
 			rmsd_sum += rmsd;
 
-		if (i % 1000 == 0 || i == num_atoms - 1)
+		if (i % 1000 == 0 || i == num_atoms - 1 || 0)
 		{
 			printf("counts: [");
 			for (int j = 0;j<6;j++)
@@ -123,7 +126,6 @@ int main()
 	}
 
 	printf("rmsd sum: %f\n", rmsd_sum);
-
 
 	free(types);
 	free(rmsds);

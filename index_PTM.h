@@ -2,6 +2,7 @@
 #define INDEX_PTM_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define PTM_CHECK_SC	(1 << 0)
 #define PTM_CHECK_FCC	(1 << 1)
@@ -30,7 +31,7 @@ extern "C" {
 #endif
 
 int initialize_PTM();
-void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags,									//inputs
+void index_PTM(	int num_points, double* points, int32_t* numbers, int32_t flags, bool topological_ordering,						//inputs
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P);	//outputs
 
 #ifdef __cplusplus
