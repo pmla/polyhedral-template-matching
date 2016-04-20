@@ -65,6 +65,7 @@ def PTM(atoms, target_structures=None, calculate_strains=False, cutoff=10.0):
 
     """
 
+    numnb = 18  # Plus central atom
     nblist = asap3.FullNeighborList(cutoff, atoms)
     structures = np.zeros(len(atoms), int)
     alloys = np.zeros(len(atoms), int)
@@ -76,16 +77,17 @@ def PTM(atoms, target_structures=None, calculate_strains=False, cutoff=10.0):
     z_all = atoms.get_atomic_numbers()
     for i in range(len(atoms)):
         indices, relative_positions, sqdist = nblist.get_neighbors(i)
-        assert(len(indices) >= 14)
-        nearest = np.argsort(sqdist)[:14]
-        positions = np.zeros((15,3))
+        assert(len(indices) >= numnb)
+        nearest = np.argsort(sqdist)[:numnb]
+        positions = np.zeros((numnb+1,3))
         positions[1:] = relative_positions[nearest]
 
-        z = np.zeros(15, np.int32)
+        z = np.zeros(numnb+1, np.int32)
         z[0] = z_all[i]
         z[1:] = z_all[indices[nearest]]
         data = ptmmodule.index_structure(positions, z, 
-                                         calculate_strains=calculate_strains)
+                                         calculate_strains=calculate_strains,
+                                         topological_ordering=True)
         # data = (struct, alloy, rmsd, scale, rotation)
         structures[i], alloys[i], rmsds[i], scales[i] = data[:4]
         if structures[i]:

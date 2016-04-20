@@ -37,7 +37,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 		|| PyArray_DIM(obj_pos, 1) != 3		//second dim is 3
 		|| PyArray_TYPE(obj_pos) != NPY_DOUBLE	//array of double
 		|| !PyArray_ISCARRAY_RO(obj_pos))	//contiguous etc.
-		return error(PyExc_TypeError, "neighbour array must be 15x3 double array");
+		return error(PyExc_TypeError, "neighbour array must be 19x3 double array");
 
 	bool check_alloys = obj_num != NULL;
 	if (check_alloys)
