@@ -79,12 +79,12 @@ int main()
 	int32_t* nbrs = NULL;
 	double* positions = NULL;
 	int ret = read_file((char*)"FeCu_positions.dat", (uint8_t**)&positions, &fsize);
-	//int ret = read_file((char*)"positions.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"fcc_positions.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
 	ret = read_file((char*)"FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	//ret = read_file((char*)"nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
