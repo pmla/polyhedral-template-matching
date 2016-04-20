@@ -281,13 +281,12 @@ void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flag
 		normalize_vertices(num_points, _points, ch_points);
 		ret = calculate_neighbour_ordering(num_points, (const double (*)[3])ch_points, ordering);
 		if (ret != 0)
-			return;
+			topological_ordering = false;
 	}
-	else
-	{
+
+	if (!topological_ordering)
 		for (int i=0;i<num_points;i++)
 			ordering[i] = i;
-	}
 
 	double points[15][3];
 	int32_t numbers[19];

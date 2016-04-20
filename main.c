@@ -79,16 +79,19 @@ int main()
 	int32_t* nbrs = NULL;
 	double* positions = NULL;
 	int ret = read_file((char*)"FeCu_positions.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"positions.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
 	ret = read_file((char*)"FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
 	int num_atoms = fsize / (MAX_NBRS * sizeof(int32_t));
 	const int max_nbrs = 18;
-	assert(num_atoms == 88737);
+	//assert(num_atoms == 88737);
+	printf("num atoms: %d\n", num_atoms);
 
 	int8_t* types = (int8_t*)calloc(sizeof(int8_t), num_atoms);
 	double* rmsds = (double*)calloc(sizeof(double), num_atoms);

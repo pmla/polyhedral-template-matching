@@ -16,55 +16,7 @@
 #define MAXF (2*MAX_POINTS - 4)
 
 
-/* int triangular(int n)
-{
-	return n*(n+1)/2;
-}
-
-static int tetrahedral(int n)
-{
-	return n*(n+1)*(n+2) / 6;
-}
-
-static int triple_index(int i, int j, int k)
-{
-	return tetrahedral(MAX_POINTS - 2) - tetrahedral(MAX_POINTS - i - 2) + (triangular(MAX_POINTS-i-2) - triangular(MAX_POINTS-1-j)) + k-j-1;
-}
-
-static void setb(uint8_t* buf, int i)
-{
-	int wordpos = i / 8;
-	int bitpos = i % 8;
-
-	buf[wordpos] |= 1 << bitpos;
-}
-
-static int getb(uint8_t* buf, int i)
-{
-	int wordpos = i / 8;
-	int bitpos = i % 8;
-	return (buf[wordpos] >> bitpos) & 1;
-}
-
-static double vector_distance_2(double* a, double* b)
-{
-	double x = a[0] - b[0];
-	double y = a[1] - b[1];
-	double z = a[2] - b[2];
-
-	return x*x + y*y + z*z;
-}
-*/
-
-static uint16_t index_i[MAX_POINTS] = {153,289,409,514,605,683,749,804,849,885,913,934,949,959,965,968,969,969,969};
-static uint8_t index_j[MAX_POINTS] = {172,155,139,124,110,97,85,74,64,55,47,40,34,29,25,22,20,19,19};
-
-static int triple_index(int i, int j, int k)
-{
-	return index_i[i] - index_j[j] + k;
-}
-
-static double norm_squared_4D(double* p)
+ double norm_squared_4D(double* p)
 {
 	double x = p[0];
 	double y = p[1];
@@ -74,7 +26,7 @@ static double norm_squared_4D(double* p)
 	return x*x + y*y + z*z + w*w;
 }
 
-static double vector_distance_2_4D(double* a, double* b)
+ double vector_distance_2_4D(double* a, double* b)
 {
 	double x = a[0] - b[0];
 	double y = a[1] - b[1];
@@ -84,7 +36,7 @@ static double vector_distance_2_4D(double* a, double* b)
 	return x*x + y*y + z*z + w*w;
 }
 
-static double norm_squared(double* p)
+ double norm_squared(double* p)
 {
 	double x = p[0];
 	double y = p[1];
@@ -93,53 +45,48 @@ static double norm_squared(double* p)
 	return x*x + y*y + z*z;
 }
 
-static double dot_product(const double* a, const double* b)
+ double dot_product(const double* a, const double* b)
 {
 	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 }
 
-static void cross_product(double* a, double* b, double* c)
+ void cross_product(double* a, double* b, double* c)
 {
 	c[0] = a[1] * b[2] - a[2] * b[1];
 	c[1] = a[2] * b[0] - a[0] * b[2];
 	c[2] = a[0] * b[1] - a[1] * b[0];
 }
 
-double dethelper(double x1, double x2, double x3, double x4, double y1, double y2, double y3, double y4, double z1, double z2, double z3, double z4)
+ double dethelper(double x2, double x3, double x4, double y2, double y3, double y4, double z2, double z3, double z4)
 {
-	return x1*y2*z3-x1*y2*z4-x1*y3*z2+x1*y3*z4+x1*y4*z2-x1*y4*z3
-		-x2*y1*z3+x2*y1*z4+x2*y3*z1-x2*y3*z4-x2*y4*z1+x2*y4*z3
-		+x3*y1*z2-x3*y1*z4-x3*y2*z1+x3*y2*z4+x3*y4*z1-x3*y4*z2
-		-x4*y1*z2+x4*y1*z3+x4*y2*z1-x4*y2*z3-x4*y3*z1+x4*y3*z2;
+	return - x2*y3*z4 + x2*y4*z3 + x3*y2*z4 - x3*y4*z2 - x4*y2*z3 + x4*y3*z2;
 }
 
-static void circumsphere_centre(double* a, double* b, double* c, double* d, double* centre)
+ bool circumsphere_centre(double* b, double* c, double* d, double* centre)
 {
 	//formula adapted from http://mathworld.wolfram.com/Circumsphere.html
 
-	double det = dethelper(a[0], b[0], c[0], d[0], a[1], b[1], c[1], d[1], a[2], b[2], c[2], d[2]);
-
-	//double sa = norm_squared(a);
-	//double sb = norm_squared(b);
-	//double sc = norm_squared(c);
-	//double sd = norm_squared(d);
 
 	//norm squared is stored in fourth element
-	double sa = a[3];
 	double sb = b[3];
 	double sc = c[3];
 	double sd = d[3];
 
-	double detx = dethelper(sa, sb, sc, sd, a[1], b[1], c[1], d[1], a[2], b[2], c[2], d[2]);
-	double dety = dethelper(sa, sb, sc, sd, a[0], b[0], c[0], d[0], a[2], b[2], c[2], d[2]);
-	double detz = dethelper(sa, sb, sc, sd, a[0], b[0], c[0], d[0], a[1], b[1], c[1], d[1]);
+	double det = dethelper(b[0], c[0], d[0], b[1], c[1], d[1], b[2], c[2], d[2]);
+	if (fabs(det) < 1E-6)
+		return false;	//degenerate facet
+
+	double detx = dethelper(sb, sc, sd, b[1], c[1], d[1], b[2], c[2], d[2]);
+	double dety = dethelper(sb, sc, sd, b[0], c[0], d[0], b[2], c[2], d[2]);
+	double detz = dethelper(sb, sc, sd, b[0], c[0], d[0], b[1], c[1], d[1]);
 
 	centre[0] = detx / (2 * det);
 	centre[1] = -dety / (2 * det);
 	centre[2] = detz / (2 * det);
+	return true;
 }
 
-static void cross_product_4D(double* r0, double* r1, double* r2, double* p)
+ void cross_product_4D(const double* r0, const double* r1, const double* r2, double* p)
 {
 	p[0] =	+r0[1] * (r1[2] * r2[3] - r1[3] * r2[2])
 		-r0[2] * (r1[1] * r2[3] - r1[3] * r2[1])
@@ -158,24 +105,9 @@ static void cross_product_4D(double* r0, double* r1, double* r2, double* p)
 		-r0[2] * (r1[0] * r2[1] - r1[1] * r2[0]);
 }
 
-static void calculate_plane_normal_4D(const double (*points)[4], int a, int b, int c, int d, double* plane_normal)
+ void calculate_plane_normal_4D(const double (*points)[4], int b, int c, int d, double* plane_normal)
 {
-	double u[4] = {	points[b][0] - points[a][0],
-			points[b][1] - points[a][1],
-			points[b][2] - points[a][2],
-			points[b][3] - points[a][3]	};
-
-	double v[4] = {	points[c][0] - points[a][0],
-			points[c][1] - points[a][1],
-			points[c][2] - points[a][2],
-			points[c][3] - points[a][3]	};
-
-	double w[4] = {	points[d][0] - points[a][0],
-			points[d][1] - points[a][1],
-			points[d][2] - points[a][2],
-			points[d][3] - points[a][3]	};
-
-	cross_product_4D(u, v, w, plane_normal);
+	cross_product_4D(points[b], points[c], points[d], plane_normal);
 	double norm = sqrt(norm_squared_4D(plane_normal));
 	plane_normal[0] /= norm;
 	plane_normal[1] /= norm;
@@ -183,38 +115,34 @@ static void calculate_plane_normal_4D(const double (*points)[4], int a, int b, i
 	plane_normal[3] /= norm;
 }
 
-static double point_plane_distance_4D(const double* w, const double* plane_point, const double* plane_cross)
+ double point_plane_distance_4D(const double* w, const double* plane_cross)
 {
-	return	  plane_cross[0] * (plane_point[0] - w[0])
-		+ plane_cross[1] * (plane_point[1] - w[1])
-		+ plane_cross[2] * (plane_point[2] - w[2])
-		+ plane_cross[3] * (plane_point[3] - w[3]);
+	return	  plane_cross[0] * (- w[0])
+		+ plane_cross[1] * (- w[1])
+		+ plane_cross[2] * (- w[2])
+		+ plane_cross[3] * (- w[3]);
 }
 
-static bool visible(const double* w, const double* plane_point, const double* plane_normal)
+ bool visible(const double* w, const double* plane_normal)
 {
-	return point_plane_distance_4D(w, plane_point, plane_normal) > TOLERANCE;
+	return point_plane_distance_4D(w, plane_normal) > 0;
 }
 
-static void _add_facet(const double (*points)[4], int a, int b, int c, int d, int8_t* facet, double* plane_normal, double* barycentre)
+ void _add_facet(const double (*points)[4], int b, int c, int d, int8_t* facet, double* plane_normal, double* barycentre)
 {
 #ifdef DEBUG
-	printf("adding: %d %d %d %d\n", a, b, c, d);
-	assert(a < b);
-	assert(a < c);
-	assert(a < d);
+	printf("adding: %d %d %d %d\n", 0, b, c, d);
 	assert(b < c);
 	assert(b < d);
 	assert(c < d);
 #endif
 
-	facet[0] = a;
-	facet[1] = b;
-	facet[2] = c;
-	facet[3] = d;
+	facet[0] = b;
+	facet[1] = c;
+	facet[2] = d;
 
-	calculate_plane_normal_4D(points, a, b, c, d, plane_normal);
-	if (visible(barycentre, points[a], plane_normal))
+	calculate_plane_normal_4D(points, b, c, d, plane_normal);
+	if (visible(barycentre, plane_normal))
 	{
 		plane_normal[0] = -plane_normal[0];
 		plane_normal[1] = -plane_normal[1];
@@ -223,7 +151,7 @@ static void _add_facet(const double (*points)[4], int a, int b, int c, int d, in
 	}
 }
 
-static void calculate_plane_normal(const double (*points)[4], int a, int b, int c, double* plane_normal)
+ void calculate_plane_normal(const double (*points)[4], int a, int b, int c, double* plane_normal)
 {
 	double u[3] = {	points[b][0] - points[a][0],
 			points[b][1] - points[a][1],
@@ -240,14 +168,14 @@ static void calculate_plane_normal(const double (*points)[4], int a, int b, int 
 	plane_normal[2] /= norm;
 }
 
-static double point_plane_distance(const double* w, const double* plane_point, const double* plane_cross)
+ double point_plane_distance(const double* w, const double* plane_point, const double* plane_cross)
 {
 	return	  plane_cross[0] * (plane_point[0] - w[0])
 		+ plane_cross[1] * (plane_point[1] - w[1])
 		+ plane_cross[2] * (plane_point[2] - w[2]);
 }
 
-static bool find_third_point(int num_points, const double (*points)[4], int a, int b, int* p_c)
+ bool find_third_point(int num_points, const double (*points)[4], int a, int b, int* p_c)
 {
 	const double* x1 = points[a];
 	const double* x2 = points[b];
@@ -279,7 +207,7 @@ static bool find_third_point(int num_points, const double (*points)[4], int a, i
 	return max_dist > TOLERANCE;
 }
 
-static bool find_fourth_point(int num_points, const double (*points)[4], int a, int b, int c, int* p_d)
+ bool find_fourth_point(int num_points, const double (*points)[4], int a, int b, int c, int* p_d)
 {
 	double plane_normal[3];
 	calculate_plane_normal(points, a, b, c, plane_normal);
@@ -305,7 +233,7 @@ static bool find_fourth_point(int num_points, const double (*points)[4], int a, 
 	return max_dist > TOLERANCE;
 }
 
-static int initial_simplex(int num_points, const double (*points)[4], int* initial_vertices)
+ int initial_simplex(int num_points, const double (*points)[4], int* initial_vertices)
 {
 	int a = 0;
 	int bi = -1;
@@ -353,12 +281,12 @@ static int initial_simplex(int num_points, const double (*points)[4], int* initi
 	return 0;
 }
 
-static int int_compare(const void* va, const void* vb)
+ int int_compare(const void* va, const void* vb)
 {
 	return *(int*)va - *(int*)vb;
 }
 
-static int initialize_convex_hull(int num_points, const double (*points)[4], int8_t facets[][4], double plane_normal[][4], double* barycentre, int* initial_vertices, bool* processed, int* p_num_facets)
+ int initialize_convex_hull(int num_points, const double (*points)[4], int8_t facets[][3], double plane_normal[][4], double* barycentre, int* initial_vertices, bool* processed, int* p_num_facets)
 {
 	int ret = initial_simplex(num_points, points, initial_vertices);
 	assert(ret == 0);
@@ -393,24 +321,22 @@ static int initialize_convex_hull(int num_points, const double (*points)[4], int
 	barycentre[2] /= 5;
 	barycentre[3] /= 5;
 
-	int num_facets = 0;
-	for (int i=0;i<5;i++)
-	{
-		int vertices[4];
-		int n=0;
-		for (int j=0;j<5;j++)
-			if (j != i)
-				vertices[n++] = initial_vertices[j];
+	b = initial_vertices[1];
+	c = initial_vertices[2];
+	d = initial_vertices[3];
+	e = initial_vertices[4];
 
-		_add_facet(points, vertices[0], vertices[1], vertices[2], vertices[3], facets[num_facets], plane_normal[num_facets], barycentre);
-		num_facets++;
-	}
+	int num_facets = 0;
+	_add_facet(points, b, c, d, facets[num_facets], plane_normal[num_facets], barycentre); num_facets++;
+	_add_facet(points, b, c, e, facets[num_facets], plane_normal[num_facets], barycentre); num_facets++;
+	_add_facet(points, b, d, e, facets[num_facets], plane_normal[num_facets], barycentre); num_facets++;
+	_add_facet(points, c, d, e, facets[num_facets], plane_normal[num_facets], barycentre); num_facets++;
 
 	*p_num_facets = num_facets;
 	return 0;
 }
 
-static int get_convex_hull_4D(int num_points, const double (*points)[4], int* p_num_facets, int8_t facets[][4])
+ int get_convex_hull_4D(int num_points, const double (*points)[4], int* p_num_facets, int8_t facets[][3])
 {
 	assert(num_points <= MAX_POINTS);
 	double plane_normal[MAXF][4];
@@ -423,10 +349,8 @@ static int get_convex_hull_4D(int num_points, const double (*points)[4], int* p_
 	assert(ret == 0);
 	assert(num_facets >= 2);
 
-	int8_t to_add[MAXF][4];
-	//uint8_t edge_visible[122];
-	//uint8_t edge_invisible[122];
-	uint8_t edgehit[1000];
+	int8_t to_add[MAXF][3];
+	uint8_t edgehit[MAX_POINTS][MAX_POINTS];
 #define VISIBLE 1
 #define INVISIBLE 2
 #define BOTH 3
@@ -438,113 +362,91 @@ static int get_convex_hull_4D(int num_points, const double (*points)[4], int* p_
 		processed[i] = true;
 
 		int num_to_add = 0;
-		//memset(edge_visible, 0, sizeof(uint8_t) * 122);
-		//memset(edge_invisible, 0, sizeof(uint8_t) * 122);
-		memset(edgehit, 0, 1000 * sizeof(uint8_t));
+		memset(edgehit, 0, MAX_POINTS*MAX_POINTS * sizeof(uint8_t));
 
 		for (int j = 0;j<num_facets;j++)
 		{
-			int a = facets[j][0];
-			int b = facets[j][1];
-			int c = facets[j][2];
-			int d = facets[j][3];
+			int b = facets[j][0];
+			int c = facets[j][1];
+			int d = facets[j][2];
 
-			int vertices[4][3] = {	{ a, b, c},
-						{ a, b, d},
-						{ a, c, d},
-						{ b, c, d}	};
+			int vertices[3][2] = {	{ b, c},
+						{ b, d},
+						{ c, d}	};
 
-			bool both[4] = {false, false, false, false};
+			bool both[3] = {false, false, false};
 
-			int ts[4];
-			for (int k=0;k<4;k++)
-				ts[k] = triple_index(vertices[k][0], vertices[k][1], vertices[k][2]);
-
-			double distance = point_plane_distance_4D(points[i], points[a], plane_normal[j]);
+			double distance = point_plane_distance_4D(points[i], plane_normal[j]);
 			bool vis = distance > TOLERANCE;
 			if (vis)
 			{
-				for (int k=0;k<4;k++)
+				for (int k=0;k<3;k++)
 				{
-					//setb(edge_visible, ts[k]);
-					//both[k] = getb(edge_invisible, ts[k]);
-
-					edgehit[ts[k]] |= VISIBLE;
-					both[k] = edgehit[ts[k]] == BOTH;
+					int u = vertices[k][0];
+					int v = vertices[k][1];
+					edgehit[u][v] |= VISIBLE;
+					both[k] = edgehit[u][v] == BOTH;
 				}
 
 #ifdef DEBUG
-				printf("removing: %d %d %d %d\n", a, b, c, d);
+				printf("removing: %d %d %d %d\n", 0, b, c, d);
 #endif
 
-				memcpy(facets[j], facets[num_facets-1], 4 * sizeof(int8_t));
+				memcpy(facets[j], facets[num_facets-1], 3 * sizeof(int8_t));
 				memcpy(plane_normal[j], plane_normal[num_facets-1], 4 * sizeof(double));
 				num_facets--;
 				j--;
 			}
 			else
 			{
-				for (int k=0;k<4;k++)
+				for (int k=0;k<3;k++)
 				{
-					//setb(edge_invisible, ts[k]);
-					//both[k] = getb(edge_visible, ts[k]);
-
-					edgehit[ts[k]] |= INVISIBLE;
-					both[k] = edgehit[ts[k]] == BOTH;
+					int u = vertices[k][0];
+					int v = vertices[k][1];
+					edgehit[u][v] |= INVISIBLE;
+					both[k] = edgehit[u][v] == BOTH;
 				}
 			}
 
-			for (int k=0;k<4;k++)
+			for (int k=0;k<3;k++)
 			{
-				if (both[k] && vertices[k][0] == 0)
+				if (both[k])
 				{
-					if (i > vertices[k][2])
-					{
-						to_add[num_to_add][0] = vertices[k][0];
-						to_add[num_to_add][1] = vertices[k][1];
-						to_add[num_to_add][2] = vertices[k][2];
-						to_add[num_to_add][3] = i;
-					}
-					else if (i > vertices[k][1])
+					if (i > vertices[k][1])
 					{
 						to_add[num_to_add][0] = vertices[k][0];
 						to_add[num_to_add][1] = vertices[k][1];
 						to_add[num_to_add][2] = i;
-						to_add[num_to_add][3] = vertices[k][2];
 					}
-					else
+					else if (i > vertices[k][0])
 					{
 						to_add[num_to_add][0] = vertices[k][0];
 						to_add[num_to_add][1] = i;
 						to_add[num_to_add][2] = vertices[k][1];
-						to_add[num_to_add][3] = vertices[k][2];
+					}
+					else
+					{
+						to_add[num_to_add][0] = i;
+						to_add[num_to_add][1] = vertices[k][0];
+						to_add[num_to_add][2] = vertices[k][1];
 					}
 
 					num_to_add++;
-					assert(num_to_add < MAXF);
+					//assert(num_to_add < MAXF);
+					if (num_to_add >= MAXF)
+						return -1;
 				}
 			}
 		}
 
 		for (int j = 0;j<num_to_add;j++)
 		{
-			assert(num_facets < MAXF);
+			//assert(num_facets < MAXF);
+			if (num_facets >= MAXF)
+				return -1;
 
-			//if (to_add[j][0] == 0)
-			{
-				_add_facet((const double (*)[4])points, to_add[j][0], to_add[j][1], to_add[j][2], to_add[j][3], facets[num_facets], plane_normal[num_facets], barycentre);
-				num_facets++;
-			}
-		}
-	}
-
-	for (int i=0;i<num_facets;i++)
-	{
-		if (facets[i][0] != 0)
-		{
-			memcpy(&facets[i], &facets[num_facets - 1], 4 * sizeof(int8_t));
-			num_facets--;
-			i--;
+			_add_facet((const double (*)[4])points, to_add[j][0], to_add[j][1], to_add[j][2], facets[num_facets], plane_normal[num_facets], barycentre);
+			num_facets++;
 		}
 	}
 
@@ -552,7 +454,7 @@ static int get_convex_hull_4D(int num_points, const double (*points)[4], int* p_
 	return ret;
 }
 
-static double triangle_area(double* x1, double* x2, double* x3)
+ double triangle_area(double* x1, double* x2, double* x3)
 {
 	//http://mathworld.wolfram.com/TriangleArea.html
 
@@ -561,27 +463,93 @@ static double triangle_area(double* x1, double* x2, double* x3)
 
 	double c[3];
 	cross_product(u, v, c);
-	return sqrt(fabs(norm_squared(c))) / 2;	//fabs guards against very small negative numbers
+	return sqrt(norm_squared(c)) / 2;
 }
 
-static int calculate_voronoi_areas(int num_points, const double (*points)[4], int num_facets, int8_t facets[][4], double* areas)
+ int next_facet(int8_t* adj, int cur, int a, int b)
+{
+	if (adj[a*MAX_POINTS + b] != cur)
+		return adj[a*MAX_POINTS + b];
+	else
+		return adj[b*MAX_POINTS + a];
+}
+
+ int calculate_voronoi_areas(int num_points, const double (*points)[4], int num_facets, int8_t facets[][3], double* areas)
 {
 	int ret = 0;
 	bool point_hit[MAX_POINTS] = {false};
 	double circumcentres[MAXF][3];
 	for (int i=0;i<num_facets;i++)
 	{
-		int a = facets[i][0];
-		int b = facets[i][1];
-		int c = facets[i][2];
-		int d = facets[i][3];
+		int b = facets[i][0];
+		int c = facets[i][1];
+		int d = facets[i][2];
 
-		point_hit[a] = true;
 		point_hit[b] = true;
 		point_hit[c] = true;
 		point_hit[d] = true;
 
-		circumsphere_centre((double*)points[a], (double*)points[b], (double*)points[c], (double*)points[d], circumcentres[i]);
+		if (!circumsphere_centre((double*)points[b], (double*)points[c], (double*)points[d], circumcentres[i]))
+			return -1;
+	}
+
+	int8_t adj[MAX_POINTS][MAX_POINTS];
+	memset(adj, -1, sizeof(int8_t) * MAX_POINTS * MAX_POINTS);
+
+	int8_t adjf[MAX_POINTS][MAX_POINTS];
+	memset(adjf, -1, sizeof(int8_t) * MAX_POINTS * MAX_POINTS);
+
+	int8_t first_facet[MAX_POINTS];
+	memset(first_facet, -1, sizeof(int8_t) * MAX_POINTS);
+
+	for (int i=0;i<num_facets;i++)
+	{
+		int b = facets[i][0];
+		int c = facets[i][1];
+		int d = facets[i][2];
+
+		if (first_facet[b] == -1)	first_facet[b] = i;
+		if (first_facet[c] == -1)	first_facet[c] = i;
+		if (first_facet[d] == -1)	first_facet[d] = i;
+
+		if (adjf[b][c] == -1)
+		{
+			adjf[b][c] = i;
+			adj[b][c] = d;
+		}
+		else if (adjf[c][b] == -1)
+		{
+			adjf[c][b] = i;
+			adj[c][b] = d;
+		}
+		else
+			return -1;
+
+		if (adjf[c][d] == -1)
+		{
+			adjf[c][d] = i;
+			adj[c][d] = b;
+		}
+		else if (adjf[d][c] == -1)
+		{
+			adjf[d][c] = i;
+			adj[d][c] = b;
+		}
+		else
+			return -1;
+
+		if (adjf[d][b] == -1)
+		{
+			adjf[d][b] = i;
+			adj[d][b] = c;
+		}
+		else if (adjf[b][d] == -1)
+		{
+			adjf[b][d] = i;
+			adj[b][d] = c;
+		}
+		else
+			return -1;
 	}
 
 	areas[0] = INFINITY;
@@ -593,73 +561,37 @@ static int calculate_voronoi_areas(int num_points, const double (*points)[4], in
 			continue;
 		}
 
-		int num_local = 0;
 		int8_t localfacets[MAXF];
-		for (int j=0;j<num_facets;j++)
+		int pivot = facets[first_facet[i]][0];
+		if (pivot == i)
+			pivot = facets[first_facet[i]][1];
+
+		int prev = facets[first_facet[i]][0];
+		if (prev == i || prev == pivot)
+			prev = facets[first_facet[i]][1];
+		if (prev == i || prev == pivot)
+			prev = facets[first_facet[i]][2];
+
+		int orig = prev;
+		int num_local = 1;
+
+		localfacets[0] = first_facet[i];
+		for (int j=1;pivot != orig;j++, num_local++)
 		{
-			int a = facets[j][0];
-			int b = facets[j][1];
-			int c = facets[j][2];
-			int d = facets[j][3];
-
-			assert(a == 0);
-			if (b == i || c == i || d == i)
-				localfacets[num_local++] = j;
-		}
-
-		int _b = i;
-		int _c = facets[localfacets[0]][1];
-		if (_c == _b)
-			_c = facets[localfacets[0]][2];
-		assert(_c != _b);
-
-		for (int j=1;j<num_local;j++)
-		{
-			bool found = false;
-			for (int k=j;k<num_local;k++)
+			if (adj[i][pivot] != -1 && adj[i][pivot] != prev)
 			{
-
-				int a = facets[localfacets[k]][0];
-				int b = facets[localfacets[k]][1];
-				int c = facets[localfacets[k]][2];
-				int d = facets[localfacets[k]][3];
-
-				assert(a == 0);
-				if ((b == _b && c == _c) || (b == _c && c == _b))
-				{
-					int8_t temp = localfacets[j];
-					localfacets[j] = localfacets[k];
-					localfacets[k] = temp;
-
-					found = true;
-					_c = d;
-					break;
-				}
-				else if ((b == _b && d == _c) || (b == _c && d == _b))
-				{
-					int8_t temp = localfacets[j];
-					localfacets[j] = localfacets[k];
-					localfacets[k] = temp;
-
-					found = true;
-					_c = c;
-					break;
-				}
-				else if ((c == _b && d == _c) || (c == _c && d == _b))
-				{
-					int8_t temp = localfacets[j];
-					localfacets[j] = localfacets[k];
-					localfacets[k] = temp;
-
-					found = true;
-					_c = b;
-					break;
-				}
+				localfacets[j] = adjf[i][pivot];
+				prev = pivot;
+				pivot = adj[i][pivot];
 			}
-
-			if (!found) return -1;
-			//this assertion will probably fail if atom lies at the surface (unbounded voronoi cell)
-			assert(found);
+			else if (adj[pivot][i] != -1 && adj[pivot][i] != prev)
+			{
+				localfacets[j] = adjf[pivot][i];
+				prev = pivot;
+				pivot = adj[pivot][i];
+			}
+			else
+				return -1;
 		}
 
 		double area = 0.0;
@@ -685,7 +617,7 @@ typedef struct
 	int index;
 } sorthelper_t;
 
-static int sorthelper_compare(const void* va, const void* vb)
+ int sorthelper_compare(const void* va, const void* vb)
 {
 	sorthelper_t* a = (sorthelper_t*)va;
 	sorthelper_t* b = (sorthelper_t*)vb;
@@ -709,13 +641,13 @@ assert(num_points <= MAX_POINTS);
 	double points[MAX_POINTS][4];
 	for (int i = 0;i<num_points;i++)
 	{
-		double x = _points[i][0];
-		double y = _points[i][1];
-		double z = _points[i][2];
+		double x = _points[i][0] - _points[0][0];
+		double y = _points[i][1] - _points[0][1];
+		double z = _points[i][2] - _points[0][2];
 		points[i][0] = x;
 		points[i][1] = y;
 		points[i][2] = z;
-		points[i][3] = norm_squared((double*)_points[i]);
+		points[i][3] = x*x + y*y + z*z;//norm_squared((double*)_points[i]);
 
 #ifdef DEBUG
 		printf("point %d: %f\t%f\t%f\t%f\n", i, x, y, z, x*x + y*y + z*z);
@@ -723,7 +655,7 @@ assert(num_points <= MAX_POINTS);
 	}
 
 	int num_facets = 0;
-	int8_t simplex[MAXF][4];
+	int8_t simplex[MAXF][3];
 	int ret = get_convex_hull_4D(num_points, (const double (*)[4])points, &num_facets, simplex);
 	//assert(ret == 0);
 	if (ret != 0)
