@@ -69,8 +69,8 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 int main()
 {
 	initialize_PTM();
-	uint64_t res = run_tests();
-	assert(res == 0);
+	//uint64_t res = run_tests();
+	//assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
 	//return 0;
@@ -98,9 +98,13 @@ int main()
 	double* quats = (double*)calloc(4 * sizeof(double), num_atoms);
 	int counts[6] = {0};
 
+#ifdef DEBUG
+extern int failcount;
+#endif
+
 	bool topological_ordering = true;
 	double rmsd_sum = 0.0;
-	//for (int j=0;j<10;j++)
+	for (int j=0;j<10;j++)
 	for (int i=0;i<num_atoms;i++)
 	{
 		double nbr[max_nbrs+1][3];
@@ -129,6 +133,10 @@ int main()
 	}
 
 	printf("rmsd sum: %f\n", rmsd_sum);
+
+#ifdef DEBUG
+	printf("failcount: %d\n", failcount);
+#endif
 
 	free(types);
 	free(rmsds);

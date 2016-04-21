@@ -258,6 +258,10 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	return 0;
 }
 
+#ifdef DEBUG
+int failcount = 0;
+#endif
+
 void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flags, bool topological_ordering,
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P)
 {
@@ -281,7 +285,12 @@ void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flag
 		normalize_vertices(num_points, _points, ch_points);
 		ret = calculate_neighbour_ordering(num_points, (const double (*)[3])ch_points, ordering);
 		if (ret != 0)
+		{
+#ifdef DEBUG
+			failcount++;
+#endif
 			topological_ordering = false;
+		}
 	}
 
 	if (!topological_ordering)
