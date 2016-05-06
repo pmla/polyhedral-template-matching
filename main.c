@@ -70,9 +70,9 @@ int main()
 {
 	initialize_PTM();
 	uint64_t res = run_tests();
-	//assert(res == 0);
-	//printf("=========================================================\n");
-	//printf("unit test result: %lu\n", res);
+	assert(res == 0);
+	printf("=========================================================\n");
+	printf("unit test result: %lu\n", res);
 	//return 0;
 
 	size_t fsize = 0;

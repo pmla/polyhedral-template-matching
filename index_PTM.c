@@ -314,7 +314,7 @@ void index_PTM(	int num_points, double* unpermuted_points, int32_t* unpermuted_n
 
 #ifdef DEBUG
 	for (int i = 0;i<num_points;i++)
-		printf("%.2f\t%.2f\t%.2f\n", _points[i*3 + 0], _points[i*3 + 1], _points[i*3 + 2]);
+		printf("%.2f\t%.2f\t%.2f\n", unpermuted_points[i*3 + 0], unpermuted_points[i*3 + 1], unpermuted_points[i*3 + 2]);
 #endif
 
 	result_t res;
