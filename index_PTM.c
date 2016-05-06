@@ -262,7 +262,7 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 int failcount = 0;
 #endif
 
-void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flags, bool topological_ordering,
+void index_PTM(	int num_points, double* unpermuted_points, int32_t* unpermuted_numbers, int32_t flags, bool topological_ordering,
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P)
 {
 	if (flags & PTM_CHECK_SC)
@@ -282,7 +282,7 @@ void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flag
 	int8_t ordering[19];
 	if (topological_ordering)
 	{
-		normalize_vertices(num_points, _points, ch_points);
+		normalize_vertices(num_points, unpermuted_points, ch_points);
 		ret = calculate_neighbour_ordering(num_points, (const double (*)[3])ch_points, ordering);
 		if (ret != 0)
 		{
@@ -302,10 +302,10 @@ void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flag
 	num_points = MIN(15, num_points);
 	for (int i=0;i<num_points;i++)
 	{
-		memcpy(points[i], &_points[3 * ordering[i]], 3 * sizeof(double));
+		memcpy(points[i], &unpermuted_points[3 * ordering[i]], 3 * sizeof(double));
 
-		if (_numbers != NULL)
-			numbers[i] = _numbers[ordering[i]];
+		if (unpermuted_numbers != NULL)
+			numbers[i] = unpermuted_numbers[ordering[i]];
 	}
 
 	convexhull_t ch;
@@ -319,7 +319,7 @@ void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flag
 
 	result_t res;
 	res.ref_struct = NULL;
-	res.rmsd = DBL_MAX;
+	res.rmsd = INFINITY;
 	*p_type = PTM_MATCH_NONE;
 	*p_alloy_type = PTM_ALLOY_NONE;
 
@@ -352,7 +352,7 @@ void index_PTM(	int num_points, double* _points, int32_t* _numbers, int32_t flag
 	{
 		*p_type = ref->type;
 
-		if (numbers != NULL)
+		if (unpermuted_numbers != NULL)
 		{
 			if (ref->type == PTM_MATCH_FCC)
 				*p_alloy_type = find_fcc_alloy_type(res.mapping, numbers);

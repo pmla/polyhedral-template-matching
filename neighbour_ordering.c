@@ -240,6 +240,37 @@ static bool find_fourth_point(int num_points, const double (*points)[4], int a, 
 	return max_dist > TOLERANCE;
 }
 
+static bool find_fifth_point(int num_points, const double (*points)[4], int a, int b, int c, int d, int* p_e)
+{
+	double plane_normal[4];
+	calculate_plane_normal_4D(points, b, c, d, plane_normal);
+
+
+	int bi = -1;
+	double max_dist = 0.0;
+	for (int i = 0;i<num_points;i++)
+	{
+		if (i == a || i == b || i == c || i == d)
+			continue;
+
+		double _centre[3];
+		if (!circumsphere_centre((double*)points[b], (double*)points[c], (double*)points[i], _centre)) continue;
+		if (!circumsphere_centre((double*)points[b], (double*)points[d], (double*)points[i], _centre)) continue;
+		if (!circumsphere_centre((double*)points[c], (double*)points[d], (double*)points[i], _centre)) continue;
+
+		const double* x0 = points[i];
+		double dist = fabs(point_plane_distance_4D(x0, plane_normal));
+		if (dist > max_dist)
+		{
+			max_dist = dist;
+			bi = i;
+		}
+	}
+
+	*p_e = bi;
+	return max_dist > TOLERANCE;
+}
+
 static int initial_simplex(int num_points, const double (*points)[4], int* initial_vertices)
 {
 	int a = 0;
@@ -304,30 +335,17 @@ static int initialize_convex_hull(int num_points, const double (*points)[4], int
 	int d = initial_vertices[3];
 	int e = -1;
 
-	/*for (int i=0;i<num_points;i++)
-	{
-		if (i != a &&i != b &&i != c &&i != d)
-		{
-			e = i;
-			break;
-		}
-	}*/
+	if (!find_fifth_point(num_points, points, a, b, c, d, &e))
+		return -1;
 
-	for (int i=0;i<num_points;i++)
-	{
-//b c e
-//b d e
-//c d e
-		if (i == a || i == b || i == c || i == d) continue;
+	double _centre[3];
+	//assert(circumsphere_centre((double*)points[b], (double*)points[c], (double*)points[e], _centre));
+	//assert(circumsphere_centre((double*)points[b], (double*)points[d], (double*)points[e], _centre));
+	//assert(circumsphere_centre((double*)points[c], (double*)points[d], (double*)points[e], _centre));
 
-		double _centre[3];
-		if (!circumsphere_centre((double*)points[b], (double*)points[c], (double*)points[i], _centre)) continue;
-		if (!circumsphere_centre((double*)points[b], (double*)points[d], (double*)points[i], _centre)) continue;
-		if (!circumsphere_centre((double*)points[c], (double*)points[d], (double*)points[i], _centre)) continue;
-
-		e = i;
-		break;
-	}
+	if (!circumsphere_centre((double*)points[b], (double*)points[c], (double*)points[e], _centre)) return -101;
+	if (!circumsphere_centre((double*)points[b], (double*)points[d], (double*)points[e], _centre)) return -101;
+	if (!circumsphere_centre((double*)points[c], (double*)points[d], (double*)points[e], _centre)) return -101;
 
 	initial_vertices[4] = e;
 
@@ -376,7 +394,9 @@ static int get_convex_hull_4D(int num_points, const double (*points)[4], int* p_
 	int initial_vertices[5];
 	bool processed[MAX_POINTS] = {false};
 	int ret = initialize_convex_hull(num_points, (const double (*)[4])points, facets, plane_normal, barycentre, initial_vertices, processed, &num_facets);
-	assert(ret == 0);
+	if (ret != 0)
+		return ret;
+	//assert(ret == 0);
 	assert(num_facets >= 2);
 
 	int8_t to_add[MAXF][3];
@@ -725,7 +745,7 @@ assert(num_points <= MAX_POINTS);
 	int ret = get_convex_hull_4D(num_points, (const double (*)[4])points, &num_facets, simplex);
 	//assert(ret == 0);
 	if (ret != 0)
-		return -1;	//todo: replace with assert again
+		return ret;	//todo: replace with assert again
 
 	double areas[MAX_POINTS];
 	ret = calculate_voronoi_areas(num_points, (const double (*)[4])points, num_facets, simplex, areas);

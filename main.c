@@ -69,7 +69,7 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 int main()
 {
 	initialize_PTM();
-	//uint64_t res = run_tests();
+	uint64_t res = run_tests();
 	//assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
@@ -78,13 +78,13 @@ int main()
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;
 	double* positions = NULL;
-	int ret = read_file((char*)"FeCu_positions.dat", (uint8_t**)&positions, &fsize);
-	//int ret = read_file((char*)"fcc_positions.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"FeCu_positions.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"fcc_positions.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
-	ret = read_file((char*)"FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	//ret = read_file((char*)"fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
