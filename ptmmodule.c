@@ -2,8 +2,8 @@
 #include <ndarraytypes.h>
 #include <arrayobject.h>
 #include <stdbool.h>
-#include "index_PTM.h"
-#include "unittest.h"
+#include "index_ptm.h"
+//#include "unittest.h"
 
 
 #define MIN_NBRS 6
@@ -11,6 +11,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+ptm_local_handle_t local_handle;	//python has no threads, so we can store the local handle in global memory.
 
 static PyObject* error(PyObject* type, char* msg)
 {
@@ -141,7 +143,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 
 	if (calculate_strains)
 	{
-		index_PTM(num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P);
+		ptm_index(local_handle, num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P, NULL);
 		if (type == PTM_MATCH_NONE)
 			return Py_BuildValue("iiddOOOOO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None, Py_None, Py_None, Py_None, Py_None);
 
@@ -168,7 +170,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	}
 	else
 	{
-		index_PTM(num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL);
+		ptm_index(local_handle, num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL);
 		if (type == PTM_MATCH_NONE)
 			return Py_BuildValue("iiddO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None);
 
@@ -191,7 +193,8 @@ PyMODINIT_FUNC initptmmodule(void)
 	(void) Py_InitModule("ptmmodule", PTMModuleMethods);
 	import_array();
 
-	initialize_PTM();
+	ptm_initialize_global();
+	local_handle = ptm_initialize_local();
 	//uint64_t res = run_tests();
 	//if (res != 0)
 	//	return error(PyExc_RuntimeError, "PTM unit tests failed");

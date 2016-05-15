@@ -113,8 +113,10 @@ def run(pos, nbrs):
 	plt.show()
 
 def go():
-	dat_pos = open('FeCu_positions.dat', 'rb').read()
-	dat_nbr = open('FeCu_nbrs.dat', 'rb').read()
+	dat_pos = open('test_data/FeCu_positions.dat', 'rb').read()
+	dat_nbr = open('test_data/FeCu_nbrs.dat', 'rb').read()
+	#dat_pos = open('test_data/fcc_positions.dat', 'rb').read()
+	#dat_nbr = open('test_data/fcc_nbrs.dat', 'rb').read()
 
 	n = len(dat_pos) / 24
 	print "num atoms:", n

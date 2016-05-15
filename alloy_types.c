@@ -1,4 +1,4 @@
-#include "index_PTM.h"
+#include "index_ptm.h"
 
 int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 {
@@ -36,7 +36,7 @@ int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 	if (num_au == len - 1)
 		return PTM_ALLOY_L12_AU;
 
-	for (int i=0;i<len;i++)
+	for (int i=0;i<len-1;i++)
 		temp[i] = numbers[mapping[i + 1]];
 
 	if (num_au == 4)

@@ -3,7 +3,7 @@
 
 
 //sc
-#define k_sc 0.42857142857130609004
+#define k_sc 0.5
 const double penrose_sc[7][3] = {	
 					{0, 0, 0},
 					{0, 0, -k_sc},
@@ -15,7 +15,7 @@ const double penrose_sc[7][3] = {
 				};
 
 //fcc
-#define k_fcc 0.16317848796621717278
+#define k_fcc 0.17677669529663678216
 const double penrose_fcc[13][3] = {
 					{0, 0, 0},
 					{0, k_fcc, k_fcc},
@@ -33,7 +33,7 @@ const double penrose_fcc[13][3] = {
 				};
 
 //hcp
-#define k_hcp 0.16317848796621717278
+#define k_hcp 0.17677669529663678216
 const double penrose_hcp[13][3] = {
 					{0, 0, 0},
 					{k_hcp, 0, k_hcp},
@@ -51,7 +51,7 @@ const double penrose_hcp[13][3] = {
 				};
 
 //ico
-#define k_ico 0.12132256433512358940
+#define k_ico 0.13143277802974323576
 #define phi 1.61803398874989490253
 //((1.0 + sqrt(5)) / 2)
 const double penrose_ico[13][3] = {
@@ -71,7 +71,7 @@ const double penrose_ico[13][3] = {
 				};
 
 //bcc
-#define k_bcc 0.10773502691899843053
+#define k_bcc 0.11543038598460284017
 const double penrose_bcc[15][3] = {
 					{0, 0, 0},
 					{-k_bcc, -k_bcc, -k_bcc},

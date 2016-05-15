@@ -1,17 +1,21 @@
 CC = gcc
+CPP = g++
 
 C_SRC_FILES = canonical.c graph_data.c convex_hull_incremental.c \
-	index_PTM.c alloy_types.c qcprot.c deformation_gradient.c \
-	normalize_vertices.c quat.c neighbour_ordering.c
+	index_ptm.c alloy_types.c deformation_gradient.c \
+	normalize_vertices.c reference_templates.c \
+	svdpolar/polar_decomposition.c \
+	qcprot/qcprot.c qcprot/quat.c #unittest.c
+
+CPP_SRC_FILES = neighbour_ordering.cpp voronoi/cell.cpp
 
 C_SRC_MODULE_FILE = ptmmodule.c 
 
-C_SRC_SVDPOLAR_FILES = polar_decomposition.c
-
 HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
-	deformation_gradient.h graph_data.h index_PTM.h \
-	normalize_vertices.h qcprot.h quat.h reference_templates.h \
+	deformation_gradient.h graph_data.h index_ptm.h \
+	normalize_vertices.h reference_templates.h \
 	neighbour_ordering.h \
+	qcprot/qcprot.h qcprot/quat.h \
 	svdpolar/polar_decomposition.h \
 	svdpolar/Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.h \
 	svdpolar/Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.h \
@@ -23,7 +27,7 @@ OBJDIR = .
 LIBRARY = libptm.a
 
 C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
-C_OBJECT_SVDPOLAR_FILES = $(C_SRC_SVDPOLAR_FILES:%.c=$(OBJDIR)/%.o) 
+CPP_OBJECT_FILES = $(CPP_SRC_FILES:%.cpp=$(OBJDIR)/%.o) 
 C_OBJECT_MODULE_FILE = $(C_SRC_MODULE_FILE:%.c=$(OBJDIR)/%.o) 
 
 PYTHONMODULE = ptmmodule.so
@@ -39,7 +43,8 @@ PYTHONINCLDIR = $(PYTHONPREFIX)/include/python$(PYTHONVERSION)
 PYTHONLIBDIR = $(PYTHONEXECPREFIX)/lib/python$(PYTHONVERSION)/config
 PYTHONLIB = python$(PYTHONVERSION)
 
-CFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra
+CFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
+CPPFLAGS = -fPIC -g -O3 -Wall -Wextra -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
 
 ifeq ($(shell uname),Darwin)
 MAKESHARED = -bundle -undefined dynamic_lookup
@@ -52,10 +57,10 @@ all: $(OBJDIR) $(OBJDIR)/$(PYTHONMODULE)
 lib: $(OBJDIR) $(OBJDIR)/$(LIBRARY)
 
 # Rule for linking module
-$(OBJDIR)/$(PYTHONMODULE): $(C_OBJECT_MODULE_FILE) $(OBJDIR)/$(LIBRARY)
-	$(CC) $(MAKESHARED) -fPIC -g -O2 -o $@ $^ -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
+$(OBJDIR)/$(PYTHONMODULE): $(C_OBJECT_MODULE_FILE) $(CPP_OBJECT_MODULE_FILE) $(OBJDIR)/$(LIBRARY)
+	$(CPP) $(MAKESHARED) -fPIC -g -O2 -o $@ $^ -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
 
-$(OBJDIR)/$(LIBRARY): $(C_OBJECT_FILES) $(C_OBJECT_SVDPOLAR_FILES)
+$(OBJDIR)/$(LIBRARY): $(C_OBJECT_FILES) $(CPP_OBJECT_FILES)
 	rm -f $@
 	ar -r -s $@ $^
 
@@ -63,8 +68,8 @@ $(OBJDIR):
 	mkdir $(OBJDIR)
 
 # Rule for compiling C source
-$(OBJDIR)/%.o: svdpolar/%.c  $(HEADER_FILES)
-	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
+$(OBJDIR)/%.o: %.cpp  $(HEADER_FILES)
+	$(CPP) -c $(CPPFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
 
 $(OBJDIR)/%.o: %.c  $(HEADER_FILES)
 	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
@@ -74,3 +79,4 @@ clean:
 
 cleanall: clean
 	rm -rf build
+

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "index_PTM.h"
+#include "index_ptm.h"
 #include "unittest.h"
 
 #define MAX_NBRS 24
@@ -68,23 +68,23 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 
 int main()
 {
-	initialize_PTM();
+	ptm_initialize_global();
 	uint64_t res = run_tests();
 	assert(res == 0);
-	printf("=========================================================\n");
-	printf("unit test result: %lu\n", res);
+	//printf("=========================================================\n");
+	//printf("unit test result: %lu\n", res);
 	//return 0;
 
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;
 	double* positions = NULL;
-	//int ret = read_file((char*)"FeCu_positions.dat", (uint8_t**)&positions, &fsize);
-	int ret = read_file((char*)"fcc_positions.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"test_data/fcc_positions.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
-	//ret = read_file((char*)"FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	ret = read_file((char*)"fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"test_data/fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
@@ -102,6 +102,8 @@ int main()
 extern int failcount;
 #endif
 
+	ptm_local_handle_t local_handle = ptm_initialize_local();
+
 	bool topological_ordering = true;
 	double rmsd_sum = 0.0;
 	for (int j=0;j<10;j++)
@@ -110,10 +112,11 @@ extern int failcount;
 		double nbr[max_nbrs+1][3];
 		get_neighbours((double (*)[3])positions, nbrs, max_nbrs, i, nbr);
 
+		int8_t mapping[MAX_NBRS];
 		int32_t type, alloy_type;
 		double scale, rmsd;
 		double q[4], F[9], F_res[3], U[9], P[9];
-		index_PTM(max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
+		ptm_index(local_handle, max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping);
 
 		types[i] = type;
 		rmsds[i] = rmsd;
@@ -143,6 +146,7 @@ extern int failcount;
 	free(quats);
 	free(positions);
 	free(nbrs);
+	ptm_uninitialize_local(local_handle);
 	return 0;
 }
 

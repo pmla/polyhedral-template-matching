@@ -31,7 +31,7 @@ double normalize_vertices(int num, double *points, double (*normalized)[3])
 
 	//calculate mean length
 	double scale = 0.0;
-	for (int i=0;i<num;i++)
+	for (int i=1;i<num;i++)
 	{
 		double x = normalized[i][0];
 		double y = normalized[i][1];

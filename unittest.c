@@ -36,9 +36,9 @@ done:
 #include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "index_PTM.h"
-#include "quat.h"
+#include "index_ptm.h"
 #include "normalize_vertices.h"
+#include "qcprot/quat.h"
 
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -48,12 +48,6 @@ done:
 #define DEGREES(x) (360 * (x) / (2.0 * M_PI))
 
 
-extern const double points_sc[7][3];
-extern const double points_fcc[13][3];
-extern const double points_hcp[13][3];
-extern const double points_ico[13][3];
-extern const double points_bcc[15][3];
-
 typedef struct
 {
 	int type;
@@ -62,11 +56,11 @@ typedef struct
 	const double (*points)[3];
 } structdata_t;
 
-structdata_t structdata[5] =  {	{ .type = PTM_MATCH_SC,  .check = PTM_CHECK_SC,  .num_points =  7, .points = points_sc },
-				{ .type = PTM_MATCH_FCC, .check = PTM_CHECK_FCC, .num_points = 13, .points = points_fcc},
-				{ .type = PTM_MATCH_HCP, .check = PTM_CHECK_HCP, .num_points = 13, .points = points_hcp},
-				{ .type = PTM_MATCH_ICO, .check = PTM_CHECK_ICO, .num_points = 13, .points = points_ico},
-				{ .type = PTM_MATCH_BCC, .check = PTM_CHECK_BCC, .num_points = 15, .points = points_bcc}};
+structdata_t structdata[5] =  {	{ .type = PTM_MATCH_SC,  .check = PTM_CHECK_SC,  .num_points =  7, .points = ptm_template_sc },
+				{ .type = PTM_MATCH_FCC, .check = PTM_CHECK_FCC, .num_points = 13, .points = ptm_template_fcc},
+				{ .type = PTM_MATCH_HCP, .check = PTM_CHECK_HCP, .num_points = 13, .points = ptm_template_hcp},
+				{ .type = PTM_MATCH_ICO, .check = PTM_CHECK_ICO, .num_points = 13, .points = ptm_template_ico},
+				{ .type = PTM_MATCH_BCC, .check = PTM_CHECK_BCC, .num_points = 15, .points = ptm_template_bcc}};
 
 typedef struct
 {
@@ -159,8 +153,123 @@ quattest_t qtest[] = {	{	.pre  = {1.00, 0.00, -0.00, 0.00},
 				.fundamental = true,
 				.strain = false				},
 
-			{	.pre  = {0.95, 0.02, -0.03, 0.15},
-				.post = {0.95, 0.02, -0.03, 0.15},
+			{	.pre  = {0.987070, 0.020780, -0.031171, 0.155853},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.683270, 0.712658, 0.088164, 0.132246},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.720005, -0.095511, 0.675923, 0.124899},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.587759, -0.007347, -0.036735, 0.808168},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.808168, 0.036735, -0.007347, -0.587759},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.675923, 0.124899, -0.720005, 0.095511},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.712658, -0.683270, -0.132246, 0.088164},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.420803, 0.410413, 0.545486, 0.597437},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.576656, 0.441584, 0.566266, -0.389633},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.389633, 0.566266, -0.441584, 0.576656},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.545486, 0.597437, -0.420803, -0.410413},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.441584, -0.576656, 0.389633, 0.566266},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.597437, -0.545486, 0.410413, -0.420803},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.410413, -0.420803, -0.597437, 0.545486},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.566266, -0.389633, -0.576656, -0.441584},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.020780, -0.987070, -0.155853, -0.031171},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.007347, 0.587759, 0.808168, 0.036735},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.124899, -0.675923, -0.095511, -0.720005},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.095511, 0.720005, 0.124899, -0.675923},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.036735, -0.808168, 0.587759, -0.007347},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.031171, -0.155853, 0.987070, 0.020780},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.088164, 0.132246, -0.683270, -0.712658},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.132246, -0.088164, 0.712658, -0.683270},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
+				.fundamental = true,
+				.strain = false				},
+
+			{	.pre  = {0.155853, 0.031171, 0.020780, -0.987070},
+				.post = {0.987070, 0.020780, -0.031171, 0.155853},
 				.fundamental = true,
 				.strain = false				},
 
@@ -169,7 +278,7 @@ quattest_t qtest[] = {	{	.pre  = {1.00, 0.00, -0.00, 0.00},
 				.fundamental = false,
 				.strain = true				},
 
-			{	.pre  = {1.05, 0.0, 0.0, -0.05, 0.95, -0.0, -0.02, 0.6, 0.94},
+			{	.pre  = {1.05, 0.0, 0.0, -0.05, 0.95, -0.0, -0.02, 0.06, 0.94},
 				.post = {},
 				.fundamental = false,
 				.strain = true				},
@@ -217,14 +326,14 @@ static double matrix_determinant(double* A)
 		+ A[2] * (A[3] * A[7] - A[4] * A[6]);
 }
 
-static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template)[3])
+static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3])
 {
 	//transform template
 	double transformed_template[15][3];
 	for (int i=0;i<num;i++)
 	{
 		double row[3] = {0, 0, 0};
-		matvec(A, (double*)template[i], row);
+		matvec(A, (double*)template_points[i], row);
 		memcpy(transformed_template[i], row, 3 * sizeof(double));
 	}
 
@@ -242,6 +351,7 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 		double y0 = points[i][1];
 		double z0 = points[i][2];
 
+		int bi = -1;
 		double min_dist = INFINITY;
 		for (int j=0;j<num;j++)
 		{
@@ -253,10 +363,65 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 			double dy = y1 - y0;
 			double dz = z1 - z0;
 			double dist = dx*dx + dy*dy + dz*dz;
+			if (dist < min_dist)
+				bi = j;
 			min_dist = MIN(min_dist, dist);
 		}
 
 		acc += min_dist;
+	}
+
+	return sqrt(fabs(acc / num));
+}
+
+static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3], int8_t* mapping)
+{
+	//transform template
+	double transformed_template[15][3];
+	for (int i=0;i<num;i++)
+	{
+		double row[3] = {0, 0, 0};
+		matvec(A, (double*)template_points[i], row);
+		memcpy(transformed_template[i], row, 3 * sizeof(double));
+	}
+
+	//translate and scale input points
+	double points[15][3];
+	subtract_barycentre(num, input_points[0], points);
+	for (int i=0;i<num;i++)
+		for (int j=0;j<3;j++)
+			points[i][j] *= scale;
+
+	/*printf("\n");
+	for (int i=0;i<num;i++)
+		printf("%d ", mapping[i]);
+	printf("\n");
+
+	for (int i=0;i<num;i++)
+		printf("%f %f %f\n", points[mapping[i]][0], points[mapping[i]][1], points[mapping[i]][2]);
+	printf("\n");
+	for (int i=0;i<num;i++)
+		printf("%f %f %f\n", transformed_template[i][0], transformed_template[i][1], transformed_template[i][2]);
+	printf("\n");*/
+
+	double acc = 0;
+	for (int i=0;i<num;i++)
+	{
+		double x0 = points[mapping[i]][0];
+		double y0 = points[mapping[i]][1];
+		double z0 = points[mapping[i]][2];
+
+		double x1 = transformed_template[i][0];
+		double y1 = transformed_template[i][1];
+		double z1 = transformed_template[i][2];
+
+		double dx = x1 - x0;
+		double dy = y1 - y0;
+		double dz = z1 - z0;
+		double dist = dx*dx + dy*dy + dz*dz;
+
+		//printf("dist: %f\n", dist);
+		acc += dist;
 	}
 
 	return sqrt(fabs(acc / num));
@@ -267,6 +432,22 @@ uint64_t run_tests()
 	int ret = 0;
 	const double tolerance = 1E-5;
 	double identity_matrix[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+	int num_structures = sizeof(structdata) / sizeof(structdata_t);
+	int num_quat_tests = sizeof(qtest) / sizeof(quattest_t);
+
+	int num_alloy_tests[] = {	sizeof(sc_alloy_tests) / sizeof(alloytest_t),
+					sizeof(fcc_alloy_tests) / sizeof(alloytest_t),
+					sizeof(hcp_alloy_tests) / sizeof(alloytest_t),
+					sizeof(ico_alloy_tests) / sizeof(alloytest_t),
+					sizeof(bcc_alloy_tests) / sizeof(alloytest_t)	};
+
+	alloytest_t* alloy_test[] = {	sc_alloy_tests,
+					fcc_alloy_tests,
+					hcp_alloy_tests,
+					ico_alloy_tests,
+					bcc_alloy_tests	};
+	int num_tests = 0;
+	ptm_local_handle_t local_handle = ptm_initialize_local();
 
 	//rotation matrix => quaternion
 	{
@@ -296,34 +477,80 @@ uint64_t run_tests()
 				CLEANUP("failed on quaternion => rotation matrix conversion", -1)
 	}
 
-	int num_structures = sizeof(structdata) / sizeof(structdata_t);
-	int num_quat_tests = sizeof(qtest) / sizeof(quattest_t);
+/*
+	//for (int it = 0;it<num_structures;it++)
+int it = 4;
+	{
+		structdata_t* s = &structdata[it];
+		double points[15][3];
+		double rotated_points[15][3];
 
-	int num_alloy_tests[] = {	sizeof(sc_alloy_tests) / sizeof(alloytest_t),
-					sizeof(fcc_alloy_tests) / sizeof(alloytest_t),
-					sizeof(hcp_alloy_tests) / sizeof(alloytest_t),
-					sizeof(ico_alloy_tests) / sizeof(alloytest_t),
-					sizeof(bcc_alloy_tests) / sizeof(alloytest_t)	};
+		memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
 
-	alloytest_t* alloy_test[] = {	sc_alloy_tests,
-					fcc_alloy_tests,
-					hcp_alloy_tests,
-					ico_alloy_tests,
-					bcc_alloy_tests	};
+		for (int k=0;k<24;k++)
+		{
+			double U[9];
+			extern double generator_cubic[24][4];
+			double qtemp[4];
+			memcpy(qtemp, generator_cubic[k], 4 * sizeof(double));
+			qtemp[1] = -qtemp[1];
+			qtemp[2] = -qtemp[2];
+			qtemp[3] = -qtemp[3];
+			quaternion_to_rotation_matrix(qtemp, U);
 
-	int num_tests = 0;
+			for (int i=0;i<s->num_points;i++)
+			{
+				double row[3] = {0, 0, 0};
+				matvec(U, (double*)points[i], row);
+				memcpy(rotated_points[i], row, 3 * sizeof(double));
+			}
+
+			for (int i=0;i<s->num_points;i++)
+			{
+				double x0 = rotated_points[i][0];
+				double y0 = rotated_points[i][1];
+				double z0 = rotated_points[i][2];
+
+				int bi = -1;
+				double min_dist = INFINITY;
+				for (int j=0;j<s->num_points;j++)
+				{
+					double x1 = points[j][0];
+					double y1 = points[j][1];
+					double z1 = points[j][2];
+
+					double dx = x1 - x0;
+					double dy = y1 - y0;
+					double dz = z1 - z0;
+					double dist = dx*dx + dy*dy + dz*dz;
+					if (dist < min_dist)
+						bi = j;
+					min_dist = MIN(min_dist, dist);
+				}
+
+				printf("%d ", bi);
+			}
+			printf("\n");
+		}
+	}
+exit(3);*/
+
 	for (int iq=0;iq<num_quat_tests;iq++)
 	{
 		double qpre[4], qpost[4], rot[9];
 		memcpy(qpre, qtest[iq].pre, 4 * sizeof(double));
 		memcpy(qpost, qtest[iq].post, 4 * sizeof(double));
 
-		normalize_quaternion(qpre);
-		normalize_quaternion(qpost);
 		if (qtest[iq].strain)
+		{
 			memcpy(rot, qtest[iq].pre, 9 * sizeof(double));
+		}
 		else
+		{
+			normalize_quaternion(qpre);
+			normalize_quaternion(qpost);
 			quaternion_to_rotation_matrix(qpre, rot);
+		}
 
 		for (int it = 0;it<num_structures;it++)
 		{
@@ -346,7 +573,7 @@ uint64_t run_tests()
 
 			int tocheck = 0;
 			for (int i = 0;i<it+1;i++)
-				tocheck |= s->check;
+				tocheck |= structdata[i].check;
 
 			for (int ia=0;ia<num_alloy_tests[it];ia++)
 			{
@@ -356,11 +583,15 @@ uint64_t run_tests()
 
 				for (int itop=0;itop<=1;itop++)
 				{
+					int8_t mapping[15];
 					bool topological = itop == 1;
 					int32_t type, alloy_type;
 					double scale, rmsd;
 					double q[4], F[9], F_res[3], U[9], P[9];
-					index_PTM(s->num_points, points[0], numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P);
+					ret = ptm_index(local_handle, s->num_points, points[0], numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping);
+					if (ret != PTM_NO_ERROR)
+						CLEANUP("indexing failed", ret);
+
 					num_tests++;
 
 #ifdef DEBUG
@@ -417,7 +648,8 @@ uint64_t run_tests()
 						{
 							double qu[4];
 							rotation_matrix_to_quaternion(U, qu);
-							rotate_quaternion_into_cubic_fundamental_zone(qu);
+							//printf("%f %f %f %f\n", qu[0], qu[1], qu[2], qu[3]);
+							//printf("%f %f %f %f\n", qpost[0], qpost[1], qpost[2], qpost[3]);
 							if (quat_misorientation(qu, qpost) > tolerance)
 								CLEANUP("failed on deformation gradient disorientation", -1);
 						}
@@ -433,16 +665,22 @@ uint64_t run_tests()
 					double rmsd_approx = nearest_neighbour_rmsd(s->num_points, scale, A, points, s->points);
 					if (fabs(rmsd_approx) > tolerance)
 						CLEANUP("failed on rmsd nearest neighbour", -1);
+
+					//check mapped neighbour rmsd
+					double rmsd_mapped = mapped_neighbour_rmsd(s->num_points, scale, A, points, s->points, mapping);
+					if (fabs(rmsd_mapped) > tolerance)
+						CLEANUP("failed on rmsd mapped neighbour", -1);
 				}
 			}
 		}
 	}
 
 #ifdef DEBUG
-	printf("num tests completed: %d\n", num_tests);
 #endif
 
 cleanup:
+	printf("num tests completed: %d\n", num_tests);
+	ptm_uninitialize_local(local_handle);
 	return ret;
 }
 
