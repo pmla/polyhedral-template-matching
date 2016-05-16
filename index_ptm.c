@@ -11,7 +11,6 @@
 #include "deformation_gradient.h"
 #include "alloy_types.h"
 #include "normalize_vertices.h"
-#include "neighbour_ordering.h"
 #include "index_ptm.h"
 #include "qcprot/qcprot.h"
 #include "qcprot/quat.h"

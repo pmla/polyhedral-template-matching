@@ -14,7 +14,6 @@ C_SRC_MODULE_FILE = ptmmodule.c
 HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
 	deformation_gradient.h graph_data.h index_ptm.h \
 	normalize_vertices.h reference_templates.h \
-	neighbour_ordering.h \
 	qcprot/qcprot.h qcprot/quat.h \
 	svdpolar/polar_decomposition.h \
 	svdpolar/Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.h \

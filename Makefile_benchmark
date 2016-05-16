@@ -26,7 +26,6 @@ CPP = g++
 HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
 	deformation_gradient.h graph_data.h index_ptm.h \
 	normalize_vertices.h reference_templates.h \
-	neighbour_ordering.h \
 	qcprot/qcprot.h qcprot/quat.h \
 	voronoi/cell.hpp \
 	svdpolar/polar_decomposition.h \

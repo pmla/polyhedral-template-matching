@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 typedef struct ptm_local_handle* ptm_local_handle_t;
-void* ptm_initialize_local();
+ptm_local_handle_t ptm_initialize_local();
 void ptm_uninitialize_local(ptm_local_handle_t ptr);
 
 int ptm_initialize_global();
