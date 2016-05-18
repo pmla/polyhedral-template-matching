@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 #include <cassert>
 #include "voronoi/cell.hpp"
 using namespace voro;
@@ -97,7 +98,8 @@ int calculate_neighbour_ordering(voronoicell_neighbor* voronoi_handle, int num_p
 	if (ret != 0)
 		return ret;
 
-	double areas[num_points] = {0};
+	double areas[num_points];
+	memset(areas, 0, num_points * sizeof(double));
 	areas[0] = INFINITY;
 	for (size_t i=0;i<nbr_indices.size();i++)
 	{
