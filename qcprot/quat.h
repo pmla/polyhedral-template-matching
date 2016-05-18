@@ -2,6 +2,8 @@
 #define QUAT_H
 
 int rotate_quaternion_into_cubic_fundamental_zone(double* q);
+int rotate_quaternion_into_icosahedral_fundamental_zone(double* q);
+int rotate_quaternion_into_hcp_fundamental_zone(double* q);
 
 void normalize_quaternion(double* q);
 void quaternion_to_rotation_matrix(double* q, double* U);

@@ -4,6 +4,7 @@ CPP = g++
 C_SRC_FILES = canonical.c graph_data.c convex_hull_incremental.c \
 	index_ptm.c alloy_types.c deformation_gradient.c \
 	normalize_vertices.c reference_templates.c \
+	fundamental_mappings.c \
 	svdpolar/polar_decomposition.c \
 	qcprot/qcprot.c qcprot/quat.c #unittest.c
 

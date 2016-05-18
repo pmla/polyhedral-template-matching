@@ -71,9 +71,9 @@ int main()
 	ptm_initialize_global();
 	uint64_t res = run_tests();
 	assert(res == 0);
-	//printf("=========================================================\n");
-	//printf("unit test result: %lu\n", res);
-	//return 0;
+	printf("=========================================================\n");
+	printf("unit test result: %lu\n", res);
+	return 0;
 
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;

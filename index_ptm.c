@@ -32,6 +32,7 @@ typedef struct
 	graph_t* graphs;
 	const double (*points)[3];
 	const double (*penrose)[3];
+	const int8_t (*mapping)[15];
 } refdata_t;
 
 typedef struct
@@ -43,11 +44,17 @@ typedef struct
 	refdata_t* ref_struct;
 } result_t;
 
-refdata_t structure_sc =  { .type = PTM_MATCH_SC,  .num_nbrs =  6, .num_facets =  8, .max_degree = 4, .num_graphs = NUM_SC_GRAPHS,  .graphs = graphs_sc,  .points = ptm_template_sc,  .penrose = penrose_sc };
-refdata_t structure_fcc = { .type = PTM_MATCH_FCC, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_FCC_GRAPHS, .graphs = graphs_fcc, .points = ptm_template_fcc, .penrose = penrose_fcc};
-refdata_t structure_hcp = { .type = PTM_MATCH_HCP, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_HCP_GRAPHS, .graphs = graphs_hcp, .points = ptm_template_hcp, .penrose = penrose_hcp};
-refdata_t structure_ico = { .type = PTM_MATCH_ICO, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_ICO_GRAPHS, .graphs = graphs_ico, .points = ptm_template_ico, .penrose = penrose_ico};
-refdata_t structure_bcc = { .type = PTM_MATCH_BCC, .num_nbrs = 14, .num_facets = 24, .max_degree = 8, .num_graphs = NUM_BCC_GRAPHS, .graphs = graphs_bcc, .points = ptm_template_bcc, .penrose = penrose_bcc};
+extern const int8_t mapping_sc[24][15];
+extern const int8_t mapping_fcc[24][15];
+extern const int8_t mapping_hcp[24][15];
+extern const int8_t mapping_ico[60][15];
+extern const int8_t mapping_bcc[24][15];
+
+refdata_t structure_sc =  { .type = PTM_MATCH_SC,  .num_nbrs =  6, .num_facets =  8, .max_degree = 4, .num_graphs = NUM_SC_GRAPHS,  .graphs = graphs_sc,  .points = ptm_template_sc,  .penrose = penrose_sc , .mapping = mapping_sc };
+refdata_t structure_fcc = { .type = PTM_MATCH_FCC, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_FCC_GRAPHS, .graphs = graphs_fcc, .points = ptm_template_fcc, .penrose = penrose_fcc, .mapping = mapping_fcc};
+refdata_t structure_hcp = { .type = PTM_MATCH_HCP, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_HCP_GRAPHS, .graphs = graphs_hcp, .points = ptm_template_hcp, .penrose = penrose_hcp, .mapping = mapping_hcp};
+refdata_t structure_ico = { .type = PTM_MATCH_ICO, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_ICO_GRAPHS, .graphs = graphs_ico, .points = ptm_template_ico, .penrose = penrose_ico, .mapping = mapping_ico};
+refdata_t structure_bcc = { .type = PTM_MATCH_BCC, .num_nbrs = 14, .num_facets = 24, .max_degree = 8, .num_graphs = NUM_BCC_GRAPHS, .graphs = graphs_bcc, .points = ptm_template_bcc, .penrose = penrose_bcc, .mapping = mapping_bcc};
 
 static int graph_degree(int num_facets, int8_t facets[][3], int num_nodes, int8_t* degree)
 {
@@ -135,7 +142,6 @@ static void check_graphs(	refdata_t* s,
 
 	for (int i = 0;i<s->num_graphs;i++)
 	{
-//printf("graph hash: %lx\n", s->graphs[i].hash);
 		if (hash == s->graphs[i].hash)
 		{
 			graph_t* gref = &s->graphs[i];
@@ -166,8 +172,6 @@ static void check_graphs(	refdata_t* s,
 
 				double scale = k0 / G2;
 				rmsd = sqrt(fabs(G1 - scale*k0) / num_points);
-//printf("got one: %d %f\n", num_points, rmsd);
-
 				if (rmsd < res->rmsd)
 				{
 					res->rmsd = rmsd;
@@ -360,113 +364,18 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 				*p_alloy_type = find_bcc_alloy_type(res.mapping, numbers);
 		}
 
-		if (ref->type == PTM_MATCH_SC || ref->type == PTM_MATCH_FCC || ref->type == PTM_MATCH_BCC)
-		{
-			//printf("res.q: %f %f %f %f\n", res.q[0], res.q[1], res.q[2], res.q[3]);
-			int bi = rotate_quaternion_into_cubic_fundamental_zone(res.q);
-			assert(bi >= 0 && bi < 24);
-			//printf("bi: %d\n", bi);
+		int bi = -1;
+		if      (ref->type == PTM_MATCH_SC)	bi = rotate_quaternion_into_cubic_fundamental_zone(res.q);
+		else if (ref->type == PTM_MATCH_FCC)	bi = rotate_quaternion_into_cubic_fundamental_zone(res.q);
+		else if (ref->type == PTM_MATCH_BCC)	bi = rotate_quaternion_into_cubic_fundamental_zone(res.q);
+		else if (ref->type == PTM_MATCH_ICO)	bi = rotate_quaternion_into_icosahedral_fundamental_zone(res.q);
+		else if (ref->type == PTM_MATCH_HCP)	bi = rotate_quaternion_into_hcp_fundamental_zone(res.q);
 
-			if (ref->type == PTM_MATCH_SC)
-			{
-				int8_t _mapping[24][7] = {	{0, 1, 2, 3, 4, 5, 6},
-								{0, 2, 1, 4, 3, 5, 6},
-								{0, 2, 1, 3, 4, 6, 5},
-								{0, 1, 2, 4, 3, 6, 5},
-								{0, 3, 4, 5, 6, 1, 2},
-								{0, 5, 6, 2, 1, 4, 3},
-								{0, 6, 5, 1, 2, 4, 3},
-								{0, 4, 3, 5, 6, 2, 1},
-								{0, 5, 6, 1, 2, 3, 4},
-								{0, 4, 3, 6, 5, 1, 2},
-								{0, 3, 4, 6, 5, 2, 1},
-								{0, 6, 5, 2, 1, 3, 4},
-								{0, 3, 4, 2, 1, 5, 6},
-								{0, 6, 5, 3, 4, 1, 2},
-								{0, 1, 2, 5, 6, 4, 3},
-								{0, 4, 3, 1, 2, 5, 6},
-								{0, 5, 6, 3, 4, 2, 1},
-								{0, 1, 2, 6, 5, 3, 4},
-								{0, 2, 1, 5, 6, 3, 4},
-								{0, 5, 6, 4, 3, 1, 2},
-								{0, 3, 4, 1, 2, 6, 5},
-								{0, 2, 1, 6, 5, 4, 3},
-								{0, 6, 5, 4, 3, 2, 1},
-								{0, 4, 3, 2, 1, 6, 5}	};
+		int8_t temp[15];
+		for (int i=0;i<ref->num_nbrs+1;i++)
+			temp[ref->mapping[bi][i]] = res.mapping[i];
 
-				int8_t temp[15];
-				for (int i=0;i<ref->num_nbrs+1;i++)
-					temp[_mapping[bi][i]] = res.mapping[i];
-
-				memcpy(res.mapping, temp, (ref->num_nbrs+1) * sizeof(int8_t));
-			}
-			else if (ref->type == PTM_MATCH_FCC)
-			{
-				int8_t _mapping[24][13] = {	{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-								{0, 2, 1, 4, 3, 7, 8, 5, 6, 11, 12, 9, 10},
-								{0, 3, 4, 1, 2, 6, 5, 8, 7, 12, 11, 10, 9},
-								{0, 4, 3, 2, 1, 8, 7, 6, 5, 10, 9, 12, 11},
-								{0, 9, 10, 11, 12, 1, 2, 4, 3, 5, 6, 8, 7},
-								{0, 7, 8, 6, 5, 11, 12, 10, 9, 2, 1, 4, 3},
-								{0, 8, 7, 5, 6, 10, 9, 11, 12, 4, 3, 2, 1},
-								{0, 11, 12, 9, 10, 2, 1, 3, 4, 7, 8, 6, 5},
-								{0, 5, 6, 8, 7, 9, 10, 12, 11, 1, 2, 3, 4},
-								{0, 10, 9, 12, 11, 4, 3, 1, 2, 8, 7, 5, 6},
-								{0, 12, 11, 10, 9, 3, 4, 2, 1, 6, 5, 7, 8},
-								{0, 6, 5, 7, 8, 12, 11, 9, 10, 3, 4, 1, 2},
-								{0, 3, 4, 2, 1, 9, 10, 11, 12, 7, 8, 5, 6},
-								{0, 12, 11, 9, 10, 8, 7, 5, 6, 1, 2, 4, 3},
-								{0, 5, 6, 7, 8, 4, 3, 2, 1, 11, 12, 10, 9},
-								{0, 4, 3, 1, 2, 11, 12, 9, 10, 5, 6, 7, 8},
-								{0, 9, 10, 12, 11, 7, 8, 6, 5, 3, 4, 2, 1},
-								{0, 8, 7, 6, 5, 1, 2, 3, 4, 12, 11, 9, 10},
-								{0, 7, 8, 5, 6, 3, 4, 1, 2, 9, 10, 12, 11},
-								{0, 11, 12, 10, 9, 5, 6, 8, 7, 4, 3, 1, 2},
-								{0, 1, 2, 4, 3, 12, 11, 10, 9, 8, 7, 6, 5},
-								{0, 6, 5, 8, 7, 2, 1, 4, 3, 10, 9, 11, 12},
-								{0, 10, 9, 11, 12, 6, 5, 7, 8, 2, 1, 3, 4},
-								{0, 2, 1, 3, 4, 10, 9, 12, 11, 6, 5, 8, 7}	};
-
-				int8_t temp[15];
-				for (int i=0;i<ref->num_nbrs+1;i++)
-					temp[_mapping[bi][i]] = res.mapping[i];
-
-				memcpy(res.mapping, temp, (ref->num_nbrs+1) * sizeof(int8_t));
-			}
-			else if (ref->type == PTM_MATCH_BCC)
-			{
-				int8_t _mapping[24][15] = {	{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
-								{0, 4, 3, 2, 1, 7, 8, 5, 6, 10, 9, 12, 11, 13, 14},
-								{0, 6, 5, 7, 8, 2, 1, 3, 4, 10, 9, 11, 12, 14, 13},
-								{0, 8, 7, 5, 6, 3, 4, 2, 1, 9, 10, 12, 11, 14, 13},
-								{0, 1, 2, 7, 8, 3, 4, 5, 6, 11, 12, 13, 14, 9, 10},
-								{0, 4, 3, 7, 8, 5, 6, 2, 1, 13, 14, 10, 9, 12, 11},
-								{0, 8, 7, 3, 4, 2, 1, 5, 6, 14, 13, 9, 10, 12, 11},
-								{0, 4, 3, 5, 6, 2, 1, 7, 8, 12, 11, 13, 14, 10, 9},
-								{0, 1, 2, 5, 6, 7, 8, 3, 4, 13, 14, 9, 10, 11, 12},
-								{0, 8, 7, 2, 1, 5, 6, 3, 4, 12, 11, 14, 13, 9, 10},
-								{0, 6, 5, 3, 4, 7, 8, 2, 1, 11, 12, 14, 13, 10, 9},
-								{0, 6, 5, 2, 1, 3, 4, 7, 8, 14, 13, 10, 9, 11, 12},
-								{0, 7, 8, 6, 5, 1, 2, 4, 3, 11, 12, 10, 9, 13, 14},
-								{0, 3, 4, 6, 5, 8, 7, 1, 2, 14, 13, 11, 12, 9, 10},
-								{0, 5, 6, 1, 2, 8, 7, 4, 3, 9, 10, 13, 14, 12, 11},
-								{0, 5, 6, 8, 7, 4, 3, 1, 2, 12, 11, 9, 10, 13, 14},
-								{0, 7, 8, 1, 2, 4, 3, 6, 5, 13, 14, 11, 12, 10, 9},
-								{0, 3, 4, 8, 7, 1, 2, 6, 5, 9, 10, 14, 13, 11, 12},
-								{0, 7, 8, 4, 3, 6, 5, 1, 2, 10, 9, 13, 14, 11, 12},
-								{0, 5, 6, 4, 3, 1, 2, 8, 7, 13, 14, 12, 11, 9, 10},
-								{0, 3, 4, 1, 2, 6, 5, 8, 7, 11, 12, 9, 10, 14, 13},
-								{0, 2, 1, 6, 5, 4, 3, 8, 7, 10, 9, 14, 13, 12, 11},
-								{0, 2, 1, 8, 7, 6, 5, 4, 3, 14, 13, 12, 11, 10, 9},
-								{0, 2, 1, 4, 3, 8, 7, 6, 5, 12, 11, 10, 9, 14, 13}	};
-
-				int8_t temp[15];
-				for (int i=0;i<ref->num_nbrs+1;i++)
-					temp[_mapping[bi][i]] = res.mapping[i];
-
-				memcpy(res.mapping, temp, (ref->num_nbrs+1) * sizeof(int8_t));
-			}
-		}
+		memcpy(res.mapping, temp, (ref->num_nbrs+1) * sizeof(int8_t));
 
 		if (F != NULL && F_res != NULL)
 		{
@@ -484,12 +393,8 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 		}
 
 		if (mapping != NULL)
-		{
-			//memcpy(mapping, res.mapping, (ref->num_nbrs + 1) * sizeof(int8_t));
-
 			for (int i=0;i<ref->num_nbrs + 1;i++)
 				mapping[i] = ordering[res.mapping[i]];
-		}
 	}
 
 	*p_rmsd = res.rmsd;

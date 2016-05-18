@@ -1,6 +1,4 @@
 /*
-	add icosahedral fundamental zone rotations
-
 	structures:
 		+ no match for each of them
 		nonzero rmsd
@@ -14,8 +12,6 @@ done:
 		scale
 		rotation
 		zero rmsd
-
-	cubic materials
 		orientations + fundamental zones
 		strain rotation must equal to rmsd rotation if no anisotropic distortion, when mapped into fundamental zone
 
@@ -127,163 +123,114 @@ alloytest_t bcc_alloy_tests[] = {
 
 typedef struct
 {
+	bool strain;
 	double pre[9];
 	double post[9];
-	bool fundamental;
-	bool strain;
 } quattest_t;
 
-quattest_t qtest[] = {	{	.pre  = {1.00, 0.00, -0.00, 0.00},
-				.post = {1.00, 0.00, -0.00, 0.00},
-				.fundamental = true,
-				.strain = false				},
+quattest_t cubic_qtest[] = {	{	.strain = false, .pre  = {1.00, 0.00, -0.00, 0.00},			.post = {1.00, 0.00, -0.00, 0.00}			},
+				{	.strain = false, .pre  = {0.00, 1.00, -0.00, 0.00},			.post = {1.00, 0.00, -0.00, 0.00}			},
+				{	.strain = false, .pre  = {0.00, 0.00, -1.00, 0.00},			.post = {1.00, 0.00, -0.00, 0.00}			},
+				{	.strain = false, .pre  = {0.00, 0.00, -0.00, 1.00},			.post = {1.00, 0.00, -0.00, 0.00}			},
+				{	.strain = false, .pre  = {0.987070, 0.020780, -0.031171, 0.155853},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.683270, 0.712658, 0.088164, 0.132246},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.720005, -0.095511, 0.675923, 0.124899},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.587759, -0.007347, -0.036735, 0.808168},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.808168, 0.036735, -0.007347, -0.587759},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.675923, 0.124899, -0.720005, 0.095511},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.712658, -0.683270, -0.132246, 0.088164},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.420803, 0.410413, 0.545486, 0.597437},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.576656, 0.441584, 0.566266, -0.389633},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.389633, 0.566266, -0.441584, 0.576656},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.545486, 0.597437, -0.420803, -0.410413},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.441584, -0.576656, 0.389633, 0.566266},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.597437, -0.545486, 0.410413, -0.420803},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.410413, -0.420803, -0.597437, 0.545486},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.566266, -0.389633, -0.576656, -0.441584},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.020780, -0.987070, -0.155853, -0.031171},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.007347, 0.587759, 0.808168, 0.036735},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.124899, -0.675923, -0.095511, -0.720005},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.095511, 0.720005, 0.124899, -0.675923},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.036735, -0.808168, 0.587759, -0.007347},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.031171, -0.155853, 0.987070, 0.020780},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.088164, 0.132246, -0.683270, -0.712658},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.132246, -0.088164, 0.712658, -0.683270},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = false, .pre  = {0.155853, 0.031171, 0.020780, -0.987070},	.post = {0.987070, 0.020780, -0.031171, 0.155853}	},
+				{	.strain = true,  .pre  = {1.1, 0.0, 0.0, -0.0, 1.0, -0.0, -0.0, 0.0, 1.0}, 		.post = {}				},
+				{	.strain = true,  .pre  = {1.05, 0.0, 0.0, -0.05, 0.95, -0.0, -0.02, 0.06, 0.94},	.post = {}				}	};
 
-			{	.pre  = {0.00, 1.00, -0.00, 0.00},
-				.post = {1.00, 0.00, -0.00, 0.00},
-				.fundamental = true,
-				.strain = false				},
+quattest_t ico_qtest[] = {	{	.strain = false, .pre  = {0.960379, 0.109103, 0.249483, -0.059392},	.post = {0.960379, 0.109103, 0.249483, -0.059392}	},
+				{	.strain = false, .pre  = {0.711212, 0.456880, 0.518044, -0.130648},	.post = {0.975588, 0.084523, 0.103873, -0.174053}	},
+				{	.strain = false, .pre  = {0.936649, 0.067820, 0.187887, 0.287729},	.post = {0.959690, 0.049837, -0.103527, -0.256504}	},
+				{	.strain = false, .pre  = {0.638434, 0.650457, 0.048934, 0.408550},	.post = {0.967981, 0.191893, 0.036316, 0.157704}	},
+				{	.strain = false, .pre  = {0.821165, -0.149986, 0.542985, -0.091435},	.post = {0.982177, 0.086695, 0.000446, -0.166771}	},
+				{	.strain = false, .pre  = {0.639462, -0.154114, -0.578165, 0.482766},	.post = {0.937381, 0.015219, -0.347198, 0.023211}	},
+				{	.strain = false, .pre  = {0.753493, 0.595008, 0.139240, -0.242540},	.post = {0.982042, 0.147653, 0.050050, 0.106243}	},
+				{	.strain = false, .pre  = {0.701011, -0.659762, 0.158265, 0.219660},	.post = {0.964889, -0.232160, 0.033991, -0.118048}	},
+				{	.strain = false, .pre  = {0.769565, 0.183283, 0.380132, -0.479246},	.post = {0.979681, 0.190250, -0.021917, -0.059573}	},
+				{	.strain = false, .pre  = {0.931242, 0.075646, -0.356282, 0.011355},	.post = {0.954908, -0.232248, 0.173874, -0.063088}	},
+				{	.strain = false, .pre  = {0.867829, 0.097112, -0.422785, -0.242270},	.post = {0.953871, -0.057962, -0.122423, 0.267923}	},
+				{	.strain = false, .pre  = {0.920769, -0.141468, -0.337810, -0.134371},	.post = {0.957539, 0.237269, 0.145568, -0.075053}	},
+				{	.strain = false, .pre  = {0.697680, -0.476591, -0.029266, -0.534085},	.post = {0.967772, -0.045774, -0.143445, -0.201856}	},
+				{	.strain = false, .pre  = {0.407309, -0.819150, 0.372159, -0.156812},	.post = {0.981364, -0.128513, -0.066650, -0.126357}	},
+				{	.strain = false, .pre  = {0.503983, -0.834038, -0.158844, -0.158590},	.post = {0.975828, 0.039719, -0.051984, -0.208520}	},
+				{	.strain = false, .pre  = {0.579265, -0.376209, -0.513427, -0.509227},	.post = {0.989064, 0.099428, -0.033590, 0.103628}	},
+				{	.strain = false, .pre  = {0.612812, -0.641471, -0.339335, 0.312774},	.post = {0.953196, -0.001049, -0.027610, -0.301087}	},
+				{	.strain = false, .pre  = {0.436573, -0.615735, 0.380584, -0.534257},	.post = {0.983574, -0.166417, 0.012745, 0.068733}	},
+				{	.strain = false, .pre  = {0.269644, -0.465014, 0.604212, 0.588202},	.post = {0.963536, -0.105690, 0.228878, 0.089680}	},
+				{	.strain = false, .pre  = {0.684766, -0.095996, -0.076056, -0.718399},	.post = {0.953244, 0.102076, -0.182363, 0.218290}	},
+				{	.strain = false, .pre  = {0.451921, -0.281443, -0.099526, 0.840626},	.post = {0.993012, 0.079448, -0.017687, 0.085457}	},
+				{	.strain = false, .pre  = {0.185681, -0.038838, -0.901638, 0.388668},	.post = {0.942386, -0.055237, -0.312601, 0.105535}	},
+				{	.strain = false, .pre  = {0.442598, 0.081466, -0.678884, -0.580161},	.post = {0.949807, 0.300306, -0.006548, -0.087403}	},
+				{	.strain = false, .pre  = {0.610532, -0.157028, 0.707014, 0.320507},	.post = {0.976294, -0.037697, -0.188948, 0.098627}	},
+				{	.strain = false, .pre  = {0.517194, -0.052227, 0.820043, -0.239400},	.post = {0.996004, 0.033614, 0.007742, 0.082374}	},
+				{	.strain = false, .pre  = {0.527468, 0.290749, -0.094791, -0.792627},	.post = {0.994829, -0.094310, -0.037682, 0.001125}	},
+				{	.strain = false, .pre  = {0.518144, 0.525232, 0.182485, 0.649891},	.post = {0.947150, -0.045132, 0.315337, -0.037851}	},
+				{	.strain = false, .pre  = {0.425858, 0.546800, -0.225130, -0.684815},	.post = {0.941301, 0.290314, 0.169372, 0.031357}	},
+				{	.strain = false, .pre  = {0.729071, 0.460371, -0.387695, 0.325893},	.post = {0.951515, -0.103449, 0.237927, -0.165251}	},
+				{	.strain = false, .pre  = {0.585124, 0.389119, 0.542312, -0.460558},	.post = {0.988557, -0.057126, 0.014314, 0.138880}	},
+				{	.strain = false, .pre  = {0.552261, 0.398459, 0.402666, 0.611636},	.post = {0.982511, 0.027584, -0.181387, 0.031791}	},
+				{	.strain = false, .pre  = {0.234592, 0.919558, 0.314282, 0.024627},	.post = {0.958352, 0.277601, 0.064725, -0.017586}	},
+				{	.strain = false, .pre  = {0.686597, 0.680007, -0.257241, -0.001496},	.post = {0.972928, -0.215003, 0.084760, 0.001273}	},
+				{	.strain = false, .pre  = {0.301914, 0.927941, 0.106506, 0.190868},	.post = {0.939450, -0.010757, 0.342467, -0.005811}	},
+				{	.strain = false, .pre  = {0.184193, -0.202322, 0.518320, 0.810237},	.post = {0.971574, -0.076732, -0.095608, 0.202523}	},
+				{	.strain = false, .pre  = {0.454091, 0.354246, 0.784990, -0.228259},	.post = {0.952515, -0.302243, -0.010663, 0.035368}	},
+				{	.strain = false, .pre  = {0.176659, 0.156611, -0.535053, 0.811162},	.post = {0.978361, 0.075681, 0.049691, 0.186048}	},
+				{	.strain = false, .pre  = {0.389189, 0.795539, 0.281348, -0.369448},	.post = {0.948595, 0.071649, -0.011938, 0.308044}	},
+				{	.strain = false, .pre  = {0.022236, -0.390218, 0.918085, -0.065986},	.post = {0.944727, -0.162850, 0.232722, -0.163740}	},
+				{	.strain = false, .pre  = {0.389599, -0.780594, -0.283174, 0.398370},	.post = {0.951091, 0.215562, -0.155514, 0.157396}	},
+				{	.strain = false, .pre  = {0.518603, 0.417864, -0.716708, -0.206810},	.post = {0.949018, 0.037138, 0.301489, -0.084202}	},
+				{	.strain = false, .pre  = {0.021515, -0.148317, 0.553731, -0.819098},	.post = {0.946178, -0.007404, 0.280346, -0.161551}	},
+				{	.strain = false, .pre  = {0.421708, -0.763995, 0.284758, -0.396721},	.post = {0.946760, 0.247461, 0.149039, -0.142114}	},
+				{	.strain = false, .pre  = {0.158295, -0.091623, -0.567854, -0.802552},	.post = {0.982121, -0.086440, -0.022205, -0.165750}	},
+				{	.strain = false, .pre  = {0.074503, -0.323527, -0.932109, 0.144753},	.post = {0.938878, -0.179832, -0.155387, 0.249047}	},
+				{	.strain = false, .pre  = {0.160104, 0.934696, 0.317340, 0.002102},	.post = {0.934696, -0.160104, -0.002102, 0.317340}	},
+				{	.strain = false, .pre  = {0.008704, 0.835398, -0.501689, 0.224370},	.post = {0.996030, 0.035803, 0.080985, 0.009134}	},
+				{	.strain = false, .pre  = {0.127408, -0.909278, 0.297157, 0.262064},	.post = {0.965183, 0.142280, -0.132672, 0.174863}	},
+				{	.strain = false, .pre  = {0.173455, -0.696049, -0.643370, -0.267404},	.post = {0.967433, 0.075218, 0.085484, 0.226073}	},
+				{	.strain = false, .pre  = {0.103343, 0.900503, 0.366757, -0.209532},	.post = {0.976650, -0.075038, -0.160427, -0.121604}	},
+				{	.strain = false, .pre  = {0.135899, -0.426302, -0.059631, 0.892324},	.post = {0.953483, -0.159551, 0.143271, -0.211864}	},
+				{	.strain = false, .pre  = {0.122320, 0.475403, 0.066330, 0.868695},	.post = {0.960987, 0.153620, -0.087538, -0.212701}	},
+				{	.strain = false, .pre  = {0.020906, 0.617289, -0.517511, -0.592199},	.post = {0.947663, -0.246129, -0.196838, -0.051089}	},
+				{	.strain = false, .pre  = {0.038143, -0.586443, 0.281833, -0.758420},	.post = {0.993887, 0.012715, 0.083446, 0.071162}	},
+				{	.strain = false, .pre  = {0.161701, 0.368764, -0.670972, 0.622626},	.post = {0.968095, -0.218198, 0.122798, 0.010144}	},
+				{	.strain = false, .pre  = {0.046935, 0.321773, -0.793677, -0.514136},	.post = {0.998600, 0.004602, 0.035962, 0.038528}	},
+				{	.strain = false, .pre  = {0.071151, -0.476847, -0.779461, -0.399994},	.post = {0.977948, -0.044142, 0.172381, -0.109336}	},
+				{	.strain = false, .pre  = {0.113851, -0.380862, -0.616422, 0.679710},	.post = {0.956244, -0.206504, 0.111718, -0.174564}	},
+				{	.strain = false, .pre  = {0.001683, -0.124987, 0.988455, -0.085627},	.post = {0.988455, -0.085627, -0.001683, 0.124987}	},
+				{	.strain = false, .pre  = {0.220005, -0.085991, 0.026420, -0.971342},	.post = {0.971342, 0.026420, 0.085991, 0.220005}	},
+				{	.strain = true,  .pre  = {1.1, 0.0, 0.0, -0.0, 1.0, -0.0, -0.0, 0.0, 1.0}, 		.post = {}				},
+				{	.strain = true,  .pre  = {1.05, 0.0, 0.0, -0.05, 0.95, -0.0, -0.02, 0.06, 0.94},	.post = {}				}	};
 
-			{	.pre  = {0.00, 0.00, -1.00, 0.00},
-				.post = {1.00, 0.00, -0.00, 0.00},
-				.fundamental = true,
-				.strain = false				},
 
-			{	.pre  = {0.00, 0.00, -0.00, 1.00},
-				.post = {1.00, 0.00, -0.00, 0.00},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.987070, 0.020780, -0.031171, 0.155853},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.683270, 0.712658, 0.088164, 0.132246},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.720005, -0.095511, 0.675923, 0.124899},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.587759, -0.007347, -0.036735, 0.808168},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.808168, 0.036735, -0.007347, -0.587759},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.675923, 0.124899, -0.720005, 0.095511},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.712658, -0.683270, -0.132246, 0.088164},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.420803, 0.410413, 0.545486, 0.597437},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.576656, 0.441584, 0.566266, -0.389633},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.389633, 0.566266, -0.441584, 0.576656},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.545486, 0.597437, -0.420803, -0.410413},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.441584, -0.576656, 0.389633, 0.566266},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.597437, -0.545486, 0.410413, -0.420803},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.410413, -0.420803, -0.597437, 0.545486},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.566266, -0.389633, -0.576656, -0.441584},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.020780, -0.987070, -0.155853, -0.031171},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.007347, 0.587759, 0.808168, 0.036735},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.124899, -0.675923, -0.095511, -0.720005},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.095511, 0.720005, 0.124899, -0.675923},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.036735, -0.808168, 0.587759, -0.007347},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.031171, -0.155853, 0.987070, 0.020780},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.088164, 0.132246, -0.683270, -0.712658},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.132246, -0.088164, 0.712658, -0.683270},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {0.155853, 0.031171, 0.020780, -0.987070},
-				.post = {0.987070, 0.020780, -0.031171, 0.155853},
-				.fundamental = true,
-				.strain = false				},
-
-			{	.pre  = {1.1, 0.0, 0.0, -0.0, 1.0, -0.0, -0.0, 0.0, 1.0},
-				.post = {},
-				.fundamental = false,
-				.strain = true				},
-
-			{	.pre  = {1.05, 0.0, 0.0, -0.05, 0.95, -0.0, -0.02, 0.06, 0.94},
-				.post = {},
-				.fundamental = false,
-				.strain = true				},
-
-			};
+quattest_t hcp_qtest[] = {	{	.strain = false, .pre  = {0.813035, -0.166389, 0.181571, -0.527562},	.post = {0.813035, -0.166389, 0.181571, -0.527562}	},
+				{	.strain = false, .pre  = {0.023227, -0.154944, -0.861953, -0.482172},	.post = {0.761148, -0.255749, -0.582977, 0.124032}	},
+				{	.strain = false, .pre  = {0.631878, 0.693281, 0.293658, -0.184001},	.post = {0.717408, -0.208128, 0.269531, -0.607751}	},
+				{	.strain = false, .pre  = {0.167480, -0.812443, 0.552710, 0.079998},	.post = {0.921658, -0.056237, -0.334734, -0.187981}	},
+				{	.strain = false, .pre  = {0.002364, -0.201656, 0.941752, 0.269132},	.post = {0.741391, 0.605179, 0.190268, -0.218852}	},
+				{	.strain = false, .pre  = {0.122621, -0.141644, 0.064344, 0.980184},	.post = {0.831875, -0.402635, 0.334567, -0.184214}	},
+				{	.strain = true,  .pre  = {1.1, 0.0, 0.0, -0.0, 1.0, -0.0, -0.0, 0.0, 1.0}, 		.post = {}				},
+				{	.strain = true,  .pre  = {1.05, 0.0, 0.0, -0.05, 0.95, -0.0, -0.02, 0.06, 0.94},	.post = {}				}	};
 
 //#ifdef DEBUG
 #define ERROR(msg, code) print_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, msg, code)
@@ -351,7 +298,6 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 		double y0 = points[i][1];
 		double z0 = points[i][2];
 
-		int bi = -1;
 		double min_dist = INFINITY;
 		for (int j=0;j<num;j++)
 		{
@@ -363,8 +309,6 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 			double dy = y1 - y0;
 			double dz = z1 - z0;
 			double dist = dx*dx + dy*dy + dz*dz;
-			if (dist < min_dist)
-				bi = j;
 			min_dist = MIN(min_dist, dist);
 		}
 
@@ -392,18 +336,6 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 		for (int j=0;j<3;j++)
 			points[i][j] *= scale;
 
-	/*printf("\n");
-	for (int i=0;i<num;i++)
-		printf("%d ", mapping[i]);
-	printf("\n");
-
-	for (int i=0;i<num;i++)
-		printf("%f %f %f\n", points[mapping[i]][0], points[mapping[i]][1], points[mapping[i]][2]);
-	printf("\n");
-	for (int i=0;i<num;i++)
-		printf("%f %f %f\n", transformed_template[i][0], transformed_template[i][1], transformed_template[i][2]);
-	printf("\n");*/
-
 	double acc = 0;
 	for (int i=0;i<num;i++)
 	{
@@ -419,8 +351,6 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 		double dy = y1 - y0;
 		double dz = z1 - z0;
 		double dist = dx*dx + dy*dy + dz*dz;
-
-		//printf("dist: %f\n", dist);
 		acc += dist;
 	}
 
@@ -433,7 +363,6 @@ uint64_t run_tests()
 	const double tolerance = 1E-5;
 	double identity_matrix[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 	int num_structures = sizeof(structdata) / sizeof(structdata_t);
-	int num_quat_tests = sizeof(qtest) / sizeof(quattest_t);
 
 	int num_alloy_tests[] = {	sizeof(sc_alloy_tests) / sizeof(alloytest_t),
 					sizeof(fcc_alloy_tests) / sizeof(alloytest_t),
@@ -446,6 +375,18 @@ uint64_t run_tests()
 					hcp_alloy_tests,
 					ico_alloy_tests,
 					bcc_alloy_tests	};
+
+	int num_quat_tests[] = {	sizeof(cubic_qtest) / sizeof(quattest_t),
+					sizeof(cubic_qtest) / sizeof(quattest_t),
+					sizeof(hcp_qtest) / sizeof(quattest_t),
+					sizeof(ico_qtest) / sizeof(quattest_t),
+					sizeof(cubic_qtest) / sizeof(quattest_t)	};
+
+	quattest_t* quat_test[] = {	cubic_qtest,
+					cubic_qtest,
+					hcp_qtest,
+					ico_qtest,
+					cubic_qtest	};
 	int num_tests = 0;
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
@@ -479,7 +420,7 @@ uint64_t run_tests()
 
 /*
 	//for (int it = 0;it<num_structures;it++)
-int it = 4;
+int it = 2;
 	{
 		structdata_t* s = &structdata[it];
 		double points[15][3];
@@ -487,12 +428,17 @@ int it = 4;
 
 		memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
 
-		for (int k=0;k<24;k++)
+		//for (int k=0;k<24;k++)
+		for (int k=0;k<6;k++)
 		{
 			double U[9];
-			extern double generator_cubic[24][4];
+			//extern double generator_cubic[24][4];
+			//extern double generator_icosahedral[60][4];
+			extern double generator_hcp[6][4];
 			double qtemp[4];
-			memcpy(qtemp, generator_cubic[k], 4 * sizeof(double));
+			//memcpy(qtemp, generator_cubic[k], 4 * sizeof(double));
+			//memcpy(qtemp, generator_icosahedral[k], 4 * sizeof(double));
+			memcpy(qtemp, generator_hcp[k], 4 * sizeof(double));
 			qtemp[1] = -qtemp[1];
 			qtemp[2] = -qtemp[2];
 			qtemp[3] = -qtemp[3];
@@ -535,25 +481,29 @@ int it = 4;
 	}
 exit(3);*/
 
-	for (int iq=0;iq<num_quat_tests;iq++)
+
+	for (int it = 0;it<num_structures;it++)
 	{
-		double qpre[4], qpost[4], rot[9];
-		memcpy(qpre, qtest[iq].pre, 4 * sizeof(double));
-		memcpy(qpost, qtest[iq].post, 4 * sizeof(double));
+		for (int iq=0;iq<num_quat_tests[it];iq++)
+		{
+			quattest_t* qtest = quat_test[it];
 
-		if (qtest[iq].strain)
-		{
-			memcpy(rot, qtest[iq].pre, 9 * sizeof(double));
-		}
-		else
-		{
-			normalize_quaternion(qpre);
-			normalize_quaternion(qpost);
-			quaternion_to_rotation_matrix(qpre, rot);
-		}
+			double qpre[4], qpost[4], rot[9];
+			memcpy(qpre, qtest[iq].pre, 4 * sizeof(double));
+			memcpy(qpost, qtest[iq].post, 4 * sizeof(double));
 
-		for (int it = 0;it<num_structures;it++)
-		{
+			if (qtest[iq].strain)
+			{
+				memcpy(rot, qtest[iq].pre, 9 * sizeof(double));
+			}
+			else
+			{
+				normalize_quaternion(qpre);
+				normalize_quaternion(qpost);
+				quaternion_to_rotation_matrix(qpre, rot);
+			}
+
+
 			structdata_t* s = &structdata[it];
 			double points[15][3];
 			memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
@@ -639,20 +589,14 @@ exit(3);*/
 							CLEANUP("failed on P identity matrix check", -1);
 
 						//check rotation
-						if (!qtest[iq].fundamental || (s->type == PTM_MATCH_SC || s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC))
-							if (quat_misorientation(q, qpost) > tolerance)
-								CLEANUP("failed on disorientation", -1);
+						if (quat_misorientation(q, qpost) > tolerance)
+							CLEANUP("failed on disorientation", -1);
 
 						//check deformation gradient disorientation
-						if (s->type == PTM_MATCH_SC || s->type == PTM_MATCH_FCC || s->type == PTM_MATCH_BCC)
-						{
-							double qu[4];
-							rotation_matrix_to_quaternion(U, qu);
-							//printf("%f %f %f %f\n", qu[0], qu[1], qu[2], qu[3]);
-							//printf("%f %f %f %f\n", qpost[0], qpost[1], qpost[2], qpost[3]);
-							if (quat_misorientation(qu, qpost) > tolerance)
-								CLEANUP("failed on deformation gradient disorientation", -1);
-						}
+						double qu[4];
+						rotation_matrix_to_quaternion(U, qu);
+						if (quat_misorientation(qu, qpost) > 1E-3)	//todo: need double precision polar decomposition library in order to reduce this error
+							CLEANUP("failed on deformation gradient disorientation", -1);
 
 						quaternion_to_rotation_matrix(q, A);
 					}

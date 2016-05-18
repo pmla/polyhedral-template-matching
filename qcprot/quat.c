@@ -18,6 +18,9 @@
 #define HALF_INV_PHI   0.3090169943749473957517182043375214561820
 
 #define SQRT_5_        2.23606797749978969640917366873127623544061835961152572427089
+#define SQRT_2_3       0.8164965809277260344600790631375275552273
+#define SQRT_1_6       0.4082482904638630172300395315687637776136
+
 
 double generator_cubic[24][4] = {	{1,	0,	0,	0	},
 					{0,	1,	0,	0	},
@@ -43,6 +46,74 @@ double generator_cubic[24][4] = {	{1,	0,	0,	0	},
 					{0,	-HALF_SQRT_2,	HALF_SQRT_2,	0	},
 					{0,	-HALF_SQRT_2,	0,	HALF_SQRT_2	},
 					{0,	0,	-HALF_SQRT_2,	HALF_SQRT_2	}	};
+
+double generator_hcp[6][4] = {		{1, 0, 0, 0},
+					{0.5, 0.5, 0.5, 0.5},
+					{0.5, -0.5, -0.5, -0.5},
+					{0, SQRT_2_3, -SQRT_1_6, -SQRT_1_6},
+					{0, SQRT_1_6, -SQRT_2_3, SQRT_1_6},
+					{0, SQRT_1_6, SQRT_1_6, -SQRT_2_3}	};
+
+double generator_icosahedral[60][4] = {	{1, 0, 0, 0},
+					{HALF_PHI, -HALF_INV_PHI, -0.5, 0},
+					{HALF_PHI, 0, -HALF_INV_PHI, -0.5},
+					{HALF_PHI, -0.5, 0, -HALF_INV_PHI},
+					{HALF_PHI, HALF_INV_PHI, -0.5, 0},
+					{HALF_PHI, 0, HALF_INV_PHI, -0.5},
+					{HALF_PHI, -0.5, 0, HALF_INV_PHI},
+					{HALF_PHI, 0.5, 0, -HALF_INV_PHI},
+					{HALF_PHI, 0, -HALF_INV_PHI, 0.5},
+					{HALF_PHI, -HALF_INV_PHI, 0.5, 0},
+					{HALF_PHI, 0, HALF_INV_PHI, 0.5},
+					{HALF_PHI, HALF_INV_PHI, 0.5, 0},
+					{HALF_PHI, 0.5, 0, HALF_INV_PHI},
+					{0.5, HALF_PHI, -HALF_INV_PHI, 0},
+					{0.5, HALF_PHI, HALF_INV_PHI, 0},
+					{0.5, 0.5, 0.5, 0.5},
+					{0.5, 0.5, 0.5, -0.5},
+					{0.5, 0.5, -0.5, 0.5},
+					{0.5, 0.5, -0.5, -0.5},
+					{0.5, HALF_INV_PHI, 0, HALF_PHI},
+					{0.5, HALF_INV_PHI, 0, -HALF_PHI},
+					{0.5, 0, HALF_PHI, -HALF_INV_PHI},
+					{0.5, 0, HALF_PHI, HALF_INV_PHI},
+					{0.5, 0, -HALF_PHI, -HALF_INV_PHI},
+					{0.5, 0, -HALF_PHI, HALF_INV_PHI},
+					{0.5, -HALF_INV_PHI, 0, HALF_PHI},
+					{0.5, -HALF_INV_PHI, 0, -HALF_PHI},
+					{0.5, -0.5, 0.5, 0.5},
+					{0.5, -0.5, 0.5, -0.5},
+					{0.5, -0.5, -0.5, 0.5},
+					{0.5, -0.5, -0.5, -0.5},
+					{0.5, -HALF_PHI, -HALF_INV_PHI, 0},
+					{0.5, -HALF_PHI, HALF_INV_PHI, 0},
+					{HALF_INV_PHI, -HALF_PHI, 0, -0.5},
+					{HALF_INV_PHI, 0, -0.5, -HALF_PHI},
+					{HALF_INV_PHI, -0.5, -HALF_PHI, 0},
+					{HALF_INV_PHI, 0, 0.5, -HALF_PHI},
+					{HALF_INV_PHI, -HALF_PHI, 0, 0.5},
+					{HALF_INV_PHI, 0.5, -HALF_PHI, 0},
+					{HALF_INV_PHI, HALF_PHI, 0, -0.5},
+					{HALF_INV_PHI, -0.5, HALF_PHI, 0},
+					{HALF_INV_PHI, 0, -0.5, HALF_PHI},
+					{HALF_INV_PHI, HALF_PHI, 0, 0.5},
+					{HALF_INV_PHI, 0, 0.5, HALF_PHI},
+					{HALF_INV_PHI, 0.5, HALF_PHI, 0},
+					{0, 1, 0, 0},
+					{0, HALF_PHI, -0.5, HALF_INV_PHI},
+					{0, HALF_PHI, -0.5, -HALF_INV_PHI},
+					{0, HALF_PHI, 0.5, HALF_INV_PHI},
+					{0, HALF_PHI, 0.5, -HALF_INV_PHI},
+					{0, 0.5, HALF_INV_PHI, -HALF_PHI},
+					{0, 0.5, HALF_INV_PHI, HALF_PHI},
+					{0, 0.5, -HALF_INV_PHI, -HALF_PHI},
+					{0, 0.5, -HALF_INV_PHI, HALF_PHI},
+					{0, HALF_INV_PHI, -HALF_PHI, 0.5},
+					{0, HALF_INV_PHI, -HALF_PHI, -0.5},
+					{0, HALF_INV_PHI, HALF_PHI, 0.5},
+					{0, HALF_INV_PHI, HALF_PHI, -0.5},
+					{0, 0, 1, 0},
+					{0, 0, 0, 1}	};
 
 static void quat_rot(double* r, double* a, double* b)
 {
@@ -84,6 +155,16 @@ static int rotate_quaternion_into_fundamental_zone(int num_generators, double (*
 int rotate_quaternion_into_cubic_fundamental_zone(double* q)
 {
 	return rotate_quaternion_into_fundamental_zone(24, generator_cubic, q);
+}
+
+int rotate_quaternion_into_icosahedral_fundamental_zone(double* q)
+{
+	return rotate_quaternion_into_fundamental_zone(60, generator_icosahedral, q);
+}
+
+int rotate_quaternion_into_hcp_fundamental_zone(double* q)
+{
+	return rotate_quaternion_into_fundamental_zone(6, generator_hcp, q);
 }
 
 double quat_dot(double* a, double* b)
