@@ -98,10 +98,6 @@ int main()
 	double* quats = (double*)calloc(4 * sizeof(double), num_atoms);
 	int counts[6] = {0};
 
-#ifdef DEBUG
-extern int failcount;
-#endif
-
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
 	bool topological_ordering = true;
@@ -114,9 +110,9 @@ extern int failcount;
 
 		int8_t mapping[MAX_NBRS];
 		int32_t type, alloy_type;
-		double scale, rmsd;
+		double scale, rmsd, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
-		ptm_index(local_handle, max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping);
+		ptm_index(local_handle, max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &lattice_constant);
 
 		types[i] = type;
 		rmsds[i] = rmsd;
@@ -136,10 +132,6 @@ extern int failcount;
 	}
 
 	printf("rmsd sum: %f\n", rmsd_sum);
-
-#ifdef DEBUG
-	printf("failcount: %d\n", failcount);
-#endif
 
 	free(types);
 	free(rmsds);

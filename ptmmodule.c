@@ -133,7 +133,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	}
 
 	int32_t type, alloy_type;
-	double scale, rmsd;
+	double scale, rmsd, lattice_constant;
 	double q[4], F[9], lstsq_residual[3], U[9], P[9];
 
 	npy_intp dims_3[2] = {3};
@@ -143,7 +143,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 
 	if (calculate_strains)
 	{
-		ptm_index(local_handle, num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P, NULL);
+		ptm_index(local_handle, num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P, NULL, &lattice_constant);
 		if (type == PTM_MATCH_NONE)
 			return Py_BuildValue("iiddOOOOO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None, Py_None, Py_None, Py_None, Py_None);
 
@@ -170,7 +170,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	}
 	else
 	{
-		ptm_index(local_handle, num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL);
+		ptm_index(local_handle, num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &lattice_constant);
 		if (type == PTM_MATCH_NONE)
 			return Py_BuildValue("iiddO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None);
 

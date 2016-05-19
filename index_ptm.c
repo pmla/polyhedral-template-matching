@@ -12,6 +12,7 @@
 #include "alloy_types.h"
 #include "neighbour_ordering.h"
 #include "normalize_vertices.h"
+#include "reference_templates.h"
 #include "index_ptm.h"
 #include "qcprot/qcprot.h"
 #include "qcprot/quat.h"
@@ -262,12 +263,8 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	return 0;
 }
 
-#ifdef DEBUG
-int failcount = 0;
-#endif
-
 int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermuted_points, int32_t* unpermuted_numbers, int32_t flags, bool topological_ordering,
-		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, int8_t* mapping)
+		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, int8_t* mapping, double* p_lattice_constant)
 {
 	if (flags & PTM_CHECK_SC)
 		assert(num_points >= structure_sc.num_nbrs + 1);
@@ -289,12 +286,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 		normalize_vertices(num_points, unpermuted_points, ch_points);
 		ret = calculate_neighbour_ordering(local_handle, num_points, (const double (*)[3])ch_points, ordering);
 		if (ret != 0)
-		{
-#ifdef DEBUG
-			failcount++;
-#endif
 			topological_ordering = false;
-		}
 	}
 
 	if (!topological_ordering)
@@ -395,6 +387,9 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 		if (mapping != NULL)
 			for (int i=0;i<ref->num_nbrs + 1;i++)
 				mapping[i] = ordering[res.mapping[i]];
+
+		if (p_lattice_constant != NULL)
+			*p_lattice_constant = calculate_lattice_constant(ref->type, res.scale);
 	}
 
 	*p_rmsd = res.rmsd;

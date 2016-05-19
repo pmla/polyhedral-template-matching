@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <math.h>
+#include "index_ptm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,4 +77,11 @@ const double ptm_template_bcc[15][3] = {	{  0.            ,  0.            ,  0.
 #ifdef __cplusplus
 }
 #endif
+
+double calculate_lattice_constant(int type, double scale)
+{
+	assert(type >= 1 && type <= 5);
+	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(3)};
+	return c[type] / scale;
+}
 

@@ -515,7 +515,11 @@ exit(3);*/
 				memcpy(points[i], row, 3 * sizeof(double));
 			}
 
-			double rescale = 0.5;
+			double _x = s->points[1][0];
+			double _y = s->points[1][1];
+			double _z = s->points[1][2];
+			double norm = sqrt(_x*_x + _y*_y + _z*_z) / 2;
+			double rescale = 1 / norm;
 			double offset[3] = {12.0, 45.6, 789.10};
 			for (int i = 0;i<s->num_points;i++)
 				for (int j = 0;j<3;j++)
@@ -536,9 +540,9 @@ exit(3);*/
 					int8_t mapping[15];
 					bool topological = itop == 1;
 					int32_t type, alloy_type;
-					double scale, rmsd;
+					double scale, rmsd, lattice_constant;
 					double q[4], F[9], F_res[3], U[9], P[9];
-					ret = ptm_index(local_handle, s->num_points, points[0], numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping);
+					ret = ptm_index(local_handle, s->num_points, points[0], numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &lattice_constant);
 					if (ret != PTM_NO_ERROR)
 						CLEANUP("indexing failed", ret);
 
@@ -566,12 +570,27 @@ exit(3);*/
 					if (alloy_type != alloy_test[it][ia].type)
 						CLEANUP("failed on alloy type", -1);
 
+					//check U-matrix is right handed
 					if (matrix_determinant(U) <= 0)
 						CLEANUP("failed on U-matrix right-handedness test", -1);
+
 
 					double A[9];
 					if (!qtest[iq].strain)
 					{
+						//check lattice constant
+						if (type == PTM_MATCH_SC)
+							if (fabs(lattice_constant - rescale) > tolerance)
+								CLEANUP("failed on lattice constant", -1);
+
+						if (type == PTM_MATCH_FCC || type == PTM_MATCH_HCP || type == PTM_MATCH_ICO)
+							if (fabs(lattice_constant - rescale * 2 / sqrt(2)) > tolerance)
+								CLEANUP("failed on lattice constant", -1);
+
+						if (type == PTM_MATCH_BCC)
+							if (fabs(lattice_constant - rescale * 2 / sqrt(3)) > tolerance)
+								CLEANUP("failed on lattice constant", -1);
+
 						//check rmsd
 						if (rmsd > tolerance)
 							CLEANUP("failed on rmsd", -1);
@@ -619,8 +638,17 @@ exit(3);*/
 		}
 	}
 
-#ifdef DEBUG
-#endif
+
+	/*int32_t type;
+	double scale, rmsd, lattice_constant, q[4];
+	double points_fcc[13] = {
+	ret = ptm_index(local_handle, s->num_points, points[0], NULL, tocheck, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &lattice_constant);
+	if (ret != PTM_NO_ERROR)
+		CLEANUP("indexing failed", ret);
+	*/
+
+	num_tests++;
+
 
 cleanup:
 	printf("num tests completed: %d\n", num_tests);

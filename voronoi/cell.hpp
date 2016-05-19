@@ -9,8 +9,8 @@
 /** \file cell.hh
  * \brief Header file for the voronoicell and related classes. */
 
-#ifndef VOROPP_CELL_HH
-#define VOROPP_CELL_HH
+#ifndef VOROPP_CELL_HPP
+#define VOROPP_CELL_HPP
 
 #include <vector>
 #include <cstdio>
