@@ -317,7 +317,8 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 	res.ref_struct = NULL;
 	res.rmsd = INFINITY;
 	*p_type = PTM_MATCH_NONE;
-	*p_alloy_type = PTM_ALLOY_NONE;
+	if (p_alloy_type != NULL)
+		*p_alloy_type = PTM_ALLOY_NONE;
 
 	if (flags & PTM_CHECK_SC)
 	{
@@ -348,7 +349,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 	{
 		*p_type = ref->type;
 
-		if (unpermuted_numbers != NULL)
+		if (p_alloy_type != NULL && unpermuted_numbers != NULL)
 		{
 			if (ref->type == PTM_MATCH_FCC)
 				*p_alloy_type = find_fcc_alloy_type(res.mapping, numbers);

@@ -578,19 +578,6 @@ exit(3);*/
 					double A[9];
 					if (!qtest[iq].strain)
 					{
-						//check lattice constant
-						if (type == PTM_MATCH_SC)
-							if (fabs(lattice_constant - rescale) > tolerance)
-								CLEANUP("failed on lattice constant", -1);
-
-						if (type == PTM_MATCH_FCC || type == PTM_MATCH_HCP || type == PTM_MATCH_ICO)
-							if (fabs(lattice_constant - rescale * 2 / sqrt(2)) > tolerance)
-								CLEANUP("failed on lattice constant", -1);
-
-						if (type == PTM_MATCH_BCC)
-							if (fabs(lattice_constant - rescale * 2 / sqrt(3)) > tolerance)
-								CLEANUP("failed on lattice constant", -1);
-
 						//check rmsd
 						if (rmsd > tolerance)
 							CLEANUP("failed on rmsd", -1);
@@ -639,16 +626,30 @@ exit(3);*/
 	}
 
 
-	/*int32_t type;
-	double scale, rmsd, lattice_constant, q[4];
-	double points_fcc[13] = {
-	ret = ptm_index(local_handle, s->num_points, points[0], NULL, tocheck, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &lattice_constant);
-	if (ret != PTM_NO_ERROR)
-		CLEANUP("indexing failed", ret);
-	*/
+	double lc_points_sc[7][3] = {{0,0,0},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
+	double lc_points_fcc[13][3] = {{0,0,0},{0,1,1},{0,-1,-1},{0,1,-1},{0,-1,1},{1,0,1},{-1,0,-1},{1,0,-1},{-1,0,1},{1,1,0},{-1,-1,0},{1,-1,0},{-1,1,0}};
+	double lc_points_bcc[15][3] = {{0,0,0},{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
+	double* pdata[3] = {lc_points_sc[0], lc_points_fcc[0], lc_points_bcc[0]};
 
-	num_tests++;
+	int lcdat[3] = {0, 1, 4};
+	for (int i=0;i<3;i++)
+	{
+		structdata_t* s = &structdata[lcdat[i]];
 
+		int32_t type;
+		double scale, rmsd, lattice_constant, q[4];
+		ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &lattice_constant);
+		if (ret != PTM_NO_ERROR)
+			CLEANUP("indexing failed", ret);
+
+		if (type != s->type)
+			CLEANUP("failed on type", -1);
+
+		if (fabs(lattice_constant - 2) > tolerance)
+			CLEANUP("failed on lattice constant", -1);
+
+		num_tests++;
+	}
 
 cleanup:
 	printf("num tests completed: %d\n", num_tests);

@@ -94,8 +94,8 @@ def run(pos, nbrs):
 		for i in range(num_atoms):
 
 			positions = np.concatenate(([pos[i]], pos[nbrs[i][:18]]))
-			(struct, alloy, rmsd, scale, rot, F, F_res, P, U) = ptmmodule.index_structure(positions, calculate_strains=1, topological_ordering=1)
-			#(struct, alloy, rmsd, scale, rot) = ptmmodule.index_structure(positions)
+			(struct, alloy, rmsd, scale, rot, F, F_res, P, U, lattice_constant) = ptmmodule.index_structure(positions, calculate_strains=1, topological_ordering=1)
+			#(struct, alloy, rmsd, scale, rot, lattice_constant) = ptmmodule.index_structure(positions)
 			#if struct == 2:
 			#	vm, r = calc_fcc_strain(F, F_res, P, U, positions[:13])
 			#	strains[i] = vm

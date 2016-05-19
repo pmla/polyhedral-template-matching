@@ -1361,9 +1361,7 @@ void voronoicell_neighbor::neighbors(std::vector<int> &v) {
 }
 
 // Explicit instantiation
-template bool voronoicell_base::nplane(voronoicell&,double,double,double,double,int);
 template bool voronoicell_base::nplane(voronoicell_neighbor&,double,double,double,double,int);
-template void voronoicell_base::check_memory_for_copy(voronoicell&,voronoicell_base*);
 template void voronoicell_base::check_memory_for_copy(voronoicell_neighbor&,voronoicell_base*);
 
 }

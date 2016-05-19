@@ -9,8 +9,8 @@
 /** \file config.hh
  * \brief Master configuration file for setting various compile-time options. */
 
-#ifndef VOROPP_CONFIG_HPP
-#define VOROPP_CONFIG_HPP
+#ifndef VOROPP_CONFIG_HH
+#define VOROPP_CONFIG_HH
 
 namespace voro {
 

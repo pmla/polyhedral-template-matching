@@ -145,7 +145,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 	{
 		ptm_index(local_handle, num_points, pos, numbers, flags, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, lstsq_residual, U, P, NULL, &lattice_constant);
 		if (type == PTM_MATCH_NONE)
-			return Py_BuildValue("iiddOOOOO", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None, Py_None, Py_None, Py_None, Py_None);
+			return Py_BuildValue("iiddOOOOOd", PTM_MATCH_NONE, PTM_ALLOY_NONE, INFINITY, INFINITY, Py_None, Py_None, Py_None, Py_None, Py_None, 0);
 
 		PyObject* arr_q = PyArray_SimpleNew(1, dims_4, NPY_DOUBLE);
 		PyObject* arr_res = PyArray_SimpleNew(1, dims_3, NPY_DOUBLE);
@@ -159,7 +159,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 		memcpy(PyArray_DATA((PyArrayObject*)arr_U), U, 9 * sizeof(double));
 		memcpy(PyArray_DATA((PyArrayObject*)arr_q), q, 4 * sizeof(double));
 
-		PyObject* result = Py_BuildValue("iiddOOOOO", type, alloy_type, rmsd, scale, arr_q, arr_F, arr_res, arr_P, arr_U);
+		PyObject* result = Py_BuildValue("iiddOOOOOd", type, alloy_type, rmsd, scale, arr_q, arr_F, arr_res, arr_P, arr_U, lattice_constant);
 
 		Py_DECREF(arr_q);
 		Py_DECREF(arr_res);
@@ -176,7 +176,7 @@ static PyObject* index_structure(PyObject* self, PyObject* args, PyObject* kw)
 
 		PyObject* arr_q = PyArray_SimpleNew(1, dims_4, NPY_DOUBLE);
 		memcpy(PyArray_DATA((PyArrayObject*)arr_q), q, 4 * sizeof(double));
-		PyObject* result = Py_BuildValue("iiddO", type, alloy_type, rmsd, scale, arr_q);
+		PyObject* result = Py_BuildValue("iiddOd", type, alloy_type, rmsd, scale, arr_q, lattice_constant);
 		Py_DECREF(arr_q);
 		return result;
 	}

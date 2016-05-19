@@ -81,7 +81,7 @@ const double ptm_template_bcc[15][3] = {	{  0.            ,  0.            ,  0.
 double calculate_lattice_constant(int type, double scale)
 {
 	assert(type >= 1 && type <= 5);
-	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(3)};
+	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 14. / sqrt(3) - 7};
 	return c[type] / scale;
 }
 
