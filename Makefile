@@ -5,7 +5,7 @@ C_SRC_FILES = canonical.c graph_data.c convex_hull_incremental.c \
 	index_ptm.c alloy_types.c deformation_gradient.c \
 	normalize_vertices.c reference_templates.c \
 	fundamental_mappings.c \
-	svdpolar/polar_decomposition.c \
+	polar_decomposition.c \
 	qcprot/qcprot.c qcprot/quat.c #unittest.c
 
 CPP_SRC_FILES = neighbour_ordering.cpp voronoi/cell.cpp
@@ -15,13 +15,8 @@ C_SRC_MODULE_FILE = ptmmodule.c
 HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
 	deformation_gradient.h graph_data.h index_ptm.h \
 	normalize_vertices.h reference_templates.h \
-	neighbour_ordering.h \
-	qcprot/qcprot.h qcprot/quat.h \
-	svdpolar/polar_decomposition.h \
-	svdpolar/Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.h \
-	svdpolar/Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.h \
-	svdpolar/Singular_Value_Decomposition_Kernel_Declarations.h \
-	svdpolar/Singular_Value_Decomposition_Main_Kernel_Body.h
+	neighbour_ordering.h polar_decomposition.h \
+	qcprot/qcprot.h qcprot/quat.h
 
 OBJDIR = .
 

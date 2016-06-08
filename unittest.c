@@ -258,6 +258,21 @@ static void matvec(double* A, double* x, double* b)
 	b[2] = A[6] * x[0] + A[7] * x[1] + A[8] * x[2];
 }
 
+static void matmul(double* A, double* x, double* b)
+{
+	b[0] = A[0] * x[0] + A[1] * x[3] + A[2] * x[6];
+	b[3] = A[3] * x[0] + A[4] * x[3] + A[5] * x[6];
+	b[6] = A[6] * x[0] + A[7] * x[3] + A[8] * x[6];
+
+	b[1] = A[0] * x[1] + A[1] * x[4] + A[2] * x[7];
+	b[4] = A[3] * x[1] + A[4] * x[4] + A[5] * x[7];
+	b[7] = A[6] * x[1] + A[7] * x[4] + A[8] * x[7];
+
+	b[2] = A[0] * x[2] + A[1] * x[5] + A[2] * x[8];
+	b[5] = A[3] * x[2] + A[4] * x[5] + A[5] * x[8];
+	b[8] = A[6] * x[2] + A[7] * x[5] + A[8] * x[8];
+}
+
 static bool check_matrix_equality(double* A, double* B, double tolerance)
 {
 	for (int i=0;i<9;i++)
@@ -574,6 +589,16 @@ exit(3);*/
 					if (matrix_determinant(U) <= 0)
 						CLEANUP("failed on U-matrix right-handedness test", -1);
 
+					//check strain tensor is symmetric
+					if (fabs(P[1] - P[3]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
+					if (fabs(P[2] - P[6]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
+					if (fabs(P[5] - P[7]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
+
+					//check polar decomposition
+					double _F[9];
+					matmul(P, U, _F);
+					if (!check_matrix_equality(_F, F, tolerance))
+						CLEANUP("failed on polar decomposition check", -1);
 
 					double A[9];
 					if (!qtest[iq].strain)
@@ -601,7 +626,7 @@ exit(3);*/
 						//check deformation gradient disorientation
 						double qu[4];
 						rotation_matrix_to_quaternion(U, qu);
-						if (quat_misorientation(qu, qpost) > 1E-3)	//todo: need double precision polar decomposition library in order to reduce this error
+						if (quat_misorientation(qu, qpost) > tolerance)
 							CLEANUP("failed on deformation gradient disorientation", -1);
 
 						quaternion_to_rotation_matrix(q, A);

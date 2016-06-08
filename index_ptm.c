@@ -16,7 +16,7 @@
 #include "index_ptm.h"
 #include "qcprot/qcprot.h"
 #include "qcprot/quat.h"
-#include "svdpolar/polar_decomposition.h"
+#include "polar_decomposition.h"
 
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -382,7 +382,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 			calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res.mapping, ch_points, ref->penrose, F, F_res);
 
 			if (P != NULL && U != NULL)
-				left_sided_polar_decomposition_3x3(F, P, U);
+				polar_decomposition_3x3(F, false, U, P);
 		}
 
 		if (mapping != NULL)

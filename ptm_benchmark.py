@@ -5,6 +5,38 @@ import scipy.linalg
 import matplotlib.pyplot as plt
 import scipy.optimize
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+
+def plot_points(points, label=False, edges=None):
+
+	fig = plt.figure()#figsize=(16,14))
+	fig.set_tight_layout(True)
+	ax = fig.add_subplot(111, projection='3d')
+
+	(xs, ys, zs) = zip(*points)
+	ax.scatter(xs, ys, zs, c='r')
+
+	if edges:
+		for (a, b) in edges:
+			p = [points[a], points[b]]
+			(xs, ys, zs) = zip(*p)
+			plt.plot(xs, ys, zs, c='k')
+
+	if label:
+		for p, l in zip(points, label):
+			ax.text(p[0], p[1], p[2], l, size=30, color='k')
+
+	(xs, ys, zs) = zip(*points)
+	lim = max([abs(e) for e in xs+ys+zs])
+	ax.set_xlim(-lim, lim)
+	ax.set_ylim(-lim, lim)
+	ax.set_zlim(-lim, lim)
+	plt.show()
+
+
 
 def vonmises(P):
 
@@ -95,6 +127,11 @@ def run(pos, nbrs):
 
 			positions = np.concatenate(([pos[i]], pos[nbrs[i][:18]]))
 			(struct, alloy, rmsd, scale, rot, F, F_res, P, U, lattice_constant) = ptmmodule.index_structure(positions, calculate_strains=1, topological_ordering=1)
+			if 0 and struct == 0 and all([e > 1000 for e in nbrs[i]]):
+				print nbrs[i]
+				print positions
+				positions -= pos[i]
+				plot_points(positions[:15])
 			#(struct, alloy, rmsd, scale, rot, lattice_constant) = ptmmodule.index_structure(positions)
 			#if struct == 2:
 			#	vm, r = calc_fcc_strain(F, F_res, P, U, positions[:13])
@@ -113,16 +150,23 @@ def run(pos, nbrs):
 	plt.show()
 
 def go():
-	dat_pos = open('test_data/FeCu_positions.dat', 'rb').read()
-	dat_nbr = open('test_data/FeCu_nbrs.dat', 'rb').read()
-	#dat_pos = open('test_data/fcc_positions.dat', 'rb').read()
-	#dat_nbr = open('test_data/fcc_nbrs.dat', 'rb').read()
+	if 1:
+		dat_pos = open('test_data/FeCu_positions.dat', 'rb').read()
+		dat_nbr = open('test_data/FeCu_nbrs.dat', 'rb').read()
+		#dat_pos = open('test_data/fcc_positions.dat', 'rb').read()
+		#dat_nbr = open('test_data/fcc_nbrs.dat', 'rb').read()
 
-	n = len(dat_pos) / 24
-	print "num atoms:", n
+		n = len(dat_pos) / 24
+		print "num atoms:", n
 
-	pos = np.array(struct.unpack(n * 3 * "d", dat_pos)).reshape((n, 3))
-	nbrs = np.array(struct.unpack(n * 24 * "i", dat_nbr)).reshape((n, 24))
+		pos = np.array(struct.unpack(n * 3 * "d", dat_pos)).reshape((n, 3))
+		nbrs = np.array(struct.unpack(n * 24 * "i", dat_nbr)).reshape((n, 24))
+
+		n = len(dat_pos) / 24
+		print "num atoms:", n
+
+	#pos = np.load('positions0.npy')
+	#nbrs = np.load('neighbours0.npy')
 
 	ptm, rmsds = run(pos, nbrs)
 	print ptm
