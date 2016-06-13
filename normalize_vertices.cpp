@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 
 
 void subtract_barycentre(int num, double *points, double (*normalized)[3])

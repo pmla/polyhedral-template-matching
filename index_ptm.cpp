@@ -1,22 +1,22 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <string.h>
-#include <math.h>
-#include <float.h>
-#include <assert.h>
-#include "convex_hull_incremental.h"
-#include "canonical.h"
-#include "graph_data.h"
-#include "deformation_gradient.h"
-#include "alloy_types.h"
-#include "neighbour_ordering.h"
-#include "normalize_vertices.h"
-#include "reference_templates.h"
+#include <cmath>
+#include <cfloat>
+#include <cassert>
+#include "convex_hull_incremental.hpp"
+#include "canonical.hpp"
+#include "graph_data.hpp"
+#include "deformation_gradient.hpp"
+#include "alloy_types.hpp"
+#include "neighbour_ordering.hpp"
+#include "normalize_vertices.hpp"
+#include "fundamental_mappings.hpp"
+#include "qcprot/qcprot.hpp"
+#include "qcprot/quat.hpp"
+#include "polar_decomposition.hpp"
 #include "index_ptm.h"
-#include "qcprot/qcprot.h"
-#include "qcprot/quat.h"
-#include "polar_decomposition.h"
 
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -45,11 +45,6 @@ typedef struct
 	refdata_t* ref_struct;
 } result_t;
 
-extern const int8_t mapping_sc[24][15];
-extern const int8_t mapping_fcc[24][15];
-extern const int8_t mapping_hcp[24][15];
-extern const int8_t mapping_ico[60][15];
-extern const int8_t mapping_bcc[24][15];
 
 refdata_t structure_sc =  { .type = PTM_MATCH_SC,  .num_nbrs =  6, .num_facets =  8, .max_degree = 4, .num_graphs = NUM_SC_GRAPHS,  .graphs = graphs_sc,  .points = ptm_template_sc,  .penrose = penrose_sc , .mapping = mapping_sc };
 refdata_t structure_fcc = { .type = PTM_MATCH_FCC, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_FCC_GRAPHS, .graphs = graphs_fcc, .points = ptm_template_fcc, .penrose = penrose_fcc, .mapping = mapping_fcc};
@@ -263,6 +258,13 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	return 0;
 }
 
+static double calculate_lattice_constant(int type, double scale)
+{
+	assert(type >= 1 && type <= 5);
+	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 14. / sqrt(3) - 7};
+	return c[type] / scale;
+}
+
 int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermuted_points, int32_t* unpermuted_numbers, int32_t flags, bool topological_ordering,
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, int8_t* mapping, double* p_lattice_constant)
 {
@@ -284,7 +286,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 	if (topological_ordering)
 	{
 		normalize_vertices(num_points, unpermuted_points, ch_points);
-		ret = calculate_neighbour_ordering(local_handle, num_points, (const double (*)[3])ch_points, ordering);
+		ret = calculate_neighbour_ordering((void*)local_handle, num_points, (const double (*)[3])ch_points, ordering);
 		if (ret != 0)
 			topological_ordering = false;
 	}
@@ -398,5 +400,15 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 	memcpy(q, res.q, 4 * sizeof(double));
 
 	return PTM_NO_ERROR;
+}
+
+ptm_local_handle_t ptm_initialize_local()
+{
+	return (ptm_local_handle_t)voronoi_initialize_local();
+}
+
+void ptm_uninitialize_local(ptm_local_handle_t ptr)
+{
+	voronoi_uninitialize_local(ptr);
 }
 

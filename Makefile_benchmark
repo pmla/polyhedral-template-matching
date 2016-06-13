@@ -7,47 +7,50 @@ This makefile requires GNU Make.
 endif
 
 PROGRAM = benchmark
-C_FILES = main.c canonical.c graph_data.c convex_hull_incremental.c \
-	index_ptm.c alloy_types.c deformation_gradient.c \
-	normalize_vertices.c reference_templates.c \
-	fundamental_mappings.c \
-	polar_decomposition.c \
-	qcprot/qcprot.c qcprot/quat.c unittest.c
+CPP_FILES = main.cpp canonical.cpp graph_data.cpp convex_hull_incremental.cpp \
+	index_ptm.cpp alloy_types.cpp deformation_gradient.cpp \
+	normalize_vertices.cpp \
+	polar_decomposition.cpp \
+	qcprot/qcprot.cpp qcprot/quat.cpp unittest.cpp\
+	neighbour_ordering.cpp voronoi/cell.cpp
 
-CPP_FILES = neighbour_ordering.cpp voronoi/cell.cpp
-
-COBJS := $(patsubst %.c, %.o, $(C_FILES))
+#COBJS := $(patsubst %.c, %.o, $(C_FILES))
 CPPOBJS := $(patsubst %.cpp, %.o, $(CPP_FILES))
 LDFLAGS =
 LDLIBS = -lm #-fno-omit-frame-pointer -fsanitize=address
 
-CC = gcc
+#CC = gcc
 CPP = g++
 
-HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
-	deformation_gradient.h graph_data.h index_ptm.h \
-	normalize_vertices.h reference_templates.h \
-	polar_decomposition.h \
-	qcprot/qcprot.h qcprot/quat.h \
-	neighbour_ordering.h \
+HEADER_FILES = alloy_types.hpp canonical.hpp convex_hull_incremental.hpp \
+	deformation_gradient.hpp graph_data.hpp index_ptm.h \
+	normalize_vertices.hpp \
+	fundamental_mappings.hpp \
+	polar_decomposition.hpp \
+	qcprot/qcprot.hpp qcprot/quat.hpp \
+	neighbour_ordering.hpp \
 	voronoi/cell.hpp
 
 OBJDIR = .
 
-C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
+#C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
 CPP_OBJECT_FILES = $(CPP_SRC_FILES:%.cpp=$(OBJDIR)/%.o) 
 C_OBJECT_MODULE_FILE = $(C_SRC_MODULE_FILE:%.c=$(OBJDIR)/%.o) 
 
-CFLAGS = -std=c99 -g -O3 -Wall -Wextra #-fno-omit-frame-pointer -fsanitize=address
-CPPFLAGS = -g -O3 -Wall -Wextra #-fno-omit-frame-pointer -fsanitize=address
+#CFLAGS = -std=c99 -g -O3 -Wall -Wextra #-fno-omit-frame-pointer -fsanitize=address
+CPPFLAGS = -g -O3 -std=c++11 -Wall -Wextra #-fno-omit-frame-pointer -fsanitize=address
 
 
 all: $(PROGRAM)
 
-$(PROGRAM): $(COBJS) $(CPPOBJS)
-	$(CC) -c $(CFLAGS) $(COBJS)
+#$(PROGRAM): $(COBJS) $(CPPOBJS)
+#	$(CC) -c $(CFLAGS) $(COBJS)
+#	$(CPP) -c $(CPPFLAGS) $(CPPOBJS)
+#	$(CPP) $(COBJS) $(CPPOBJS) -o $(PROGRAM) $(LDLIBS) $(LDFLAGS)
+
+$(PROGRAM): $(CPPOBJS)
 	$(CPP) -c $(CPPFLAGS) $(CPPOBJS)
-	$(CPP) $(COBJS) $(CPPOBJS) -o $(PROGRAM) $(LDLIBS) $(LDFLAGS)
+	$(CPP) $(CPPOBJS) -o $(PROGRAM) $(LDLIBS) $(LDFLAGS)
 
 # These are the pattern matching rules. In addition to the automatic
 # variables used here, the variable $* that matches whatever % stands for

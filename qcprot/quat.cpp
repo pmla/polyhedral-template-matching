@@ -1,6 +1,6 @@
 #include <string.h>
-#include <math.h>
-#include <float.h>
+#include <cmath>
+#include <cfloat>
 
 
 #define SIGN(x) (x >= 0 ? 1 : -1)

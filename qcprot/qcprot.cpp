@@ -1,11 +1,14 @@
 /*******************************************************************************
  *  -/_|:|_|_\- 
  *
- *  This code is a modification of Theobald's QCP rotation code.
- *  It has been adapted to calculate the polar decomposition of a 3x3 matrix
- *  Adaption by PM Larsen
+ *  File:		   qcprot.cpp
+ *  Version:		1.4
  *
- *  Original Author(s):	  Douglas L. Theobald
+ *  Function:	   Rapid calculation of the least-squares rotation using a 
+ *				  quaternion-based characteristic polynomial and 
+ *				  a cofactor matrix
+ *
+ *  Author(s):	  Douglas L. Theobald
  *				  Department of Biochemistry
  *				  MS 009
  *				  Brandeis University
@@ -22,7 +25,9 @@
  *				  USA
  *
  *				  pliu24@its.jnj.com
- * 
+ *
+ *  Modified by PM Larsen for use in Polyhedral Template Matching
+ *
  *
  *	If you use this QCP rotation calculation method in a publication, please
  *	reference:
@@ -80,61 +85,30 @@
  *	2011/07/08	  put in fabs() to fix taking sqrt of small neg numbers, fp error
  *	2012/07/26	  minor changes to comments and main.c, more info (v.1.4)
  *
- *      2016/05/29        QCP method adapted for polar decomposition of a 3x3 matrix.  For use in Polyhedral Template Matching.
+ *      2016/02/20        modified for use in Polyhedral Template Matching.  InnerProduct function now takes permutation array.
  *  
  ******************************************************************************/
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#include "qcprot.hpp"
+#include "quat.hpp"
 
-#include <stdbool.h>
-#include <math.h>
-
-
-static void matmul(double* A, double* x, double* b)
+int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int len, double minScore, double* rot)
 {
-	b[0] = A[0] * x[0] + A[1] * x[3] + A[2] * x[6];
-	b[3] = A[3] * x[0] + A[4] * x[3] + A[5] * x[6];
-	b[6] = A[6] * x[0] + A[7] * x[3] + A[8] * x[6];
-
-	b[1] = A[0] * x[1] + A[1] * x[4] + A[2] * x[7];
-	b[4] = A[3] * x[1] + A[4] * x[4] + A[5] * x[7];
-	b[7] = A[6] * x[1] + A[7] * x[4] + A[8] * x[7];
-
-	b[2] = A[0] * x[2] + A[1] * x[5] + A[2] * x[8];
-	b[5] = A[3] * x[2] + A[4] * x[5] + A[5] * x[8];
-	b[8] = A[6] * x[2] + A[7] * x[5] + A[8] * x[8];
-}
-
-static void quaternion_to_rotation_matrix(double* q, double* u)
-{
-	double a = q[0];
-	double b = q[1];
-	double c = q[2];
-	double d = q[3];
-
-	u[0] = a*a + b*b - c*c - d*d;
-	u[1] = 2*b*c - 2*a*d;
-	u[2] = 2*b*d + 2*a*c;
-
-	u[3] = 2*b*c + 2*a*d;
-	u[4] = a*a - b*b + c*c - d*d;
-	u[5] = 2*c*d - 2*a*b;
-
-	u[6] = 2*b*d - 2*a*c;
-	u[7] = 2*c*d + 2*a*b;
-	u[8] = a*a - b*b - c*c + d*d;
-}
-
-int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
-{
-	const double evecprec = 1e-6;
-	const double evalprec = 1e-11;
-
-	double A[9] = {_A[0], _A[1], _A[2], _A[3], _A[4], _A[5], _A[6], _A[7], _A[8]};
-	double det = A[0] * (A[4]*A[8] - A[5]*A[7]) - A[1] * (A[3]*A[8] - A[5]*A[6]) + A[2] * (A[3]*A[7] - A[4]*A[6]);
-	if (det < 0)
-	{
-		for (int i=0;i<9;i++)
-			A[i] = -A[i];
-	}
+	double 	SyzSzymSyySzz2, Sxx2Syy2Szz2Syz2Szy2, Sxy2Sxz2Syx2Szx2,
+		   SxzpSzx, SyzpSzy, SxypSyx, SyzmSzy,
+		   SxzmSzx, SxymSyx, SxxpSyy, SxxmSyy;
+	double C[4];
+	double mxEigenV; 
+	double b, a, delta, rms, qsqr;
+	double q1, q2, q3, q4, normq;
+	double a11, a12, a13, a14, a21, a22, a23, a24;
+	double a31, a32, a33, a34, a41, a42, a43, a44;
+	double x2;
+	double a3344_4334, a3244_4234, a3243_4233, a3143_4133,a3144_4134, a3142_4132; 
+	double evecprec = 1e-6;
+	double evalprec = 1e-11;
 
 	double	Sxx = A[0], Sxy = A[1], Sxz = A[2],
 		Syx = A[3], Syy = A[4], Syz = A[5],
@@ -144,19 +118,22 @@ int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
 		Sxy2 = Sxy * Sxy, Syz2 = Syz * Syz, Sxz2 = Sxz * Sxz,
 		Syx2 = Syx * Syx, Szy2 = Szy * Szy, Szx2 = Szx * Szx;
 
-	double SyzSzymSyySzz2 = 2.0*(Syz*Szy - Syy*Szz);
-	double Sxx2Syy2Szz2Syz2Szy2 = Syy2 + Szz2 - Sxx2 + Syz2 + Szy2;
-	double SxzpSzx = Sxz + Szx;
-	double SyzpSzy = Syz + Szy;
-	double SxypSyx = Sxy + Syx;
-	double SyzmSzy = Syz - Szy;
-	double SxzmSzx = Sxz - Szx;
-	double SxymSyx = Sxy - Syx;
-	double SxxpSyy = Sxx + Syy;
-	double SxxmSyy = Sxx - Syy;
-	double Sxy2Sxz2Syx2Szx2 = Sxy2 + Sxz2 - Syx2 - Szx2;
+	SyzSzymSyySzz2 = 2.0*(Syz*Szy - Syy*Szz);
+	Sxx2Syy2Szz2Syz2Szy2 = Syy2 + Szz2 - Sxx2 + Syz2 + Szy2;
 
-	double C[3];
+	C[2] = -2.0 * (Sxx2 + Syy2 + Szz2 + Sxy2 + Syx2 + Sxz2 + Szx2 + Syz2 + Szy2);
+	C[1] = 8.0 * (Sxx*Syz*Szy + Syy*Szx*Sxz + Szz*Sxy*Syx - Sxx*Syy*Szz - Syz*Szx*Sxy - Szy*Syx*Sxz);
+
+	SxzpSzx = Sxz + Szx;
+	SyzpSzy = Syz + Szy;
+	SxypSyx = Sxy + Syx;
+	SyzmSzy = Syz - Szy;
+	SxzmSzx = Sxz - Szx;
+	SxymSyx = Sxy - Syx;
+	SxxpSyy = Sxx + Syy;
+	SxxmSyy = Sxx - Syy;
+	Sxy2Sxz2Syx2Szx2 = Sxy2 + Sxz2 - Syx2 - Szx2;
+
 	C[0] = Sxy2Sxz2Syx2Szx2 * Sxy2Sxz2Syx2Szx2
 		 + (Sxx2Syy2Szz2Syz2Szy2 + SyzSzymSyySzz2) * (Sxx2Syy2Szz2Syz2Szy2 - SyzSzymSyySzz2)
 		 + (-(SxzpSzx)*(SyzmSzy)+(SxymSyx)*(SxxmSyy-Szz)) * (-(SxzmSzx)*(SyzpSzy)+(SxymSyx)*(SxxmSyy+Szz))
@@ -164,71 +141,68 @@ int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
 		 + (+(SxypSyx)*(SyzpSzy)+(SxzpSzx)*(SxxmSyy+Szz)) * (-(SxymSyx)*(SyzmSzy)+(SxzpSzx)*(SxxpSyy+Szz))
 		 + (+(SxypSyx)*(SyzmSzy)+(SxzmSzx)*(SxxmSyy-Szz)) * (-(SxymSyx)*(SyzpSzy)+(SxzmSzx)*(SxxpSyy-Szz));
 
-	C[1] = 8.0 * (Sxx*Syz*Szy + Syy*Szx*Sxz + Szz*Sxy*Syx - Sxx*Syy*Szz - Syz*Szx*Sxy - Szy*Syx*Sxz);
-
-	C[2] = -2.0 * (Sxx2 + Syy2 + Szz2 + Sxy2 + Syx2 + Sxz2 + Szx2 + Syz2 + Szy2);
-
-	double fnorm_squared = 0.0;
-	for (int i=0;i<9;i++)
-		fnorm_squared += A[i]*A[i];
-
 	//Newton-Raphson
-	double mxEigenV = sqrt(3 * fnorm_squared);
-	if (mxEigenV > evalprec)
+	mxEigenV = E0;
+	int i = 0;
+	for (i = 0; i < 50; ++i)
 	{
-		for (int i=0;i<50;i++)
-		{
-			double oldg = mxEigenV;
-			double x2 = mxEigenV*mxEigenV;
-			double b = (x2 + C[2])*mxEigenV;
-			double a = b + C[1];
-			double delta = ((a * mxEigenV + C[0]) / (2 * x2 * mxEigenV + b + a));
-			mxEigenV -= delta;
-			if (fabs(mxEigenV - oldg) < fabs(evalprec * mxEigenV))
-				break;
-		}
-	}
-	else
-	{
-		mxEigenV = 0.0;
+		double oldg = mxEigenV;
+		x2 = mxEigenV*mxEigenV;
+		b = (x2 + C[2])*mxEigenV;
+		a = b + C[1];
+		delta = ((a*mxEigenV + C[0])/(2.0*x2*mxEigenV + b + a));
+		mxEigenV -= delta;
+		//printf("\n diff[%3d]: %16g %16g %16g", i, mxEigenV - oldg, evalprec*mxEigenV, mxEigenV);
+		if (fabs(mxEigenV - oldg) < fabs(evalprec*mxEigenV))
+			break;
 	}
 
-	double a11 = SxxpSyy + Szz - mxEigenV;
-	double a12 = SyzmSzy;
-	double a13 = -SxzmSzx;
-	double a14 = SxymSyx;
+	//if (i == 50) 
+	//   fprintf(stderr,"\nMore than %d iterations needed!\n", i);
 
-	double a21 = SyzmSzy;
-	double a22 = SxxmSyy - Szz  -mxEigenV;
-	double a23 = SxypSyx;
-	double a24 = SxzpSzx;
+	//the fabs() is to guard against extremely small, but *negative* numbers due to floating point error
+	rms = sqrt(fabs(2.0 * (E0 - mxEigenV)/len));
+	(*rmsd) = rms;
+	//printf("\n\n %16g %16g %16g \n", rms, E0, 2.0 * (E0 - mxEigenV)/len);
 
-	double a31 = a13;
-	double a32 = a23;
-	double a33 = Syy - Sxx - Szz - mxEigenV;
-	double a34 = SyzpSzy;
+	if (minScore > 0) 
+		if (rms < minScore)
+			return -1; // Don't bother with rotation. 
 
-	double a41 = a14;
-	double a42 = a24;
-	double a43 = a34;
-	double a44 = Szz - SxxpSyy - mxEigenV;
+	a11 = SxxpSyy + Szz - mxEigenV;
+	a12 = SyzmSzy;
+	a13 = -SxzmSzx;
+	a14 = SxymSyx;
 
-	double a3344_4334 = a33 * a44 - a43 * a34;
-	double a3244_4234 = a32 * a44 - a42 * a34;
-	double a3243_4233 = a32 * a43 - a42 * a33;
-	double a3143_4133 = a31 * a43 - a41 * a33;
-	double a3144_4134 = a31 * a44 - a41 * a34;
-	double a3142_4132 = a31 * a42 - a41 * a32;
+	a21 = SyzmSzy;
+	a22 = SxxmSyy - Szz  -mxEigenV;
+	a23 = SxypSyx;
+	a24 = SxzpSzx;
 
-	double q1 =  a22*a3344_4334-a23*a3244_4234+a24*a3243_4233;
-	double q2 = -a21*a3344_4334+a23*a3144_4134-a24*a3143_4133;
-	double q3 =  a21*a3244_4234-a22*a3144_4134+a24*a3142_4132;
-	double q4 = -a21*a3243_4233+a22*a3143_4133-a23*a3142_4132;
+	a31 = a13;
+	a32 = a23;
+	a33 = Syy - Sxx - Szz - mxEigenV;
+	a34 = SyzpSzy;
 
-	double qsqr = q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4;
-	double q[4];
+	a41 = a14;
+	a42 = a24;
+	a43 = a34;
+	a44 = Szz - SxxpSyy - mxEigenV;
 
-	bool too_small = false;
+	a3344_4334 = a33 * a44 - a43 * a34;
+	a3244_4234 = a32 * a44-a42*a34;
+	a3243_4233 = a32 * a43 - a42 * a33;
+	a3143_4133 = a31 * a43-a41*a33;
+	a3144_4134 = a31 * a44 - a41 * a34;
+	a3142_4132 = a31 * a42-a41*a32;
+
+	q1 =  a22*a3344_4334-a23*a3244_4234+a24*a3243_4233;
+	q2 = -a21*a3344_4334+a23*a3144_4134-a24*a3143_4133;
+	q3 =  a21*a3244_4234-a22*a3144_4134+a24*a3142_4132;
+	q4 = -a21*a3243_4233+a22*a3143_4133-a23*a3142_4132;
+
+	qsqr = q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4;
+
 	//The following code tries to calculate another column in the adjoint matrix when the norm of the 
 	//current column is too small.
 	//Usually this block will never be activated.  To be absolutely safe this should be
@@ -239,7 +213,7 @@ int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
 		q2 = -a11*a3344_4334 + a13*a3144_4134 - a14*a3143_4133;
 		q3 =  a11*a3244_4234 - a12*a3144_4134 + a14*a3142_4132;
 		q4 = -a11*a3243_4233 + a12*a3143_4133 - a13*a3142_4132;
-		qsqr = q1*q1 + q2*q2 + q3*q3 + q4*q4;
+		qsqr = q1*q1 + q2 *q2 + q3*q3+q4*q4;
 
 		if (qsqr < evecprec)
 		{
@@ -251,7 +225,7 @@ int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
 			q2 = -a41 * a1324_1423 + a43 * a1124_1421 - a44 * a1123_1321;
 			q3 =  a41 * a1224_1422 - a42 * a1124_1421 + a44 * a1122_1221;
 			q4 = -a41 * a1223_1322 + a42 * a1123_1321 - a43 * a1122_1221;
-			qsqr = q1*q1 + q2*q2 + q3*q3 + q4*q4;
+			qsqr = q1*q1 + q2 *q2 + q3*q3+q4*q4;
 
 			if (qsqr < evecprec)
 			{
@@ -259,7 +233,7 @@ int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
 				q2 = -a31 * a1324_1423 + a33 * a1124_1421 - a34 * a1123_1321;
 				q3 =  a31 * a1224_1422 - a32 * a1124_1421 + a34 * a1122_1221;
 				q4 = -a31 * a1223_1322 + a32 * a1123_1321 - a33 * a1122_1221;
-				qsqr = q1*q1 + q2*q2 + q3*q3 + q4*q4;
+				qsqr = q1*q1 + q2 *q2 + q3*q3 + q4*q4;
 				
 				if (qsqr < evecprec)
 				{
@@ -268,41 +242,53 @@ int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
 					q[1] = 0.0;
 					q[2] = 0.0;
 					q[3] = 0.0;
-					U[0] = U[4] = U[8] = 1.0;
-					U[1] = U[2] = U[3] = U[5] = U[6] = U[7] = 0.0;
-					too_small = true;
+					//rot[0] = rot[4] = rot[8] = 1.0;
+					//rot[1] = rot[2] = rot[3] = rot[5] = rot[6] = rot[7] = 0.0;
+					return 0;
 				}
 			}
 		}
 	}
 
-	if (!too_small)
+	normq = sqrt(qsqr);
+	q1 /= normq;
+	q2 /= normq;
+	q3 /= normq;
+	q4 /= normq;
+	q[0] = q1;
+	q[1] = q2;
+	q[2] = q3;
+	q[3] = q4;
+
+	quaternion_to_rotation_matrix(q, rot);
+	return 1;
+}
+
+void InnerProduct(double *A, int num, const double (*coords1)[3], double (*coords2)[3], int8_t* permutation)
+{
+	A[0] = A[1] = A[2] = A[3] = A[4] = A[5] = A[6] = A[7] = A[8] = 0.0;
+
+	for (int i = 0; i < num; ++i)
 	{
-		double normq = sqrt(qsqr);
-		q1 /= normq;
-		q2 /= normq;
-		q3 /= normq;
-		q4 /= normq;
-		q[0] = -q1;
-		q[1] = q2;
-		q[2] = q3;
-		q[3] = q4;
-		quaternion_to_rotation_matrix(q, U);
+		double x1 = coords1[i][0];
+		double y1 = coords1[i][1];
+		double z1 = coords1[i][2];
+
+		double x2 = coords2[permutation[i]][0];
+		double y2 = coords2[permutation[i]][1];
+		double z2 = coords2[permutation[i]][2];
+
+		A[0] += x1 * x2;
+		A[1] += x1 * y2;
+		A[2] += x1 * z2;
+
+		A[3] += y1 * x2;
+		A[4] += y1 * y2;
+		A[5] += y1 * z2;
+
+		A[6] += z1 * x2;
+		A[7] += z1 * y2;
+		A[8] += z1 * z2;  
 	}
-
-	if (det < 0)
-	{
-		for (int i=0;i<9;i++)
-			U[i] = -U[i];
-	}
-
-	double invU[9] = {U[0], U[3], U[6], U[1], U[4], U[7], U[2], U[5], U[8]};
-
-	if (right_sided)
-		matmul(invU, _A, P);
-	else
-		matmul(_A, invU, P);
-
-	return !too_small;
 }
 

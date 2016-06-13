@@ -1,7 +1,7 @@
 #include <string.h>
-#include <assert.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <cassert>
+#include <cstdint>
+#include <cstdbool>
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))

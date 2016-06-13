@@ -9,21 +9,6 @@ using namespace std;
 #define MAX_POINTS 19
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int calculate_neighbour_ordering(voronoicell_neighbor* voronoi_handle, int num_points, const double (*_points)[3], int8_t* ordering);
-
-void* ptm_initialize_local();
-void ptm_uninitialize_local(voronoicell_neighbor* ptr);
-
-
-#ifdef __cplusplus
-}
-#endif
-
-
 typedef struct
 {
 	double area;
@@ -67,9 +52,11 @@ static int calculate_voronoi_face_areas(int num_points, const double (*_points)[
 	return 0;
 }
 
-int calculate_neighbour_ordering(voronoicell_neighbor* voronoi_handle, int num_points, const double (*_points)[3], int8_t* ordering)
+int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const double (*_points)[3], int8_t* ordering)
 {
 	assert(num_points <= MAX_POINTS);
+
+	voronoicell_neighbor* voronoi_handle = (voronoicell_neighbor*)_voronoi_handle;
 
 	double max_norm = 0;
 	double points[num_points][3];
@@ -130,14 +117,15 @@ int calculate_neighbour_ordering(voronoicell_neighbor* voronoi_handle, int num_p
 	return ret;
 }
 
-void* ptm_initialize_local()
+void* voronoi_initialize_local()
 {
 	voronoicell_neighbor* ptr = new voronoicell_neighbor;
 	return (void*)ptr;
 }
 
-void ptm_uninitialize_local(voronoicell_neighbor* ptr)
+void voronoi_uninitialize_local(void* _ptr)
 {
+	voronoicell_neighbor* ptr = (voronoicell_neighbor*)_ptr;
 	delete ptr;
 }
 

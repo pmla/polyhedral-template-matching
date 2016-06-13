@@ -1,22 +1,21 @@
 CC = gcc
 CPP = g++
 
-C_SRC_FILES = canonical.c graph_data.c convex_hull_incremental.c \
-	index_ptm.c alloy_types.c deformation_gradient.c \
-	normalize_vertices.c reference_templates.c \
-	fundamental_mappings.c \
-	polar_decomposition.c \
-	qcprot/qcprot.c qcprot/quat.c #unittest.c
-
-CPP_SRC_FILES = neighbour_ordering.cpp voronoi/cell.cpp
+CPP_SRC_FILES = canonical.cpp graph_data.cpp convex_hull_incremental.cpp \
+	index_ptm.cpp alloy_types.cpp deformation_gradient.cpp \
+	normalize_vertices.cpp \
+	polar_decomposition.cpp \
+	qcprot/qcprot.cpp qcprot/quat.cpp \
+	neighbour_ordering.cpp voronoi/cell.cpp
 
 C_SRC_MODULE_FILE = ptmmodule.c 
 
-HEADER_FILES = alloy_types.h canonical.h convex_hull_incremental.h \
-	deformation_gradient.h graph_data.h index_ptm.h \
-	normalize_vertices.h reference_templates.h \
-	neighbour_ordering.h polar_decomposition.h \
-	qcprot/qcprot.h qcprot/quat.h
+HEADER_FILES = alloy_types.hpp canonical.hpp convex_hull_incremental.hpp \
+	deformation_gradient.hpp graph_data.hpp index_ptm.h \
+	normalize_vertices.hpp reference_templates.hpp \
+	neighbour_ordering.hpp polar_decomposition.hpp \
+	fundamental_mappings.hpp \
+	qcprot/qcprot.hpp qcprot/quat.hpp
 
 OBJDIR = .
 
@@ -39,8 +38,8 @@ PYTHONINCLDIR = $(PYTHONPREFIX)/include/python$(PYTHONVERSION)
 PYTHONLIBDIR = $(PYTHONEXECPREFIX)/lib/python$(PYTHONVERSION)/config
 PYTHONLIB = python$(PYTHONVERSION)
 
-CFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
-CPPFLAGS = -fPIC -g -O3 -Wall -Wextra -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
+CFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra -z,defs -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
+CPPFLAGS = -fPIC -g -O3 -std=c++11 -Wall -Wextra -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
 
 ifeq ($(shell uname),Darwin)
 MAKESHARED = -bundle -undefined dynamic_lookup

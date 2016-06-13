@@ -25,16 +25,16 @@ done:
 	check det(U) > 0
 */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <string.h>
-#include <assert.h>
-#include <math.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <cstdbool>
 #include "index_ptm.h"
-#include "normalize_vertices.h"
-#include "qcprot/quat.h"
+#include "normalize_vertices.hpp"
+#include "qcprot/quat.hpp"
 
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -651,29 +651,31 @@ exit(3);*/
 	}
 
 
-	double lc_points_sc[7][3] = {{0,0,0},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
-	double lc_points_fcc[13][3] = {{0,0,0},{0,1,1},{0,-1,-1},{0,1,-1},{0,-1,1},{1,0,1},{-1,0,-1},{1,0,-1},{-1,0,1},{1,1,0},{-1,-1,0},{1,-1,0},{-1,1,0}};
-	double lc_points_bcc[15][3] = {{0,0,0},{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
-	double* pdata[3] = {lc_points_sc[0], lc_points_fcc[0], lc_points_bcc[0]};
-
-	int lcdat[3] = {0, 1, 4};
-	for (int i=0;i<3;i++)
 	{
-		structdata_t* s = &structdata[lcdat[i]];
+		double lc_points_sc[7][3] = {{0,0,0},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
+		double lc_points_fcc[13][3] = {{0,0,0},{0,1,1},{0,-1,-1},{0,1,-1},{0,-1,1},{1,0,1},{-1,0,-1},{1,0,-1},{-1,0,1},{1,1,0},{-1,-1,0},{1,-1,0},{-1,1,0}};
+		double lc_points_bcc[15][3] = {{0,0,0},{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
+		double* pdata[3] = {lc_points_sc[0], lc_points_fcc[0], lc_points_bcc[0]};
 
-		int32_t type;
-		double scale, rmsd, lattice_constant, q[4];
-		ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &lattice_constant);
-		if (ret != PTM_NO_ERROR)
-			CLEANUP("indexing failed", ret);
+		int lcdat[3] = {0, 1, 4};
+		for (int i=0;i<3;i++)
+		{
+			structdata_t* s = &structdata[lcdat[i]];
 
-		if (type != s->type)
-			CLEANUP("failed on type", -1);
+			int32_t type;
+			double scale, rmsd, lattice_constant, q[4];
+			ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &lattice_constant);
+			if (ret != PTM_NO_ERROR)
+				CLEANUP("indexing failed", ret);
 
-		if (fabs(lattice_constant - 2) > tolerance)
-			CLEANUP("failed on lattice constant", -1);
+			if (type != s->type)
+				CLEANUP("failed on type", -1);
 
-		num_tests++;
+			if (fabs(lattice_constant - 2) > tolerance)
+				CLEANUP("failed on lattice constant", -1);
+
+			num_tests++;
+		}
 	}
 
 cleanup:

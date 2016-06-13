@@ -1,11 +1,11 @@
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdbool>
+#include <cstdio>
+#include <cstdlib>
 #include <string.h>
-#include <assert.h>
+#include <cassert>
 #include "index_ptm.h"
-#include "unittest.h"
+#include "unittest.hpp"
 
 #define MAX_NBRS 24
 

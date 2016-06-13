@@ -1,5 +1,5 @@
-#ifndef QUAT_H
-#define QUAT_H
+#ifndef QUAT_HPP
+#define QUAT_HPP
 
 int rotate_quaternion_into_cubic_fundamental_zone(double* q);
 int rotate_quaternion_into_icosahedral_fundamental_zone(double* q);

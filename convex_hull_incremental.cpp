@@ -1,10 +1,10 @@
-#include <math.h>
-#include <float.h>
+#include <cmath>
+#include <cfloat>
 #include <string.h>
-#include <assert.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "convex_hull_incremental.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdbool>
+#include "convex_hull_incremental.hpp"
 
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))

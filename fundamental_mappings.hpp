@@ -1,4 +1,7 @@
-#include <stdint.h>
+#ifndef FUNDAMENTAL_MAPPINGS_HPP
+#define FUNDAMENTAL_MAPPINGS_HPP
+
+#include <cstdint>
 
 const int8_t mapping_sc[24][15] = {	{0, 1, 2, 3, 4, 5, 6},
 					{0, 2, 1, 4, 3, 5, 6},
@@ -143,8 +146,5 @@ const int8_t mapping_hcp[6][15] = {	{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
 					{0, 2, 1, 6, 5, 4, 3, 8, 7, 11, 12, 9, 10},
 					{0, 6, 5, 4, 3, 2, 1, 10, 9, 8, 7, 12, 11}	};
 
-
-#ifdef __cplusplus
-}
 #endif
 

@@ -1,9 +1,9 @@
-#ifndef CONVEX_HULL_INCREMENTAL_H
-#define CONVEX_HULL_INCREMENTAL_H
+#ifndef CONVEX_HULL_INCREMENTAL_HPP
+#define CONVEX_HULL_INCREMENTAL_HPP
 
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 
 #define MAXF 24
 typedef struct

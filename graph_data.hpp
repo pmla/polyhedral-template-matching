@@ -1,16 +1,16 @@
-#ifndef GRAPH_DATA_H
-#define GRAPH_DATA_H
+#ifndef GRAPH_DATA_HPP
+#define GRAPH_DATA_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 typedef struct
 {
 	int id;
+	uint64_t hash;
 	int automorphism_index;
 	int num_automorphisms;
-	int8_t facets[24][3];
-	uint64_t hash;
 	int8_t canonical_labelling[15];
+	int8_t facets[24][3];
 } graph_t;
 
 #define NUM_SC_GRAPHS 1

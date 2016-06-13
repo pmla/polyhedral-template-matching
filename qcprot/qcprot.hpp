@@ -1,7 +1,7 @@
 /*******************************************************************************
  *  -/_|:|_|_\- 
  *
- *  File:           qcprot.h
+ *  File:           qcprot.hpp
  *
  *  Function:       Rapid calculation of the least-squares rotation using a 
  *                  quaternion-based characteristic polynomial and 
@@ -24,7 +24,8 @@
  *                  USA
  *
  *                  pliu24@its.jnj.com
- * 
+ *
+ *  Modified by PM Larsen for use in Polyhedral Template Matching 
  *
  *    If you use this QCP rotation calculation method in a publication, please
  *    reference:
@@ -74,8 +75,8 @@
  *  
  ******************************************************************************/
 
-#ifndef QCPROT_H
-#define QCPROT_H
+#ifndef QCPROT_HPP
+#define QCPROT_HPP
 
 #include <stdint.h>
 int FastCalcRMSDAndRotation(double *q, double *A, double *rmsd, double E0, int len, double minScore, double* rot);
