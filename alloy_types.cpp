@@ -3,7 +3,7 @@
 int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 {
 	int len = 13;
-	int8_t temp[len];
+	int8_t temp[13];
 
 	int num_cu = 1, cu = numbers[0];
 	for (int i=1;i<len;i++)
@@ -70,7 +70,7 @@ int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 int32_t find_bcc_alloy_type(int8_t* mapping, int32_t* numbers)
 {
 	int len = 15;
-	int8_t temp[len];
+	int8_t temp[15];
 
 	int num_cu = 1, cu = numbers[0];
 	for (int i=1;i<len;i++)

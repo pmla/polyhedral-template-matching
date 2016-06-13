@@ -87,7 +87,7 @@ static void initialize_graphs(refdata_t* s)
 {
 	for (int i = 0;i<s->num_graphs;i++)
 	{
-		int8_t degree[s->num_nbrs];
+		int8_t degree[MAX_NBRS];
 		int _max_degree = graph_degree(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree);
 		assert(_max_degree <= s->max_degree);
 
@@ -114,8 +114,8 @@ static void check_graphs(	refdata_t* s,
 {
 	int num_points = s->num_nbrs + 1;
 	const double (*ideal_points)[3] = s->points;
-	int8_t inverse_labelling[num_points];
-	int8_t mapping[num_points];
+	int8_t inverse_labelling[MAX_POINTS];
+	int8_t mapping[MAX_POINTS];
 
 	for (int i=0; i<num_points; i++)
 		inverse_labelling[ canonical_labelling[i] ] = i;
@@ -183,8 +183,8 @@ static void check_graphs(	refdata_t* s,
 
 static int match_general(refdata_t* s, double (*ch_points)[3], double* points, convexhull_t* ch, result_t* res)
 {
-	int8_t degree[s->num_nbrs];
-	int8_t facets[s->num_facets][3];
+	int8_t degree[MAX_NBRS];
+	int8_t facets[MAX_FACETS][3];
 	int ret = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, s->num_facets, ch, facets);
 	ch->ok = ret == 0;
 
@@ -203,10 +203,10 @@ static int match_general(refdata_t* s, double (*ch_points)[3], double* points, c
 			if (degree[i] != 4)
 				return -8;
 
-	double normalized[s->num_nbrs + 1][3];
+	double normalized[MAX_POINTS][3];
 	subtract_barycentre(s->num_nbrs + 1, points, normalized);
 
-	int8_t canonical_labelling[s->num_nbrs + 1];
+	int8_t canonical_labelling[MAX_POINTS];
 	uint64_t hash = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling);
 #ifdef DEBUG
 	printf("hash: %lx\n", hash);
@@ -225,8 +225,8 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	int num_facets = structure_fcc.num_facets;
 	int max_degree = structure_fcc.max_degree;
 
-	int8_t degree[num_nbrs];
-	int8_t facets[num_facets][3];
+	int8_t degree[MAX_NBRS];
+	int8_t facets[MAX_FACETS][3];
 	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, num_facets, ch, facets);
 	ch->ok = ret == 0;
 
@@ -240,10 +240,10 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	if (_max_degree > max_degree)
 		return -9;
 
-	double normalized[num_nbrs + 1][3];
+	double normalized[MAX_POINTS][3];
 	subtract_barycentre(num_nbrs + 1, points, normalized);
 
-	int8_t canonical_labelling[num_nbrs + 1];
+	int8_t canonical_labelling[MAX_POINTS];
 	uint64_t hash = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling);
 #ifdef DEBUG
 	printf("hash: %lx\n", hash);
@@ -278,11 +278,12 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 		assert(num_points >= structure_fcc.num_nbrs + 1);
 
 
-	assert(num_points <= 19);
+#define MAX_INPUT_POINTS 19
+	assert(num_points <= MAX_INPUT_POINTS);
 
 	int ret = 0;
-	double ch_points[num_points][3];
-	int8_t ordering[num_points];
+	double ch_points[MAX_INPUT_POINTS][3];
+	int8_t ordering[MAX_INPUT_POINTS];
 	if (topological_ordering)
 	{
 		normalize_vertices(num_points, unpermuted_points, ch_points);
@@ -295,8 +296,8 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 		for (int i=0;i<num_points;i++)
 			ordering[i] = i;
 
-	double points[num_points][3];
-	int32_t numbers[num_points];
+	double points[MAX_POINTS][3];
+	int32_t numbers[MAX_POINTS];
 	num_points = MIN(15, num_points);
 	for (int i=0;i<num_points;i++)
 	{

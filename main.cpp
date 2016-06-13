@@ -7,7 +7,7 @@
 #include "index_ptm.h"
 #include "unittest.hpp"
 
-#define MAX_NBRS 24
+#define _MAX_NBRS 24
 
 
 static int read_file(const char* path, uint8_t** p_buf, size_t* p_fsize)
@@ -61,7 +61,7 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 
 	for (int j=0;j<max_nbrs;j++)
 	{
-		int index = nbrs[i * MAX_NBRS + j];
+		int index = nbrs[i * _MAX_NBRS + j];
 		memcpy(nbr[j+1], positions[index], 3 * sizeof(double));
 	}
 }
@@ -88,7 +88,7 @@ int main()
 	if (ret != 0)
 		return -1;
 
-	int num_atoms = fsize / (MAX_NBRS * sizeof(int32_t));
+	int num_atoms = fsize / (_MAX_NBRS * sizeof(int32_t));
 	const int max_nbrs = 18;
 	//assert(num_atoms == 88737);
 	printf("num atoms: %d\n", num_atoms);
@@ -108,7 +108,7 @@ int main()
 		double nbr[max_nbrs+1][3];
 		get_neighbours((double (*)[3])positions, nbrs, max_nbrs, i, nbr);
 
-		int8_t mapping[MAX_NBRS];
+		int8_t mapping[_MAX_NBRS];
 		int32_t type, alloy_type;
 		double scale, rmsd, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];

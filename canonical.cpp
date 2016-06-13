@@ -31,11 +31,11 @@ static void build_facet_map(int num_facets, int8_t facets[][3], int8_t common[MA
 
 static bool weinberg(int num_nodes, int num_edges, int8_t common[MAXV][MAXV], int8_t* best_code, int8_t* canonical_labelling, int prev, int cur)
 {
-	bool m[num_nodes][num_nodes];
-	memset(m, 0, sizeof(bool) * num_nodes * num_nodes);
+	bool m[MAXV][MAXV];
+	memset(m, 0, sizeof(bool) * MAXV * MAXV);
 
-	int8_t index[num_nodes];
-	memset(index, -1, sizeof(int8_t) * num_nodes);
+	int8_t index[MAXV];
+	memset(index, -1, sizeof(int8_t) * MAXV);
 	index[prev] = 0;
 	int n = 1;
 

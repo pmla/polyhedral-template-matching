@@ -33,6 +33,13 @@
 
 
 //--------------------------------
+//    internal definitions
+//--------------------------------
+#define MAX_NBRS	14
+#define MAX_POINTS	15
+#define MAX_FACETS	24
+
+//--------------------------------
 //    function declarations
 //--------------------------------
 #ifdef __cplusplus

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 #include "voronoi/cell.hpp"
 using namespace voro;
 using namespace std;
@@ -16,21 +17,18 @@ typedef struct
 	int index;
 } sorthelper_t;
 
-static int sorthelper_compare(const void* va, const void* vb)
+static bool sorthelper_compare(sorthelper_t const& a, sorthelper_t const& b)
 {
-	sorthelper_t* a = (sorthelper_t*)va;
-	sorthelper_t* b = (sorthelper_t*)vb;
+	if (a.area > b.area)
+		return true;
 
-	if (a->area > b->area)
-		return -1;
+	if (a.area < b.area)
+		return false;
 
-	if (a->area < b->area)
-		return 1;
+	if (a.dist < b.dist)
+		return true;
 
-	if (a->dist < b->dist)
-		return -1;
-
-	return 1;
+	return false;
 }
 
 //todo: change voronoi code to return errors rather than exiting
@@ -59,8 +57,8 @@ int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const do
 	voronoicell_neighbor* voronoi_handle = (voronoicell_neighbor*)_voronoi_handle;
 
 	double max_norm = 0;
-	double points[num_points][3];
-	double normsq[num_points];
+	double points[MAX_POINTS][3];
+	double normsq[MAX_POINTS];
 	for (int i = 0;i<num_points;i++)
 	{
 		double x = _points[i][0] - _points[0][0];
@@ -85,7 +83,7 @@ int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const do
 	if (ret != 0)
 		return ret;
 
-	double areas[num_points];
+	double areas[MAX_POINTS];
 	memset(areas, 0, num_points * sizeof(double));
 	areas[0] = INFINITY;
 	for (size_t i=0;i<nbr_indices.size();i++)
@@ -104,7 +102,8 @@ int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const do
 		data[i].index = i;
 	}
 
-	qsort(data, num_points, sizeof(sorthelper_t), sorthelper_compare);
+	//qsort(data, num_points, sizeof(sorthelper_t), sorthelper_compare);
+	std::sort(data, data + num_points, &sorthelper_compare);
 
 #ifdef DEBUG
 	for (int i=0;i<num_points;i++)
