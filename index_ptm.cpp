@@ -46,11 +46,12 @@ typedef struct
 } result_t;
 
 
-refdata_t structure_sc =  { .type = PTM_MATCH_SC,  .num_nbrs =  6, .num_facets =  8, .max_degree = 4, .num_graphs = NUM_SC_GRAPHS,  .graphs = graphs_sc,  .points = ptm_template_sc,  .penrose = penrose_sc , .mapping = mapping_sc };
-refdata_t structure_fcc = { .type = PTM_MATCH_FCC, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_FCC_GRAPHS, .graphs = graphs_fcc, .points = ptm_template_fcc, .penrose = penrose_fcc, .mapping = mapping_fcc};
-refdata_t structure_hcp = { .type = PTM_MATCH_HCP, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_HCP_GRAPHS, .graphs = graphs_hcp, .points = ptm_template_hcp, .penrose = penrose_hcp, .mapping = mapping_hcp};
-refdata_t structure_ico = { .type = PTM_MATCH_ICO, .num_nbrs = 12, .num_facets = 20, .max_degree = 6, .num_graphs = NUM_ICO_GRAPHS, .graphs = graphs_ico, .points = ptm_template_ico, .penrose = penrose_ico, .mapping = mapping_ico};
-refdata_t structure_bcc = { .type = PTM_MATCH_BCC, .num_nbrs = 14, .num_facets = 24, .max_degree = 8, .num_graphs = NUM_BCC_GRAPHS, .graphs = graphs_bcc, .points = ptm_template_bcc, .penrose = penrose_bcc, .mapping = mapping_bcc};
+//refdata_t structure_sc =  { .type = PTM_MATCH_SC,  .num_nbrs =  6, .num_facets =  8, .max_degree = 4, .num_graphs = NUM_SC_GRAPHS,  .graphs = graphs_sc,  .points = ptm_template_sc,  .penrose = penrose_sc , .mapping = mapping_sc };
+refdata_t structure_sc =  { PTM_MATCH_SC,   6,  8, 4, NUM_SC_GRAPHS,  graphs_sc,  ptm_template_sc,  penrose_sc , mapping_sc };
+refdata_t structure_fcc = { PTM_MATCH_FCC, 12, 20, 6, NUM_FCC_GRAPHS, graphs_fcc, ptm_template_fcc, penrose_fcc, mapping_fcc};
+refdata_t structure_hcp = { PTM_MATCH_HCP, 12, 20, 6, NUM_HCP_GRAPHS, graphs_hcp, ptm_template_hcp, penrose_hcp, mapping_hcp};
+refdata_t structure_ico = { PTM_MATCH_ICO, 12, 20, 6, NUM_ICO_GRAPHS, graphs_ico, ptm_template_ico, penrose_ico, mapping_ico};
+refdata_t structure_bcc = { PTM_MATCH_BCC, 14, 24, 8, NUM_BCC_GRAPHS, graphs_bcc, ptm_template_bcc, penrose_bcc, mapping_bcc};
 
 static int graph_degree(int num_facets, int8_t facets[][3], int num_nodes, int8_t* degree)
 {
