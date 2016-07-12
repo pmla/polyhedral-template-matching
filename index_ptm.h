@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-//--------------------------------
+//------------------------------------
 //    definitions
-//--------------------------------
+//------------------------------------
 #define PTM_NO_ERROR	0
 
 
@@ -31,18 +31,14 @@
 #define PTM_ALLOY_L12_AU	4
 #define PTM_ALLOY_B2		5
 
+
 #define PTM_MAX_NBRS	14
+#define PTM_MAX_POINTS	15
+#define PTM_MAX_FACETS	24
 
-
-//--------------------------------
-//    internal definitions
-//--------------------------------
-#define MAX_POINTS	15
-#define MAX_FACETS	24
-
-//--------------------------------
+//------------------------------------
 //    function declarations
-//--------------------------------
+//------------------------------------
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,14 +52,19 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* atomic_p
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, int8_t* mapping, double* p_lattice_constant);	//outputs
 
 
-//--------------------------------
+//------------------------------------
+//    global initialization switch
+//------------------------------------
+extern bool ptm_initialized;
+
+//------------------------------------
 //    number of neighbours
-//--------------------------------
+//------------------------------------
 const int ptm_num_nbrs[6] = {0, 6, 12, 12, 12, 14};
 
-//--------------------------------
+//------------------------------------
 //    template structures
-//--------------------------------
+//------------------------------------
 
 //these point sets have barycentre {0, 0, 0} and are scaled such that the mean neighbour distance is 1
 const double ptm_template_sc[7][3] = {		{  0.            ,  0.            ,  0.             },

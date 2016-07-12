@@ -101,13 +101,21 @@ static int initialize_graphs(refdata_t* s)
 	return PTM_NO_ERROR;
 }
 
+bool ptm_initialized = false;
 int ptm_initialize_global()
 {
+	if (ptm_initialized)
+		return PTM_NO_ERROR;
+
 	int ret = initialize_graphs(&structure_sc);
 	ret |= initialize_graphs(&structure_fcc);
 	ret |= initialize_graphs(&structure_hcp);
 	ret |= initialize_graphs(&structure_ico);
 	ret |= initialize_graphs(&structure_bcc);
+
+	if (ret == PTM_NO_ERROR)
+		ptm_initialized = true;
+
 	return ret;
 }
 
@@ -119,8 +127,8 @@ static void check_graphs(	refdata_t* s,
 {
 	int num_points = s->num_nbrs + 1;
 	const double (*ideal_points)[3] = s->points;
-	int8_t inverse_labelling[MAX_POINTS];
-	int8_t mapping[MAX_POINTS];
+	int8_t inverse_labelling[PTM_MAX_POINTS];
+	int8_t mapping[PTM_MAX_POINTS];
 
 	for (int i=0; i<num_points; i++)
 		inverse_labelling[ canonical_labelling[i] ] = i;
@@ -189,7 +197,7 @@ static void check_graphs(	refdata_t* s,
 static int match_general(refdata_t* s, double (*ch_points)[3], double* points, convexhull_t* ch, result_t* res)
 {
 	int8_t degree[PTM_MAX_NBRS];
-	int8_t facets[MAX_FACETS][3];
+	int8_t facets[PTM_MAX_FACETS][3];
 	int ret = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, s->num_facets, ch, facets);
 	ch->ok = ret == 0;
 
@@ -208,10 +216,10 @@ static int match_general(refdata_t* s, double (*ch_points)[3], double* points, c
 			if (degree[i] != 4)
 				return PTM_NO_ERROR;
 
-	double normalized[MAX_POINTS][3];
+	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(s->num_nbrs + 1, points, normalized);
 
-	int8_t canonical_labelling[MAX_POINTS];
+	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;
 	ret = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling, &hash);
 	if (ret != PTM_NO_ERROR)
@@ -235,7 +243,7 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	int max_degree = structure_fcc.max_degree;
 
 	int8_t degree[PTM_MAX_NBRS];
-	int8_t facets[MAX_FACETS][3];
+	int8_t facets[PTM_MAX_FACETS][3];
 	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, num_facets, ch, facets);
 	ch->ok = ret == 0;
 
@@ -249,10 +257,10 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	if (_max_degree > max_degree)
 		return PTM_NO_ERROR;
 
-	double normalized[MAX_POINTS][3];
+	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(num_nbrs + 1, points, normalized);
 
-	int8_t canonical_labelling[MAX_POINTS];
+	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;
 	ret = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling, &hash);
 	if (ret != PTM_NO_ERROR)
@@ -309,8 +317,8 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 		for (int i=0;i<num_points;i++)
 			ordering[i] = i;
 
-	double points[MAX_POINTS][3];
-	int32_t numbers[MAX_POINTS];
+	double points[PTM_MAX_POINTS][3];
+	int32_t numbers[PTM_MAX_POINTS];
 	num_points = MIN(15, num_points);
 	for (int i=0;i<num_points;i++)
 	{
