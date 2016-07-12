@@ -84,27 +84,31 @@ static void make_facets_clockwise(int num_facets, int8_t (*facets)[3], const dou
 		add_facet(points, facets[i][0], facets[i][1], facets[i][2], facets[i], plane_normal, origin);
 }
 
-static void initialize_graphs(refdata_t* s)
+static int initialize_graphs(refdata_t* s)
 {
 	for (int i = 0;i<s->num_graphs;i++)
 	{
-		int8_t degree[MAX_NBRS];
+		int8_t degree[PTM_MAX_NBRS];
 		int _max_degree = graph_degree(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree);
 		assert(_max_degree <= s->max_degree);
 
 		make_facets_clockwise(s->num_facets, s->graphs[i].facets, &s->points[1]);
-		s->graphs[i].hash = canonical_form(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree, s->graphs[i].canonical_labelling);
+		int ret = canonical_form(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree, s->graphs[i].canonical_labelling, &s->graphs[i].hash);
+		if (ret != 0)
+			return ret;
 	}
+
+	return PTM_NO_ERROR;
 }
 
 int ptm_initialize_global()
 {
-	initialize_graphs(&structure_sc);
-	initialize_graphs(&structure_fcc);
-	initialize_graphs(&structure_hcp);
-	initialize_graphs(&structure_ico);
-	initialize_graphs(&structure_bcc);
-	return 0;
+	int ret = initialize_graphs(&structure_sc);
+	ret |= initialize_graphs(&structure_fcc);
+	ret |= initialize_graphs(&structure_hcp);
+	ret |= initialize_graphs(&structure_ico);
+	ret |= initialize_graphs(&structure_bcc);
+	return ret;
 }
 
 static void check_graphs(	refdata_t* s,
@@ -184,7 +188,7 @@ static void check_graphs(	refdata_t* s,
 
 static int match_general(refdata_t* s, double (*ch_points)[3], double* points, convexhull_t* ch, result_t* res)
 {
-	int8_t degree[MAX_NBRS];
+	int8_t degree[PTM_MAX_NBRS];
 	int8_t facets[MAX_FACETS][3];
 	int ret = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, s->num_facets, ch, facets);
 	ch->ok = ret == 0;
@@ -193,22 +197,26 @@ static int match_general(refdata_t* s, double (*ch_points)[3], double* points, c
 	printf("s->type: %d\tret: %d\n", s->type, ret);
 #endif
 	if (ret != 0)
-		return ret;
+		return PTM_NO_ERROR;
 
 	int max_degree = graph_degree(s->num_facets, facets, s->num_nbrs, degree);
 	if (max_degree > s->max_degree)
-		return -7;
+		return PTM_NO_ERROR;
 
 	if (s->type == PTM_MATCH_SC)
 		for (int i = 0;i<s->num_nbrs;i++)
 			if (degree[i] != 4)
-				return -8;
+				return PTM_NO_ERROR;
 
 	double normalized[MAX_POINTS][3];
 	subtract_barycentre(s->num_nbrs + 1, points, normalized);
 
 	int8_t canonical_labelling[MAX_POINTS];
-	uint64_t hash = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling);
+	uint64_t hash = 0;
+	ret = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling, &hash);
+	if (ret != PTM_NO_ERROR)
+		return ret;
+
 #ifdef DEBUG
 	printf("hash: %lx\n", hash);
 	printf("degree:\t");
@@ -217,7 +225,7 @@ static int match_general(refdata_t* s, double (*ch_points)[3], double* points, c
 	printf("\n");
 #endif
 	check_graphs(s, hash, canonical_labelling, normalized, res);
-	return 0;
+	return PTM_NO_ERROR;
 }
 
 static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t flags, convexhull_t* ch, result_t* res)
@@ -226,7 +234,7 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	int num_facets = structure_fcc.num_facets;
 	int max_degree = structure_fcc.max_degree;
 
-	int8_t degree[MAX_NBRS];
+	int8_t degree[PTM_MAX_NBRS];
 	int8_t facets[MAX_FACETS][3];
 	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, num_facets, ch, facets);
 	ch->ok = ret == 0;
@@ -235,17 +243,21 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	printf("s->type: %d\tret: %d\n", 2, ret);
 #endif
 	if (ret != 0)
-		return ret;
+		return PTM_NO_ERROR;
 
 	int _max_degree = graph_degree(num_facets, facets, num_nbrs, degree);
 	if (_max_degree > max_degree)
-		return -9;
+		return PTM_NO_ERROR;
 
 	double normalized[MAX_POINTS][3];
 	subtract_barycentre(num_nbrs + 1, points, normalized);
 
 	int8_t canonical_labelling[MAX_POINTS];
-	uint64_t hash = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling);
+	uint64_t hash = 0;
+	ret = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling, &hash);
+	if (ret != PTM_NO_ERROR)
+		return ret;
+
 #ifdef DEBUG
 	printf("hash: %lx\n", hash);
 	printf("degree:\t");
@@ -256,7 +268,7 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	if (flags & PTM_CHECK_FCC)	check_graphs(&structure_fcc, hash, canonical_labelling, normalized, res);
 	if (flags & PTM_CHECK_HCP)	check_graphs(&structure_hcp, hash, canonical_labelling, normalized, res);
 	if (flags & PTM_CHECK_ICO)	check_graphs(&structure_ico, hash, canonical_labelling, normalized, res);
-	return 0;
+	return PTM_NO_ERROR;
 }
 
 static double calculate_lattice_constant(int type, double scale)
@@ -324,9 +336,15 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 	if (p_alloy_type != NULL)
 		*p_alloy_type = PTM_ALLOY_NONE;
 
+	if (mapping != NULL)
+		memset(mapping, -1, num_points * sizeof(int8_t));
+
+
 	if (flags & PTM_CHECK_SC)
 	{
 		ret = match_general(&structure_sc, ch_points, (double*)points, &ch, &res);
+		//if (ret != PTM_NO_ERROR)
+		//	return ret;
 #ifdef DEBUG
 		printf("match sc  ret: %d\t%p\n", ret, res.ref_struct);
 #endif
@@ -335,6 +353,8 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
 	{
 		ret = match_fcc_hcp_ico(ch_points, (double*)points, flags, &ch, &res);
+		//if (ret != PTM_NO_ERROR)
+		//	return ret;
 #ifdef DEBUG
 		printf("match fcc ret: %d\t%p\n", ret, res.ref_struct);
 #endif
@@ -343,6 +363,8 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 	if (flags & PTM_CHECK_BCC)
 	{
 		ret = match_general(&structure_bcc, ch_points, (double*)points, &ch, &res);
+		//if (ret != PTM_NO_ERROR)
+		//	return ret;
 #ifdef DEBUG
 		printf("match bcc ret: %d\t%p\n", ret, res.ref_struct);
 #endif

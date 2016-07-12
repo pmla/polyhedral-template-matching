@@ -1,7 +1,8 @@
 #include <string.h>
-#include <cassert>
+//#include <cassert>
 #include <cstdint>
 #include <cstdbool>
+#include "index_ptm.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -9,7 +10,7 @@
 #define MAXV 14
 #define MAXE 36
 
-static void build_facet_map(int num_facets, int8_t facets[][3], int8_t common[MAXV][MAXV])
+static bool build_facet_map(int num_facets, int8_t facets[][3], int8_t common[MAXV][MAXV])
 {
 	memset(common, -1, sizeof(int8_t) * MAXV * MAXV);
 
@@ -19,14 +20,18 @@ static void build_facet_map(int num_facets, int8_t facets[][3], int8_t common[MA
 		int b = facets[i][1];
 		int c = facets[i][2];
 
-		assert(common[a][b] == -1);
-		assert(common[b][c] == -1);
-		assert(common[c][a] == -1);
+		//assert(common[a][b] == -1);
+		//assert(common[b][c] == -1);
+		//assert(common[c][a] == -1);
+		if (common[a][b] != -1 || common[b][c] != -1 || common[c][a] != -1)
+			return false;
 
 		common[a][b] = c;
 		common[b][c] = a;
 		common[c][a] = b;
 	}
+
+	return true;
 }
 
 static bool weinberg(int num_nodes, int num_edges, int8_t common[MAXV][MAXV], int8_t* best_code, int8_t* canonical_labelling, int prev, int cur)
@@ -83,11 +88,12 @@ static bool weinberg(int num_nodes, int num_edges, int8_t common[MAXV][MAXV], in
 	return false;
 }
 
-uint64_t canonical_form(int num_facets, int8_t facets[][3], int num_nodes, int8_t* degree, int8_t* canonical_labelling)
+int canonical_form(int num_facets, int8_t facets[][3], int num_nodes, int8_t* degree, int8_t* canonical_labelling, uint64_t* p_hash)
 {
 	int8_t common[MAXV][MAXV] = {{0}};
 	int num_edges = 3 * num_facets / 2;
-	build_facet_map(num_facets, facets, common);
+	if (!build_facet_map(num_facets, facets, common))
+		return -1;
 
 	int8_t best_code[2 * MAXE] = {0};
 	memset(best_code, 126, sizeof(int8_t) * 2 * num_edges);
@@ -155,6 +161,7 @@ uint64_t canonical_form(int num_facets, int8_t facets[][3], int num_nodes, int8_
 		hash ^= e;
 	}
 
-	return hash;
+	*p_hash = hash;
+	return PTM_NO_ERROR;
 }
 

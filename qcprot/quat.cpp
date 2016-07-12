@@ -281,27 +281,57 @@ double quat_misorientation(double* q1, double* q2)
 	return acos(quat_quick_misorientation(q1, q2));
 }
 
-void quat_map_cubic(double* r, int i, double* b)
+
+double quat_quick_disorientation_cubic(double* q0, double* q1)
 {
-	quat_rot(r, generator_cubic[i], b);
+	double qrot[4];
+	double qinv[4] = {q0[0], -q0[1], -q0[2], -q0[3]};
+	quat_rot(qinv, q1, qrot);
+
+	rotate_quaternion_into_cubic_fundamental_zone(qrot);
+	double t = qrot[0];
+	t = MIN(1, MAX(-1, t));
+	return 2 * t * t - 1;
 }
 
-double quat_quick_disorientation(double* q0, double* q1)
+double quat_disorientation_cubic(double* q0, double* q1)
 {
-	double dmax = -DBL_MAX;
-	int i = 0;
-	for (i=0;i<24;i++)
-	{
-		double f[4];
-		quat_map_cubic(q0, i, f);
-		dmax = MAX(dmax, quat_quick_misorientation(f, q1));
-	}
-
-	return MAX(MIN(dmax, 1.0), -1.0);
+	return acos(quat_quick_disorientation_cubic(q0, q1));
 }
 
-double quat_disorientation(double* q0, double* q1)
+
+double quat_quick_disorientation_hcp(double* q0, double* q1)
 {
-	return acos(quat_quick_disorientation(q0, q1));
+	double qrot[4];
+	double qinv[4] = {q0[0], -q0[1], -q0[2], -q0[3]};
+	quat_rot(qinv, q1, qrot);
+
+	rotate_quaternion_into_hcp_fundamental_zone(qrot);
+	double t = qrot[0];
+	t = MIN(1, MAX(-1, t));
+	return 2 * t * t - 1;
+}
+
+double quat_disorientation_hcp(double* q0, double* q1)
+{
+	return acos(quat_quick_disorientation_hcp(q0, q1));
+}
+
+
+double quat_quick_disorientation_icosahedral(double* q0, double* q1)
+{
+	double qrot[4];
+	double qinv[4] = {q0[0], -q0[1], -q0[2], -q0[3]};
+	quat_rot(qinv, q1, qrot);
+
+	rotate_quaternion_into_icosahedral_fundamental_zone(qrot);
+	double t = qrot[0];
+	t = MIN(1, MAX(-1, t));
+	return 2 * t * t - 1;
+}
+
+double quat_disorientation_icosahedral(double* q0, double* q1)
+{
+	return acos(quat_quick_disorientation_icosahedral(q0, q1));
 }
 
