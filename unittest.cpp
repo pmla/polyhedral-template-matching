@@ -521,6 +521,7 @@ exit(3);*/
 
 
 			structdata_t* s = &structdata[it];
+			double scaled_only[15][3] = {0};
 			double points[15][3];
 			memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
 
@@ -539,7 +540,12 @@ exit(3);*/
 			double offset[3] = {12.0, 45.6, 789.10};
 			for (int i = 0;i<s->num_points;i++)
 				for (int j = 0;j<3;j++)
+					scaled_only[i][j] = points[i][j] * rescale;
+
+			for (int i = 0;i<s->num_points;i++)
+				for (int j = 0;j<3;j++)
 					points[i][j] = points[i][j] * rescale + offset[j];
+
 
 			int tocheck = 0;
 			for (int i = 0;i<it+1;i++)
@@ -556,9 +562,9 @@ exit(3);*/
 					int8_t mapping[15];
 					bool topological = itop == 1;
 					int32_t type, alloy_type;
-					double scale, rmsd, lattice_constant;
+					double scale, rmsd, interatomic_distance, lattice_constant;
 					double q[4], F[9], F_res[3], U[9], P[9];
-					ret = ptm_index(local_handle, s->num_points, points[0], numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &lattice_constant);
+					ret = ptm_index(local_handle, s->num_points, points[0], numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
 					if (ret != PTM_NO_ERROR)
 						CLEANUP("indexing failed", ret);
 
@@ -576,6 +582,7 @@ exit(3);*/
 					printf("P:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8]);
 					printf("F:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8]);
 					//printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0] - U[0], rot[1] - U[1], rot[2] - U[2], rot[3] - U[3], rot[4] - U[4], rot[5] - U[5], rot[6] - U[6], rot[7] - U[7], rot[8] - U[8]);
+					printf("interatomic distance:\t\t%f\n", interatomic_distance);
 #endif
 
 					//check type
@@ -631,6 +638,13 @@ exit(3);*/
 							CLEANUP("failed on deformation gradient disorientation", -1);
 
 						quaternion_to_rotation_matrix(q, A);
+
+						double x = scaled_only[1][0];
+						double y = scaled_only[1][1];
+						double z = scaled_only[1][2];
+						double iad = sqrt(x*x + y*y + z*z);
+						if (fabs(iad - interatomic_distance) > tolerance)
+							CLEANUP("failed on interatomic distance", -1);
 					}
 					else
 					{
@@ -664,8 +678,8 @@ exit(3);*/
 			structdata_t* s = &structdata[lcdat[i]];
 
 			int32_t type;
-			double scale, rmsd, lattice_constant, q[4];
-			ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &lattice_constant);
+			double scale, rmsd, interatomic_distance, lattice_constant, q[4];
+			ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &interatomic_distance, &lattice_constant);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 
@@ -674,6 +688,13 @@ exit(3);*/
 
 			if (fabs(lattice_constant - 2) > tolerance)
 				CLEANUP("failed on lattice constant", -1);
+
+			double x = pdata[i][3 * 1 + 0];
+			double y = pdata[i][3 * 1 + 1];
+			double z = pdata[i][3 * 1 + 2];
+			double iad = sqrt(x*x + y*y + z*z);
+			if (fabs(iad - interatomic_distance) > tolerance)
+				CLEANUP("failed on interatomic distance", -1);
 
 			num_tests++;
 		}

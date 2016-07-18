@@ -279,15 +279,29 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 	return PTM_NO_ERROR;
 }
 
-static double calculate_lattice_constant(int type, double scale)
+/*static double calculate_lattice_constant(int type, double scale)
 {
 	assert(type >= 1 && type <= 5);
 	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 14. / sqrt(3) - 7};
 	return c[type] / scale;
+}*/
+
+static double calculate_lattice_constant(int type, double interatomic_distance)
+{
+	assert(type >= 1 && type <= 5);
+	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 2. / sqrt(3)};
+	return c[type] * interatomic_distance;
+}
+
+static double calculate_interatomic_distance(int type, double scale)
+{
+	assert(type >= 1 && type <= 5);
+	double c[6] = {0, 1, 1, 1, 1, (7. - 3.5 * sqrt(3))};
+	return c[type] / scale;
 }
 
 int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermuted_points, int32_t* unpermuted_numbers, int32_t flags, bool topological_ordering,
-		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, int8_t* mapping, double* p_lattice_constant)
+		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, int8_t* mapping, double* p_interatomic_distance, double* p_lattice_constant)
 {
 	if (flags & PTM_CHECK_SC)
 		assert(num_points >= structure_sc.num_nbrs + 1);
@@ -423,8 +437,14 @@ int ptm_index(	ptm_local_handle_t local_handle, int num_points, double* unpermut
 			for (int i=0;i<ref->num_nbrs + 1;i++)
 				mapping[i] = ordering[res.mapping[i]];
 
+		double interatomic_distance = calculate_interatomic_distance(ref->type, res.scale);
+		double lattice_constant = calculate_lattice_constant(ref->type, interatomic_distance);
+
+		if (p_interatomic_distance != NULL)
+			*p_interatomic_distance = interatomic_distance;
+
 		if (p_lattice_constant != NULL)
-			*p_lattice_constant = calculate_lattice_constant(ref->type, res.scale);
+			*p_lattice_constant = lattice_constant;
 	}
 
 	*p_rmsd = res.rmsd;

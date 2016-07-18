@@ -110,9 +110,9 @@ int main()
 
 		int8_t mapping[_MAX_NBRS];
 		int32_t type, alloy_type;
-		double scale, rmsd, lattice_constant;
+		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
-		ptm_index(local_handle, max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &lattice_constant);
+		ptm_index(local_handle, max_nbrs + 1, nbr[0], NULL, PTM_CHECK_ALL, topological_ordering, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
 
 		types[i] = type;
 		rmsds[i] = rmsd;
