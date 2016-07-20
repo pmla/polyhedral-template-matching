@@ -282,21 +282,21 @@ static int match_fcc_hcp_ico(double (*ch_points)[3], double* points, int32_t fla
 /*static double calculate_lattice_constant(int type, double scale)
 {
 	assert(type >= 1 && type <= 5);
-	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 14. / sqrt(3) - 7};
+	double c[6] = {0, 2 / sqrt(2), 2 / sqrt(2), 14. / sqrt(3) - 7, 2 / sqrt(2), 1};
 	return c[type] / scale;
 }*/
 
 static double calculate_lattice_constant(int type, double interatomic_distance)
 {
 	assert(type >= 1 && type <= 5);
-	double c[6] = {0, 1, 2 / sqrt(2), 2 / sqrt(2), 2 / sqrt(2), 2. / sqrt(3)};
+	double c[6] = {0, 2 / sqrt(2), 2 / sqrt(2), 2. / sqrt(3), 2 / sqrt(2), 1};
 	return c[type] * interatomic_distance;
 }
 
 static double calculate_interatomic_distance(int type, double scale)
 {
 	assert(type >= 1 && type <= 5);
-	double c[6] = {0, 1, 1, 1, 1, (7. - 3.5 * sqrt(3))};
+	double c[6] = {0, 1, 1, (7. - 3.5 * sqrt(3)), 1, 1};
 	return c[type] / scale;
 }
 

@@ -53,11 +53,11 @@ typedef struct
 } structdata_t;
 
 //                              { .type = PTM_MATCH_SC,  .check = PTM_CHECK_SC,  .num_points =  7, .points = ptm_template_sc },
-structdata_t structdata[5] =  {	{ PTM_MATCH_SC,  PTM_CHECK_SC,   7, ptm_template_sc },
-				{ PTM_MATCH_FCC, PTM_CHECK_FCC, 13, ptm_template_fcc},
+structdata_t structdata[5] =  {	{ PTM_MATCH_FCC, PTM_CHECK_FCC, 13, ptm_template_fcc},
 				{ PTM_MATCH_HCP, PTM_CHECK_HCP, 13, ptm_template_hcp},
+				{ PTM_MATCH_BCC, PTM_CHECK_BCC, 15, ptm_template_bcc},
 				{ PTM_MATCH_ICO, PTM_CHECK_ICO, 13, ptm_template_ico},
-				{ PTM_MATCH_BCC, PTM_CHECK_BCC, 15, ptm_template_bcc}};
+				{ PTM_MATCH_SC,  PTM_CHECK_SC,   7, ptm_template_sc } };
 
 typedef struct
 {
@@ -380,27 +380,27 @@ uint64_t run_tests()
 	double identity_matrix[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 	int num_structures = sizeof(structdata) / sizeof(structdata_t);
 
-	int num_alloy_tests[] = {	sizeof(sc_alloy_tests) / sizeof(alloytest_t),
-					sizeof(fcc_alloy_tests) / sizeof(alloytest_t),
+	int num_alloy_tests[] = {	sizeof(fcc_alloy_tests) / sizeof(alloytest_t),
 					sizeof(hcp_alloy_tests) / sizeof(alloytest_t),
+					sizeof(bcc_alloy_tests) / sizeof(alloytest_t),
 					sizeof(ico_alloy_tests) / sizeof(alloytest_t),
-					sizeof(bcc_alloy_tests) / sizeof(alloytest_t)	};
+					sizeof(sc_alloy_tests) / sizeof(alloytest_t)	};
 
-	alloytest_t* alloy_test[] = {	sc_alloy_tests,
-					fcc_alloy_tests,
+	alloytest_t* alloy_test[] = {	fcc_alloy_tests,
 					hcp_alloy_tests,
+					bcc_alloy_tests,
 					ico_alloy_tests,
-					bcc_alloy_tests	};
+					sc_alloy_tests	};
 
 	int num_quat_tests[] = {	sizeof(cubic_qtest) / sizeof(quattest_t),
-					sizeof(cubic_qtest) / sizeof(quattest_t),
 					sizeof(hcp_qtest) / sizeof(quattest_t),
+					sizeof(cubic_qtest) / sizeof(quattest_t),
 					sizeof(ico_qtest) / sizeof(quattest_t),
 					sizeof(cubic_qtest) / sizeof(quattest_t)	};
 
 	quattest_t* quat_test[] = {	cubic_qtest,
-					cubic_qtest,
 					hcp_qtest,
+					cubic_qtest,
 					ico_qtest,
 					cubic_qtest	};
 	int num_tests = 0;
@@ -549,7 +549,8 @@ exit(3);*/
 
 			int tocheck = 0;
 			for (int i = 0;i<it+1;i++)
-				tocheck |= structdata[i].check;
+				if (structdata[i].num_points <= structdata[it].num_points)
+					tocheck |= structdata[i].check;
 
 			for (int ia=0;ia<num_alloy_tests[it];ia++)
 			{
@@ -670,9 +671,9 @@ exit(3);*/
 		double lc_points_sc[7][3] = {{0,0,0},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
 		double lc_points_fcc[13][3] = {{0,0,0},{0,1,1},{0,-1,-1},{0,1,-1},{0,-1,1},{1,0,1},{-1,0,-1},{1,0,-1},{-1,0,1},{1,1,0},{-1,-1,0},{1,-1,0},{-1,1,0}};
 		double lc_points_bcc[15][3] = {{0,0,0},{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
-		double* pdata[3] = {lc_points_sc[0], lc_points_fcc[0], lc_points_bcc[0]};
+		double* pdata[3] = {lc_points_fcc[0], lc_points_bcc[0], lc_points_sc[0]};
 
-		int lcdat[3] = {0, 1, 4};
+		int lcdat[3] = {0, 2, 4};
 		for (int i=0;i<3;i++)
 		{
 			structdata_t* s = &structdata[lcdat[i]];
