@@ -1,6 +1,10 @@
 # polyhedral-template-matching
 Polyhedral Template Matching algorithm for analysis of molecular dynamics simulation data
 
+The method is now included in OVITO and ASAP.
+OVITO PTM documentation: http://www.ovito.org/manual/particles.modifiers.polyhedral_template_matching.html
+ASAP PTM documentation: http://wiki.fysik.dtu.dk/asap/Local%20crystalline%20order
+
 
 If you use PTM in a publication, please reference:
 
