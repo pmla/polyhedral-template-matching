@@ -32,13 +32,11 @@ done:
 #include <cmath>
 #include <cstdint>
 #include <cstdbool>
-#include "index_ptm.h"
+#include <algorithm>
 #include "normalize_vertices.hpp"
 #include "qcprot/quat.hpp"
+#include "ptm_functions.h"
 
-
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 #define RADIANS(x) (2.0 * M_PI * (x) / 360.0)
 #define DEGREES(x) (360 * (x) / (2.0 * M_PI))
@@ -325,7 +323,7 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 			double dy = y1 - y0;
 			double dz = z1 - z0;
 			double dist = dx*dx + dy*dy + dz*dz;
-			min_dist = MIN(min_dist, dist);
+			min_dist = std::min(min_dist, dist);
 		}
 
 		acc += min_dist;

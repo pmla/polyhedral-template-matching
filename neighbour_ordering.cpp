@@ -3,11 +3,10 @@
 #include <cstring>
 #include <cassert>
 #include <algorithm>
+#include "ptm_constants.h"
 #include "voronoi/cell.hpp"
 using namespace voro;
-using namespace std;
 
-#define MAX_POINTS 19
 
 
 typedef struct
@@ -32,9 +31,9 @@ static bool sorthelper_compare(sorthelper_t const& a, sorthelper_t const& b)
 }
 
 //todo: change voronoi code to return errors rather than exiting
-static int calculate_voronoi_face_areas(int num_points, const double (*_points)[3], double* normsq, double max_norm, voronoicell_neighbor* v, vector<int>& nbr_indices, vector<double>& face_areas)
+static int calculate_voronoi_face_areas(int num_points, const double (*_points)[3], double* normsq, double max_norm, voronoicell_neighbor* v, std::vector<int>& nbr_indices, std::vector<double>& face_areas)
 {
-	const double k = 1000 * max_norm;
+	const double k = 1000 * max_norm;	//todo: reduce this constant
 	v->init(-k,k,-k,k,-k,k);
 
 	for (int i=1;i<num_points;i++)
@@ -52,13 +51,13 @@ static int calculate_voronoi_face_areas(int num_points, const double (*_points)[
 
 int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const double (*_points)[3], int8_t* ordering)
 {
-	assert(num_points <= MAX_POINTS);
+	assert(num_points <= PTM_MAX_INPUT_POINTS);
 
 	voronoicell_neighbor* voronoi_handle = (voronoicell_neighbor*)_voronoi_handle;
 
 	double max_norm = 0;
-	double points[MAX_POINTS][3];
-	double normsq[MAX_POINTS];
+	double points[PTM_MAX_INPUT_POINTS][3];
+	double normsq[PTM_MAX_INPUT_POINTS];
 	for (int i = 0;i<num_points;i++)
 	{
 		double x = _points[i][0] - _points[0][0];
@@ -69,7 +68,7 @@ int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const do
 		points[i][2] = z;
 
 		normsq[i] = x*x + y*y + z*z;
-		max_norm = max(max_norm, normsq[i]);
+		max_norm = std::max(max_norm, normsq[i]);
 #ifdef DEBUG
 		printf("point %d: %f\t%f\t%f\t%f\n", i, x, y, z, x*x + y*y + z*z);
 #endif
@@ -77,13 +76,13 @@ int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const do
 
 	max_norm = sqrt(max_norm);
 
-	vector<int> nbr_indices(num_points+6);
-	vector<double> face_areas(num_points+6);
+	std::vector<int> nbr_indices(num_points + 6);
+	std::vector<double> face_areas(num_points + 6);
 	int ret = calculate_voronoi_face_areas(num_points, points, normsq, max_norm, voronoi_handle, nbr_indices, face_areas);
 	if (ret != 0)
 		return ret;
 
-	double areas[MAX_POINTS];
+	double areas[PTM_MAX_INPUT_POINTS];
 	memset(areas, 0, num_points * sizeof(double));
 	areas[0] = INFINITY;
 	for (size_t i=0;i<nbr_indices.size();i++)
@@ -93,7 +92,7 @@ int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const do
 			areas[index] = face_areas[i];
 	}
 
-	sorthelper_t data[MAX_POINTS];
+	sorthelper_t data[PTM_MAX_INPUT_POINTS];
 	for (int i=0;i<num_points;i++)
 	{
 		assert(areas[i] == areas[i]);
@@ -102,7 +101,6 @@ int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const do
 		data[i].index = i;
 	}
 
-	//qsort(data, num_points, sizeof(sorthelper_t), sorthelper_compare);
 	std::sort(data, data + num_points, &sorthelper_compare);
 
 #ifdef DEBUG

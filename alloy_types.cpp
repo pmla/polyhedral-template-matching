@@ -1,9 +1,11 @@
-#include "index_ptm.h"
+#include <cstdint>
+#include "ptm_constants.h"
+
 
 int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 {
-	int len = 13;
-	int8_t temp[13];
+	int len = PTM_NUM_POINTS_FCC;
+	int8_t temp[PTM_NUM_POINTS_FCC];
 
 	int num_cu = 1, cu = numbers[0];
 	for (int i=1;i<len;i++)
@@ -69,8 +71,8 @@ int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 
 int32_t find_bcc_alloy_type(int8_t* mapping, int32_t* numbers)
 {
-	int len = 15;
-	int8_t temp[15];
+	int len = PTM_NUM_POINTS_BCC;
+	int8_t temp[PTM_NUM_POINTS_BCC];
 
 	int num_cu = 1, cu = numbers[0];
 	for (int i=1;i<len;i++)
@@ -99,8 +101,7 @@ int32_t find_bcc_alloy_type(int8_t* mapping, int32_t* numbers)
 		}
 	}
 
-
-	for (int i=8;i<14;i++)
+	for (int i=8;i<len-1;i++)
 		if (temp[i] == cu)
 			num_cu_outer++;
 

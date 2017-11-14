@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <string.h>
 #include <cassert>
-#include "index_ptm.h"
+#include "ptm_functions.h"
 #include "unittest.hpp"
 
 #define _MAX_NBRS 24
@@ -102,7 +102,6 @@ int main()
 
 	bool topological_ordering = true;
 	double rmsd_sum = 0.0;
-	for (int j=0;j<10;j++)
 	for (int i=0;i<num_atoms;i++)
 	{
 		double nbr[max_nbrs+1][3];

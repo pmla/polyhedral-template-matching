@@ -1,18 +1,15 @@
 #include <string.h>
-//#include <cassert>
 #include <cstdint>
 #include <cstdbool>
-#include "index_ptm.h"
+#include <algorithm>
+#include "ptm_constants.h"
 
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
-#define MAXV 14
-#define MAXE 36
+#define MAXE (3 * PTM_MAX_NBRS - 6)
 
-static bool build_facet_map(int num_facets, int8_t facets[][3], int8_t common[MAXV][MAXV])
+static bool build_facet_map(int num_facets, int8_t facets[][3], int8_t common[PTM_MAX_NBRS][PTM_MAX_NBRS])
 {
-	memset(common, -1, sizeof(int8_t) * MAXV * MAXV);
+	memset(common, -1, sizeof(int8_t) * PTM_MAX_NBRS * PTM_MAX_NBRS);
 
 	for (int i = 0;i<num_facets;i++)
 	{
@@ -34,13 +31,13 @@ static bool build_facet_map(int num_facets, int8_t facets[][3], int8_t common[MA
 	return true;
 }
 
-static bool weinberg(int num_nodes, int num_edges, int8_t common[MAXV][MAXV], int8_t* best_code, int8_t* canonical_labelling, int prev, int cur)
+static bool weinberg(int num_nodes, int num_edges, int8_t common[PTM_MAX_NBRS][PTM_MAX_NBRS], int8_t* best_code, int8_t* canonical_labelling, int prev, int cur)
 {
-	bool m[MAXV][MAXV];
-	memset(m, 0, sizeof(bool) * MAXV * MAXV);
+	bool m[PTM_MAX_NBRS][PTM_MAX_NBRS];
+	memset(m, 0, sizeof(bool) * PTM_MAX_NBRS * PTM_MAX_NBRS);
 
-	int8_t index[MAXV];
-	memset(index, -1, sizeof(int8_t) * MAXV);
+	int8_t index[PTM_MAX_NBRS];
+	memset(index, -1, sizeof(int8_t) * PTM_MAX_NBRS);
 	index[prev] = 0;
 	int n = 1;
 
@@ -90,7 +87,7 @@ static bool weinberg(int num_nodes, int num_edges, int8_t common[MAXV][MAXV], in
 
 int canonical_form(int num_facets, int8_t facets[][3], int num_nodes, int8_t* degree, int8_t* canonical_labelling, uint64_t* p_hash)
 {
-	int8_t common[MAXV][MAXV] = {{0}};
+	int8_t common[PTM_MAX_NBRS][PTM_MAX_NBRS] = {{0}};
 	int num_edges = 3 * num_facets / 2;
 	if (!build_facet_map(num_facets, facets, common))
 		return -1;
@@ -121,9 +118,9 @@ int canonical_form(int num_facets, int8_t facets[][3], int num_nodes, int8_t* de
 			int db = degree[b];
 			int dc = degree[c];
 
-			best_degree = MAX(best_degree, ((uint32_t)da << 16) | ((uint32_t)db << 8) | ((uint32_t)dc << 0));
-			best_degree = MAX(best_degree, ((uint32_t)da << 0) | ((uint32_t)db << 16) | ((uint32_t)dc << 8));
-			best_degree = MAX(best_degree, ((uint32_t)da << 8) | ((uint32_t)db << 0) | ((uint32_t)dc << 16));
+			best_degree = std::max(best_degree, ((uint32_t)da << 16) | ((uint32_t)db << 8) | ((uint32_t)dc << 0));
+			best_degree = std::max(best_degree, ((uint32_t)da << 0) | ((uint32_t)db << 16) | ((uint32_t)dc << 8));
+			best_degree = std::max(best_degree, ((uint32_t)da << 8) | ((uint32_t)db << 0) | ((uint32_t)dc << 16));
 		}
 
 		for (int i = 0;i<num_facets;i++)
@@ -163,5 +160,27 @@ int canonical_form(int num_facets, int8_t facets[][3], int num_nodes, int8_t* de
 
 	*p_hash = hash;
 	return PTM_NO_ERROR;
+}
+
+int graph_degree(int num_facets, int8_t facets[][3], int num_nodes, int8_t* degree)
+{
+	memset(degree, 0, sizeof(int8_t) * num_nodes);
+
+	for (int i = 0;i<num_facets;i++)
+	{
+		int a = facets[i][0];
+		int b = facets[i][1];
+		int c = facets[i][2];
+
+		degree[a]++;
+		degree[b]++;
+		degree[c]++;
+	}
+
+	int8_t max_degree = 0;
+	for (int i = 0;i<num_nodes;i++)
+		max_degree = std::max(max_degree, degree[i]);
+
+	return max_degree;
 }
 

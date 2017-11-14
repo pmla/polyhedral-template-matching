@@ -12,6 +12,7 @@ CPP_FILES = main.cpp canonical.cpp graph_data.cpp convex_hull_incremental.cpp \
 	normalize_vertices.cpp \
 	polar_decomposition.cpp \
 	qcprot/qcprot.cpp qcprot/quat.cpp unittest.cpp\
+	initialize_data.cpp \
 	neighbour_ordering.cpp voronoi/cell.cpp
 
 #COBJS := $(patsubst %.c, %.o, $(C_FILES))
@@ -28,6 +29,7 @@ HEADER_FILES = alloy_types.hpp canonical.hpp convex_hull_incremental.hpp \
 	fundamental_mappings.hpp \
 	polar_decomposition.hpp \
 	qcprot/qcprot.hpp qcprot/quat.hpp \
+	initialize_data.hpp \
 	neighbour_ordering.hpp \
 	voronoi/cell.hpp
 

@@ -4,11 +4,10 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdbool>
+#include <algorithm>
 #include "convex_hull_incremental.hpp"
+#include "ptm_constants.h"
 
-
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 #define VISIBLE 1
 #define INVISIBLE 2
@@ -217,7 +216,7 @@ void add_facet(const double (*points)[3], int a, int b, int c, int8_t* facet, do
 
 static int initialize_convex_hull(int num_points, const double (*points)[3], int8_t facets[][3], double plane_normal[][3], bool* processed, int* initial_vertices, double* barycentre)
 {
-	memset(processed, 0, 15 * sizeof(bool));
+	memset(processed, 0, PTM_MAX_POINTS * sizeof(bool));
 	memset(barycentre, 0, 3 * sizeof(double));
 	int ret = initial_simplex(num_points, points, initial_vertices);
 	if (ret != 0)
@@ -245,7 +244,11 @@ static int initialize_convex_hull(int num_points, const double (*points)[3], int
 
 int get_convex_hull(int num_points, const double (*points)[3], int num_expected_facets, convexhull_t* ch, int8_t simplex[][3])
 {
-	assert(num_points == 7 || num_points == 13 || num_points == 15);
+	assert(	num_points == PTM_NUM_POINTS_FCC
+		|| num_points == PTM_NUM_POINTS_HCP
+		|| num_points == PTM_NUM_POINTS_BCC
+		|| num_points == PTM_NUM_POINTS_ICO
+		|| num_points == PTM_NUM_POINTS_SC);
 
 	int ret = 0;
 	int num_prev = ch->num_prev;
@@ -268,8 +271,8 @@ int get_convex_hull(int num_points, const double (*points)[3], int num_expected_
 
 		int num_to_add = 0;
 		int8_t to_add[MAXF][3];
-		int8_t edge_visible[15][15];
-		memset(edge_visible, 0, sizeof(int8_t) * 15 * 15);
+		int8_t edge_visible[PTM_MAX_POINTS][PTM_MAX_POINTS];
+		memset(edge_visible, 0, sizeof(int8_t) * PTM_MAX_POINTS * PTM_MAX_POINTS);
 		for (int j = 0;j<ch->num_facets;j++)
 		{
 			int a = ch->facets[j][0];

@@ -4,13 +4,16 @@
 
 #include <cstdint>
 #include <cstdbool>
+#include "ptm_constants.h"
 
-#define MAXF 24
+
+#define MAXF (2 * PTM_MAX_NBRS - 4)
+
 typedef struct
 {
 	int8_t facets[MAXF][3];
 	double plane_normal[MAXF][3];
-	bool processed[15];
+	bool processed[PTM_MAX_POINTS];
 	int initial_vertices[4];
 	double barycentre[3];
 	int num_facets;
