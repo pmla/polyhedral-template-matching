@@ -13,9 +13,8 @@
 #include "alloy_types.hpp"
 #include "neighbour_ordering.hpp"
 #include "normalize_vertices.hpp"
-#include "qcprot/qcprot.hpp"
 #include "qcprot/quat.hpp"
-#include "polar_decomposition.hpp"
+#include "qcprot/polar.hpp"
 #include "initialize_data.hpp"
 #include "ptm_functions.h"
 #include "ptm_constants.h"
@@ -38,13 +37,14 @@ extern refdata_t structure_ico;
 extern refdata_t structure_bcc;
 
 
-static double calc_rmsd(int num_points, const double (*ideal_points)[3], double (*normalized)[3], int8_t* mapping, double G1, double G2, double E0, double* q, double* p_scale)
+static double calc_rmsd(int num_points, const double (*ideal_points)[3], double (*normalized)[3], int8_t* mapping,
+			double G1, double G2, double E0, double* q, double* p_scale)
 {
 	double A0[9];
 	InnerProduct(A0, num_points, ideal_points, normalized, mapping);
 
-	double rot[9], _rmsd = -1;
-	FastCalcRMSDAndRotation(q, A0, &_rmsd, E0, num_points, -1, rot);
+	double nrmsdsq, rot[9];
+	FastCalcRMSDAndRotation(A0, E0, &nrmsdsq, q, rot);
 
 	double k0 = 0;
 	for (int i=0;i<num_points;i++)

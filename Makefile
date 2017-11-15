@@ -1,77 +1,66 @@
-CC = gcc
-CPP = g++
+# Generic GNUMakefile
 
-CPP_SRC_FILES = canonical.cpp graph_data.cpp convex_hull_incremental.cpp \
+# Just a snippet to stop executing under other make(1) commands
+# that won't understand these lines
+ifneq (,)
+This makefile requires GNU Make.
+endif
+
+PROGRAM = benchmark
+CPP_FILES = main.cpp canonical.cpp graph_data.cpp convex_hull_incremental.cpp \
 	index_ptm.cpp alloy_types.cpp deformation_gradient.cpp \
 	normalize_vertices.cpp \
-	polar_decomposition.cpp \
-	qcprot/qcprot.cpp qcprot/quat.cpp \
+	qcprot/quat.cpp \
+	qcprot/polar.cpp \
+	unittest.cpp\
+	initialize_data.cpp \
 	neighbour_ordering.cpp voronoi/cell.cpp
 
-C_SRC_MODULE_FILE = ptmmodule.c 
+#COBJS := $(patsubst %.c, %.o, $(C_FILES))
+CPPOBJS := $(patsubst %.cpp, %.o, $(CPP_FILES))
+LDFLAGS =
+LDLIBS = -lm #-fno-omit-frame-pointer -fsanitize=address
+
+#CC = gcc
+CPP = g++
 
 HEADER_FILES = alloy_types.hpp canonical.hpp convex_hull_incremental.hpp \
 	deformation_gradient.hpp graph_data.hpp index_ptm.h \
-	normalize_vertices.hpp reference_templates.hpp \
-	neighbour_ordering.hpp polar_decomposition.hpp \
+	normalize_vertices.hpp \
 	fundamental_mappings.hpp \
-	qcprot/qcprot.hpp qcprot/quat.hpp
+	qcprot/quat.hpp \
+	qcprot/polar.hpp \
+	initialize_data.hpp \
+	neighbour_ordering.hpp \
+	voronoi/cell.hpp
 
 OBJDIR = .
 
-LIBRARY = libptm.a
-
-C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
+#C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
 CPP_OBJECT_FILES = $(CPP_SRC_FILES:%.cpp=$(OBJDIR)/%.o) 
 C_OBJECT_MODULE_FILE = $(C_SRC_MODULE_FILE:%.c=$(OBJDIR)/%.o) 
 
-PYTHONMODULE = ptmmodule.so
+#CFLAGS = -std=c99 -g -O3 -Wall -Wextra
+CPPFLAGS = -g -O3 -std=c++11 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
 
-PYTHON = python
 
-PYTHONVERSION = $(shell $(PYTHON) -c 'import sys; print "{0[0]}.{0[1]}".format(sys.version_info)')
-PYTHONPREFIX = $(shell $(PYTHON) -c 'import sys; print sys.prefix')
-PYTHONEXECPREFIX = $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
-NUMPY_INCLUDE := $(shell $(PYTHON) -c 'import numpy; print numpy.get_include()')/numpy
+all: $(PROGRAM)
 
-PYTHONINCLDIR = $(PYTHONPREFIX)/include/python$(PYTHONVERSION)
-PYTHONLIBDIR = $(PYTHONEXECPREFIX)/lib/python$(PYTHONVERSION)/config
-PYTHONLIB = python$(PYTHONVERSION)
+#$(PROGRAM): $(COBJS) $(CPPOBJS)
+#	$(CC) -c $(CFLAGS) $(COBJS)
+#	$(CPP) -c $(CPPFLAGS) $(CPPOBJS)
+#	$(CPP) $(COBJS) $(CPPOBJS) -o $(PROGRAM) $(LDLIBS) $(LDFLAGS)
 
-CFLAGS = -std=c99 -fPIC -g -O3 -Wall -Wextra -z,defs -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
-CPPFLAGS = -fPIC -g -O3 -std=c++11 -Wall -Wextra -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE)
+$(PROGRAM): $(CPPOBJS)
+	$(CPP) -c $(CPPFLAGS) $(CPPOBJS)
+	$(CPP) $(CPPOBJS) -o $(PROGRAM) $(LDLIBS) $(LDFLAGS)
 
-ifeq ($(shell uname),Darwin)
-MAKESHARED = -bundle -undefined dynamic_lookup
-else
-MAKESHARED = -shared
-endif
+# These are the pattern matching rules. In addition to the automatic
+# variables used here, the variable $* that matches whatever % stands for
+# can be useful in special cases.
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-all: $(OBJDIR) $(OBJDIR)/$(PYTHONMODULE)
-
-lib: $(OBJDIR) $(OBJDIR)/$(LIBRARY)
-
-# Rule for linking module
-$(OBJDIR)/$(PYTHONMODULE): $(C_OBJECT_MODULE_FILE) $(CPP_OBJECT_MODULE_FILE) $(OBJDIR)/$(LIBRARY)
-	$(CPP) $(MAKESHARED) -fPIC -g -O2 -o $@ $^ -L$(PYTHONLIBDIR) -l$(PYTHONLIB) -lm
-
-$(OBJDIR)/$(LIBRARY): $(C_OBJECT_FILES) $(CPP_OBJECT_FILES)
-	rm -f $@
-	ar -r -s $@ $^
-
-$(OBJDIR):
-	mkdir $(OBJDIR)
-
-# Rule for compiling C source
-$(OBJDIR)/%.o: %.cpp  $(HEADER_FILES)
-	$(CPP) -c $(CPPFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
-
-$(OBJDIR)/%.o: %.c  $(HEADER_FILES)
-	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ -I$(PYTHONINCLDIR) -I$(NUMPY_INCLUDE) $<
-
-clean:
-	rm -f $(OBJDIR)/*.o $(OBJDIR)/ptmmodule.so
-
-cleanall: clean
-	rm -rf build
+%: %.c
+	$(CC) $(CFLAGS) -o $@ $<
 
