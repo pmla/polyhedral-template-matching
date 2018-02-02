@@ -10,6 +10,7 @@ PROGRAM = benchmark
 CPP_FILES = main.cpp canonical.cpp graph_data.cpp convex_hull_incremental.cpp \
 	index_ptm.cpp alloy_types.cpp deformation_gradient.cpp \
 	normalize_vertices.cpp \
+	structure_matcher.cpp \
 	qcprot/quat.cpp \
 	qcprot/polar.cpp \
 	unittest.cpp\
@@ -27,6 +28,7 @@ CPP = g++
 HEADER_FILES = alloy_types.hpp canonical.hpp convex_hull_incremental.hpp \
 	deformation_gradient.hpp graph_data.hpp index_ptm.h \
 	normalize_vertices.hpp \
+	structure_matcher.hpp \
 	fundamental_mappings.hpp \
 	qcprot/quat.hpp \
 	qcprot/polar.hpp \

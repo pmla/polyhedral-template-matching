@@ -1,15 +1,15 @@
 #include <cmath>
 
 
-void subtract_barycentre(int num, double *points, double (*normalized)[3])
+void subtract_barycentre(int num, double (*points)[3], double (*normalized)[3])
 {
 	//calculate barycentre
 	double sum[3] = {0, 0, 0};
 	for (int i=0;i<num;i++)
 	{
-		sum[0] += points[i * 3 + 0];
-		sum[1] += points[i * 3 + 1];
-		sum[2] += points[i * 3 + 2];
+		sum[0] += points[i][0];
+		sum[1] += points[i][1];
+		sum[2] += points[i][2];
 	}
 
 	sum[0] /= num;
@@ -19,13 +19,13 @@ void subtract_barycentre(int num, double *points, double (*normalized)[3])
 	//subtract barycentre
 	for (int i=0;i<num;i++)
 	{
-		normalized[i][0] = points[i * 3 + 0] - sum[0];
-		normalized[i][1] = points[i * 3 + 1] - sum[1];
-		normalized[i][2] = points[i * 3 + 2] - sum[2];
+		normalized[i][0] = points[i][0] - sum[0];
+		normalized[i][1] = points[i][1] - sum[1];
+		normalized[i][2] = points[i][2] - sum[2];
 	}
 }
 
-double normalize_vertices(int num, double *points, double (*normalized)[3])
+double normalize_vertices(int num, double (*points)[3], double (*normalized)[3])
 {
 	subtract_barycentre(num, points, normalized);
 

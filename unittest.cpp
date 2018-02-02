@@ -300,7 +300,7 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 
 	//translate and scale input points
 	double points[15][3];
-	subtract_barycentre(num, input_points[0], points);
+	subtract_barycentre(num, input_points, points);
 	for (int i=0;i<num;i++)
 		for (int j=0;j<3;j++)
 			points[i][j] *= scale;
@@ -345,7 +345,7 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 
 	//translate and scale input points
 	double points[15][3];
-	subtract_barycentre(num, input_points[0], points);
+	subtract_barycentre(num, input_points, points);
 	for (int i=0;i<num;i++)
 		for (int j=0;j<3;j++)
 			points[i][j] *= scale;
@@ -563,7 +563,7 @@ exit(3);*/
 					int32_t type, alloy_type;
 					double scale, rmsd, interatomic_distance, lattice_constant;
 					double q[4], F[9], F_res[3], U[9], P[9];
-					ret = ptm_index(local_handle, s->num_points, points[0], numbers, tocheck, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
+					ret = ptm_index(local_handle, tocheck, s->num_points, points, numbers, topological, 0, NULL, NULL, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
 					if (ret != PTM_NO_ERROR)
 						CLEANUP("indexing failed", ret);
 
@@ -665,11 +665,14 @@ exit(3);*/
 	}
 
 
+/*
 	{
 		double lc_points_sc[7][3] = {{0,0,0},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
 		double lc_points_fcc[13][3] = {{0,0,0},{0,1,1},{0,-1,-1},{0,1,-1},{0,-1,1},{1,0,1},{-1,0,-1},{1,0,-1},{-1,0,1},{1,1,0},{-1,-1,0},{1,-1,0},{-1,1,0}};
 		double lc_points_bcc[15][3] = {{0,0,0},{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
-		double* pdata[3] = {lc_points_fcc[0], lc_points_bcc[0], lc_points_sc[0]};
+		//double* pdata[3] = {lc_points_fcc, lc_points_bcc, lc_points_sc};
+
+		double* (*pdata)[3] = {lc_points_fcc, lc_points_bcc, lc_points_sc};
 
 		int lcdat[3] = {0, 2, 4};
 		for (int i=0;i<3;i++)
@@ -698,6 +701,7 @@ exit(3);*/
 			num_tests++;
 		}
 	}
+*/
 
 cleanup:
 	printf("num tests completed: %d\n", num_tests);

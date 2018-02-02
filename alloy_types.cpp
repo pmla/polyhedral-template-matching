@@ -2,7 +2,7 @@
 #include "ptm_constants.h"
 
 
-int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
+static int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 {
 	int len = PTM_NUM_POINTS_FCC;
 	int8_t temp[PTM_NUM_POINTS_FCC];
@@ -69,7 +69,7 @@ int32_t find_fcc_alloy_type(int8_t* mapping, int32_t* numbers)
 	return PTM_ALLOY_NONE;
 }
 
-int32_t find_bcc_alloy_type(int8_t* mapping, int32_t* numbers)
+static int32_t find_bcc_alloy_type(int8_t* mapping, int32_t* numbers)
 {
 	int len = PTM_NUM_POINTS_BCC;
 	int8_t temp[PTM_NUM_POINTS_BCC];
@@ -107,6 +107,17 @@ int32_t find_bcc_alloy_type(int8_t* mapping, int32_t* numbers)
 
 	if (num_au_inner == 8 && num_cu_outer == 6)
 		return PTM_ALLOY_B2;
+
+	return PTM_ALLOY_NONE;
+}
+
+int32_t find_alloy_type(int type, int8_t* mapping, int32_t* numbers)
+{
+	if (type == PTM_MATCH_FCC)
+		return find_fcc_alloy_type(mapping, numbers);
+
+	if (type == PTM_MATCH_BCC)
+		return find_bcc_alloy_type(mapping, numbers);
 
 	return PTM_ALLOY_NONE;
 }
