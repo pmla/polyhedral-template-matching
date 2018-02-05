@@ -242,13 +242,15 @@ static int initialize_convex_hull(int num_points, const double (*points)[3], int
 	return 0;
 }
 
-int get_convex_hull(int num_points, const double (*points)[3], int num_expected_facets, convexhull_t* ch, int8_t simplex[][3])
+int get_convex_hull(int num_points, const double (*points)[3], convexhull_t* ch, int8_t simplex[][3])
 {
 	assert(	num_points == PTM_NUM_POINTS_FCC
 		|| num_points == PTM_NUM_POINTS_HCP
 		|| num_points == PTM_NUM_POINTS_BCC
 		|| num_points == PTM_NUM_POINTS_ICO
-		|| num_points == PTM_NUM_POINTS_SC);
+		|| num_points == PTM_NUM_POINTS_SC
+		|| num_points == PTM_NUM_POINTS_DCUB
+		|| num_points == PTM_NUM_POINTS_DHEX);
 
 	int ret = 0;
 	int num_prev = ch->num_prev;
@@ -270,7 +272,7 @@ int get_convex_hull(int num_points, const double (*points)[3], int num_expected_
 		ch->processed[i] = true;
 
 		int num_to_add = 0;
-		int8_t to_add[MAXF][3];
+		int8_t to_add[PTM_MAX_FACETS][3];
 		int8_t edge_visible[PTM_MAX_POINTS][PTM_MAX_POINTS];
 		memset(edge_visible, 0, sizeof(int8_t) * PTM_MAX_POINTS * PTM_MAX_POINTS);
 		for (int j = 0;j<ch->num_facets;j++)
@@ -338,16 +340,12 @@ int get_convex_hull(int num_points, const double (*points)[3], int num_expected_
 
 		for (int j = 0;j<num_to_add;j++)
 		{
-			if (ch->num_facets >= MAXF)
+			if (ch->num_facets >= PTM_MAX_FACETS)
 				return -4;
 
 			add_facet(points, to_add[j][0], to_add[j][1], to_add[j][2], ch->facets[ch->num_facets], ch->plane_normal[ch->num_facets], ch->barycentre); ch->num_facets++;
 		}
 	}
-
-
-	if (ch->num_facets != num_expected_facets)
-		return -5;			//incorrect number of facets in convex hull
 
 	for (int i=0;i<ch->num_facets;i++)
 	{
@@ -356,6 +354,7 @@ int get_convex_hull(int num_points, const double (*points)[3], int num_expected_
 		int c = ch->facets[i][2];
 		if (a == 0 || b == 0 || c == 0)
 			return -6;		//central atom contained in convex hull
+//todo: presence of central atom in convex hull is not an algorithm error.
 
 		simplex[i][0] = a - 1;
 		simplex[i][1] = b - 1;

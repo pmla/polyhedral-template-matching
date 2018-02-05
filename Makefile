@@ -7,10 +7,12 @@ This makefile requires GNU Make.
 endif
 
 PROGRAM = benchmark
-CPP_FILES = main.cpp canonical.cpp graph_data.cpp convex_hull_incremental.cpp \
+CPP_FILES = main.cpp graph_data.cpp convex_hull_incremental.cpp \
 	index_ptm.cpp alloy_types.cpp deformation_gradient.cpp \
 	normalize_vertices.cpp \
 	structure_matcher.cpp \
+	canonical_coloured.cpp \
+	graph_tools.cpp \
 	qcprot/quat.cpp \
 	qcprot/polar.cpp \
 	unittest.cpp\
@@ -25,10 +27,12 @@ LDLIBS = -lm #-fno-omit-frame-pointer -fsanitize=address
 #CC = gcc
 CPP = g++
 
-HEADER_FILES = alloy_types.hpp canonical.hpp convex_hull_incremental.hpp \
+HEADER_FILES = alloy_types.hpp convex_hull_incremental.hpp \
 	deformation_gradient.hpp graph_data.hpp index_ptm.h \
 	normalize_vertices.hpp \
 	structure_matcher.hpp \
+	canonical_coloured.hpp \
+	graph_tools.hpp \
 	fundamental_mappings.hpp \
 	qcprot/quat.hpp \
 	qcprot/polar.hpp \

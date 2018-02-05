@@ -7,20 +7,14 @@
 #include <cassert>
 #include <algorithm>
 #include "convex_hull_incremental.hpp"
-#include "canonical.hpp"
+#include "canonical_coloured.hpp"
 #include "graph_data.hpp"
+#include "graph_tools.hpp"
 #include "normalize_vertices.hpp"
 #include "qcprot/polar.hpp"
 #include "initialize_data.hpp"
 #include "structure_matcher.hpp"
 #include "ptm_constants.h"
-
-
-extern refdata_t structure_sc;
-extern refdata_t structure_fcc;
-extern refdata_t structure_hcp;
-extern refdata_t structure_ico;
-extern refdata_t structure_bcc;
 
 
 static double calc_rmsd(int num_points, const double (*ideal_points)[3], double (*normalized)[3], int8_t* mapping,
@@ -50,12 +44,16 @@ static double calc_rmsd(int num_points, const double (*ideal_points)[3], double 
 	return sqrt(fabs(G1 - scale*k0) / num_points);
 }
 
-static void check_graphs(	refdata_t* s,
+static void check_graphs(	const refdata_t* s,
 				uint64_t hash,
+				std::array<int8_t, 2 * PTM_MAX_EDGES> &code,
 				int8_t* canonical_labelling,
 				double (*normalized)[3],
 				result_t* res)
 {
+	//if (s->graphmap->find(code) == s->graphmap->end())
+	//	return;
+
 	int num_points = s->num_nbrs + 1;
 	const double (*ideal_points)[3] = s->points;
 	int8_t inverse_labelling[PTM_MAX_POINTS];
@@ -103,17 +101,44 @@ static void check_graphs(	refdata_t* s,
 			}
 		}
 	}
+
+/*
+	for ( auto _gref = (*s->graphmap)[code].begin(); _gref != (*s->graphmap)[code].end(); _gref++ )
+	{
+		graph_t* gref = *_gref;
+		assert (hash == gref->hash);
+
+		for (int j = 0;j<gref->num_automorphisms;j++)
+		{
+			for (int k=0;k<num_points;k++)
+				mapping[automorphisms[gref->automorphism_index + j][k]] = inverse_labelling[ gref->canonical_labelling[k] ];
+
+			double q[4], scale = 0;
+			double rmsd = calc_rmsd(num_points, ideal_points, normalized, mapping, G1, G2, E0, q, &scale);
+			if (rmsd < res->rmsd)
+			{
+				res->rmsd = rmsd;
+				res->scale = scale;
+				res->ref_struct = s;
+				memcpy(res->q, q, 4 * sizeof(double));
+				memcpy(res->mapping, mapping, sizeof(int8_t) * num_points);
+			}
+		}
+	}*/
 }
 
-int match_general(refdata_t* s, double (*ch_points)[3], double (*points)[3], convexhull_t* ch, result_t* res)
+int match_general(const refdata_t* s, double (*ch_points)[3], double (*points)[3], convexhull_t* ch, result_t* res)
 {
 	int8_t degree[PTM_MAX_NBRS];
 	int8_t facets[PTM_MAX_FACETS][3];
 
-	int ret = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, s->num_facets, ch, facets);
+	int ret = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, ch, facets);
 	ch->ok = ret == 0;
 	if (ret != 0)
 		return PTM_NO_ERROR;
+
+	if (ch->num_facets != s->num_facets)
+		return PTM_NO_ERROR;			//incorrect number of facets in convex hull
 
 	int max_degree = graph_degree(s->num_facets, facets, s->num_nbrs, degree);
 	if (max_degree > s->max_degree)
@@ -127,13 +152,16 @@ int match_general(refdata_t* s, double (*ch_points)[3], double (*points)[3], con
 	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(s->num_nbrs + 1, points, normalized);
 
+	std::array<int8_t, 2 * PTM_MAX_EDGES> code;
+	int8_t colours[PTM_MAX_POINTS] = {0};
 	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;
-	ret = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling, &hash);
+	ret = canonical_form_coloured(s->num_facets, facets, s->num_nbrs, degree, colours, canonical_labelling, &code[0], &hash);
+	//ret = canonical_form(s->num_facets, facets, s->num_nbrs, degree, canonical_labelling, &hash);
 	if (ret != PTM_NO_ERROR)
 		return ret;
 
-	check_graphs(s, hash, canonical_labelling, normalized, res);
+	check_graphs(s, hash, code, canonical_labelling, normalized, res);
 	return PTM_NO_ERROR;
 }
 
@@ -146,10 +174,13 @@ int match_fcc_hcp_ico(double (*ch_points)[3], double (*points)[3], int32_t flags
 	int8_t degree[PTM_MAX_NBRS];
 	int8_t facets[PTM_MAX_FACETS][3];
 
-	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, num_facets, ch, facets);
+	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, ch, facets);
 	ch->ok = ret == 0;
 	if (ret != 0)
 		return PTM_NO_ERROR;
+
+	if (ch->num_facets != num_facets)
+		return PTM_NO_ERROR;			//incorrect number of facets in convex hull
 
 	int _max_degree = graph_degree(num_facets, facets, num_nbrs, degree);
 	if (_max_degree > max_degree)
@@ -158,15 +189,58 @@ int match_fcc_hcp_ico(double (*ch_points)[3], double (*points)[3], int32_t flags
 	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(num_nbrs + 1, points, normalized);
 
+	std::array<int8_t, 2 * PTM_MAX_EDGES> code;
+	int8_t colours[PTM_MAX_POINTS] = {0};
 	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;
-	ret = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling, &hash);
+	ret = canonical_form_coloured(num_facets, facets, num_nbrs, degree, colours, canonical_labelling, &code[0], &hash);
+	//ret = canonical_form(num_facets, facets, num_nbrs, degree, canonical_labelling, &hash);
 	if (ret != PTM_NO_ERROR)
 		return ret;
 
-	if (flags & PTM_CHECK_FCC)	check_graphs(&structure_fcc, hash, canonical_labelling, normalized, res);
-	if (flags & PTM_CHECK_HCP)	check_graphs(&structure_hcp, hash, canonical_labelling, normalized, res);
-	if (flags & PTM_CHECK_ICO)	check_graphs(&structure_ico, hash, canonical_labelling, normalized, res);
+	if (flags & PTM_CHECK_FCC)	check_graphs(&structure_fcc, hash, code, canonical_labelling, normalized, res);
+	if (flags & PTM_CHECK_HCP)	check_graphs(&structure_hcp, hash, code, canonical_labelling, normalized, res);
+	if (flags & PTM_CHECK_ICO)	check_graphs(&structure_ico, hash, code, canonical_labelling, normalized, res);
+	return PTM_NO_ERROR;
+}
+
+int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, convexhull_t* ch, result_t* res)
+{
+	int num_nbrs = structure_dcub.num_nbrs;
+	int num_facets = structure_dcub.num_facets;
+	int max_degree = structure_dcub.max_degree;
+
+	int8_t degree[PTM_MAX_NBRS];
+	int8_t facets[PTM_MAX_FACETS][3];
+
+	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, ch, facets);
+	ch->ok = ret == 0;
+	if (ret != 0)
+		return PTM_NO_ERROR;
+
+	if (ch->num_facets < num_facets)
+		return PTM_NO_ERROR;			//incorrect number of facets in convex hull
+
+	int _max_degree = graph_degree(num_facets, facets, num_nbrs, degree);
+	if (_max_degree > max_degree)
+		return PTM_NO_ERROR;
+
+	//sort out convex hull here
+
+	double normalized[PTM_MAX_POINTS][3];
+	subtract_barycentre(num_nbrs + 1, points, normalized);
+
+return 0;
+	std::array<int8_t, 2 * PTM_MAX_EDGES> code;
+	int8_t colours[PTM_MAX_POINTS] = {0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int8_t canonical_labelling[PTM_MAX_POINTS];
+	uint64_t hash = 0;
+	ret = canonical_form_coloured(num_facets, facets, num_nbrs, degree, colours, canonical_labelling, &code[0], &hash);
+	if (ret != PTM_NO_ERROR)
+		return ret;
+
+	//if (flags & PTM_CHECK_DCUB)	check_graphs(&structure_dcub, hash, code, canonical_labelling, normalized, res);
+	//if (flags & PTM_CHECK_DHEX)	check_graphs(&structure_dhex, hash, code, canonical_labelling, normalized, res);
 	return PTM_NO_ERROR;
 }
 

@@ -7,16 +7,15 @@
 #include <cassert>
 #include <algorithm>
 #include "initialize_data.hpp"
-#include "ptm_functions.h"
 
 
-//refdata_t structure_sc =  { .type = PTM_MATCH_SC,  .num_nbrs =  6, .num_facets =  8, .max_degree = 4, .num_graphs = NUM_SC_GRAPHS,  .graphs = graphs_sc,  .points = ptm_template_sc,  .penrose = penrose_sc , .mapping = mapping_sc };
-refdata_t structure_sc =  { PTM_MATCH_SC,   6,  8, 4, NUM_SC_GRAPHS,  graphs_sc,  ptm_template_sc,  penrose_sc , mapping_sc };
-refdata_t structure_fcc = { PTM_MATCH_FCC, 12, 20, 6, NUM_FCC_GRAPHS, graphs_fcc, ptm_template_fcc, penrose_fcc, mapping_fcc};
-refdata_t structure_hcp = { PTM_MATCH_HCP, 12, 20, 6, NUM_HCP_GRAPHS, graphs_hcp, ptm_template_hcp, penrose_hcp, mapping_hcp};
-refdata_t structure_ico = { PTM_MATCH_ICO, 12, 20, 6, NUM_ICO_GRAPHS, graphs_ico, ptm_template_ico, penrose_ico, mapping_ico};
-refdata_t structure_bcc = { PTM_MATCH_BCC, 14, 24, 8, NUM_BCC_GRAPHS, graphs_bcc, ptm_template_bcc, penrose_bcc, mapping_bcc};
-
+graphmap_t map_sc;
+graphmap_t map_fcc;
+graphmap_t map_hcp;
+graphmap_t map_ico;
+graphmap_t map_bcc;
+graphmap_t map_dcub;
+graphmap_t map_dhex;
 
 static void make_facets_clockwise(int num_facets, int8_t (*facets)[3], const double (*points)[3])
 {
@@ -27,18 +26,25 @@ static void make_facets_clockwise(int num_facets, int8_t (*facets)[3], const dou
 		add_facet(points, facets[i][0], facets[i][1], facets[i][2], facets[i], plane_normal, origin);
 }
 
-static int initialize_graphs(refdata_t* s)
+static int initialize_graphs(const refdata_t* s)
 {
 	for (int i = 0;i<s->num_graphs;i++)
 	{
+		std::array<int8_t, 2 * PTM_MAX_EDGES> code;
+
+		int8_t colours[PTM_MAX_POINTS] = {0};
 		int8_t degree[PTM_MAX_NBRS];
 		int _max_degree = graph_degree(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree);
 		assert(_max_degree <= s->max_degree);
 
 		make_facets_clockwise(s->num_facets, s->graphs[i].facets, &s->points[1]);
-		int ret = canonical_form(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree, s->graphs[i].canonical_labelling, &s->graphs[i].hash);
+		int ret = canonical_form_coloured(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree, colours, s->graphs[i].canonical_labelling, (int8_t*)&code[0], &s->graphs[i].hash);
 		if (ret != 0)
 			return ret;
+		
+		if (s->graphmap->find(code) == s->graphmap->end())
+			(*s->graphmap)[code] = std::vector< graph_t* >();
+		(*s->graphmap)[code].push_back(&s->graphs[i]);
 	}
 
 	return PTM_NO_ERROR;

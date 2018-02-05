@@ -20,13 +20,6 @@
 #include "ptm_constants.h"
 
 
-extern refdata_t structure_sc;
-extern refdata_t structure_fcc;
-extern refdata_t structure_hcp;
-extern refdata_t structure_ico;
-extern refdata_t structure_bcc;
-
-
 static double calculate_lattice_constant(int type, double interatomic_distance)
 {
 	assert(type >= 1 && type <= 5);
@@ -46,9 +39,9 @@ static int order_points(ptm_local_handle_t local_handle, int num_points, double 
 {
 	if (topological_ordering)
 	{
-		double ch_points[PTM_MAX_INPUT_POINTS][3];
-		normalize_vertices(num_points, unpermuted_points, ch_points);
-		int ret = calculate_neighbour_ordering((void*)local_handle, num_points, (const double (*)[3])ch_points, ordering);
+		double normalized_points[PTM_MAX_INPUT_POINTS][3];
+		normalize_vertices(num_points, unpermuted_points, normalized_points);
+		int ret = calculate_neighbour_ordering((void*)local_handle, num_points, (const double (*)[3])normalized_points, ordering);
 		if (ret != 0)
 			topological_ordering = false;
 	}
@@ -93,13 +86,16 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 	assert(num_points <= PTM_MAX_INPUT_POINTS);
 
 	if (flags & PTM_CHECK_SC)
-		assert(num_points >= structure_sc.num_nbrs + 1);
+		assert(num_points >= PTM_NUM_POINTS_SC);
 
 	if (flags & PTM_CHECK_BCC)
-		assert(num_points >= structure_bcc.num_nbrs + 1);
+		assert(num_points >= PTM_NUM_POINTS_BCC);
 
 	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
-		assert(num_points >= structure_fcc.num_nbrs + 1);
+		assert(num_points >= PTM_NUM_POINTS_FCC);
+
+	//if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
+	//	assert(num_dpoints >= PTM_NUM_POINTS_DCUB);
 
 	int ret = 0;
 	result_t res;
@@ -117,7 +113,6 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 	int32_t numbers[PTM_MAX_POINTS];
 
 	convexhull_t ch;
-	ch.ok = false;
 	double ch_points[PTM_MAX_INPUT_POINTS][3];
 
 
@@ -125,6 +120,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 	{
 		num_points = order_points(local_handle, num_points, unpermuted_points, unpermuted_numbers, topological_ordering, ordering, points, numbers);
 		normalize_vertices(num_points, points, ch_points);
+		ch.ok = false;
 
 		if (flags & PTM_CHECK_SC)
 			ret = match_general(&structure_sc, ch_points, points, &ch, &res);
@@ -136,7 +132,15 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 			ret = match_general(&structure_bcc, ch_points, points, &ch, &res);
 	}
 
-	refdata_t* ref = res.ref_struct;
+	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
+	{
+		normalize_vertices(num_points, points, ch_points);
+		ch.ok = false;
+
+		ret = match_dcub_dhex(ch_points, points, flags, &ch, &res);
+	}
+
+	const refdata_t* ref = res.ref_struct;
 	if (ref != NULL)
 	{
 		*p_type = ref->type;
@@ -153,15 +157,16 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 		if (F != NULL && F_res != NULL)
 		{
-			//todo: replace ch_points with scaled_points
-			subtract_barycentre(ref->num_nbrs + 1, points, ch_points);
+			double scaled_points[PTM_MAX_INPUT_POINTS][3];
+
+			subtract_barycentre(ref->num_nbrs + 1, points, scaled_points);
 			for (int i = 0;i<ref->num_nbrs + 1;i++)
 			{
-				ch_points[i][0] *= res.scale;
-				ch_points[i][1] *= res.scale;
-				ch_points[i][2] *= res.scale;
+				scaled_points[i][0] *= res.scale;
+				scaled_points[i][1] *= res.scale;
+				scaled_points[i][2] *= res.scale;
 			}
-			calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res.mapping, ch_points, ref->penrose, F, F_res);
+			calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res.mapping, scaled_points, ref->penrose, F, F_res);
 
 			if (P != NULL && U != NULL)
 				polar_decomposition_3x3(F, false, U, P);
