@@ -8,6 +8,9 @@
 #include <algorithm>
 #include "initialize_data.hpp"
 
+#include <array>
+using namespace std;
+
 
 static void make_facets_clockwise(int num_facets, int8_t (*facets)[3], const double (*points)[3])
 {

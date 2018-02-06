@@ -126,3 +126,78 @@ void voronoi_uninitialize_local(void* _ptr)
 	delete ptr;
 }
 
+
+typedef struct
+{
+	double dist;
+	int p;
+	int index;
+} diamond_t;
+
+static bool diamond_compare(diamond_t const& a, diamond_t const& b)
+{
+	return a.dist < b.dist;
+}
+
+int calculate_diamond_neighbour_ordering(	int num_points, double (*unpermuted_points)[3], int32_t* unpermuted_numbers,
+						int8_t* ordering, double (*points)[3], int32_t* numbers)
+{
+	assert(num_points <= PTM_MAX_INPUT_POINTS);
+
+	diamond_t data[4 * (PTM_MAX_INPUT_POINTS - 5)];
+	int index = 0;
+	for (int i=5;i<num_points;i++)
+	{
+		for (int j=1;j<5;j++)
+		{
+			double dx = unpermuted_points[i][0] - unpermuted_points[j][0];
+			double dy = unpermuted_points[i][1] - unpermuted_points[j][1];
+			double dz = unpermuted_points[i][2] - unpermuted_points[j][2];
+
+			double d = dx*dx + dy*dy + dz*dz;
+
+			data[index].p = j - 1;
+			data[index].index = i;
+			data[index].dist = d;
+			index++;
+		}
+	}
+	int n = index;
+
+	std::sort(data, data + n, &diamond_compare);
+
+	for (index=0;index<5;index++)
+		ordering[index] = index;
+
+	int num_found = 0;
+	bool hit[PTM_MAX_INPUT_POINTS] = {0};
+	int counts[4] = {0};
+	for (int i=0;i<n;i++)
+	{
+		int p = data[i].p;
+		int q = data[i].index;
+		if (hit[q] || counts[p] >= 3)
+			continue;
+
+		ordering[1 + 4 + 3 * p + counts[p]] = q;
+		counts[p]++;
+		index++;
+		num_found++;
+		if (num_found >= 12)
+			break;
+	}
+
+	if (num_found != 12)
+		return -1;
+
+	for (int i=0;i<PTM_NUM_NBRS_DCUB+1;i++)
+	{
+		memcpy(points[i], &unpermuted_points[ordering[i]], 3 * sizeof(double));
+
+		if (unpermuted_numbers != NULL)
+			numbers[i] = unpermuted_numbers[ordering[i]];
+	}
+
+	return 0;
+}
+

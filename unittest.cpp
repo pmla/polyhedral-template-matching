@@ -563,7 +563,7 @@ exit(3);*/
 					int32_t type, alloy_type;
 					double scale, rmsd, interatomic_distance, lattice_constant;
 					double q[4], F[9], F_res[3], U[9], P[9];
-					ret = ptm_index(local_handle, tocheck, s->num_points, points, numbers, topological, 0, NULL, NULL, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
+					ret = ptm_index(local_handle, tocheck, s->num_points, points, numbers, topological, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
 					if (ret != PTM_NO_ERROR)
 						CLEANUP("indexing failed", ret);
 

@@ -78,79 +78,6 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 	}
 }
 
-static bool get_diamond_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, int central, double (*nbr)[3])
-{
-	assert(max_nbrs >= 4);
-
-	memcpy(nbr[0], positions[central], 3 * sizeof(double));
-	std::set<int> hit;
-	hit.insert(central);
-
-int yep[17] = {0};
-memset(yep, -1, 17 * sizeof(int));
-yep[0] = central;
-
-	std::map< int, int> counts;
-	std::map< int, int> pos;
-	vector<tuple< double, int, int >> data;
-	for (int i=0;i<4;i++)
-	{
-		int inner = nbrs[central * _MAX_NBRS + i];
-yep[1+i] = inner;
-
-		memcpy(nbr[i + 1], positions[inner], 3 * sizeof(double));
-		hit.insert(inner);
-		counts[inner] = 0;
-		pos[inner] = i;
-
-		double* p = positions[inner];
-		for (int j=0;j<max_nbrs;j++)
-		{
-			int outer = nbrs[inner * _MAX_NBRS + j];
-			double* q = positions[outer];
-
-			double dx = p[0] - q[0];
-			double dy = p[1] - q[1];
-			double dz = p[2] - q[2];
-			double dist = dx*dx + dy*dy + dz*dz;
-			data.push_back(make_tuple(dist, inner, outer));
-		}
-	}
-
-	sort(data.begin(), data.end(), [](	const tuple<double,int,int>& a,
-						const tuple<double,int,int>& b) -> bool
-						{
-							return std::get<0>(a) < std::get<0>(b);
-						});
-	int num_found = 0;
-	for ( auto t = data.begin(); t != data.end(); t++ )
-	{
-		int inner = std::get<1>(*t);
-		int outer = std::get<2>(*t);
-		if (counts[inner] >= 3)
-			continue;
-
-		if (hit.find(outer) != hit.end())
-			continue;
-
-yep[1 + 4 + 3 * pos[inner] + counts[inner]] = outer;
-
-		memcpy(nbr[1 + 4 + 3 * pos[inner] + counts[inner]], positions[outer], 3 * sizeof(double));
-
-		counts[inner]++;
-		hit.insert(outer);
-		num_found++;
-
-		if (num_found >= 12)
-			break;
-	}
-
-for (int i=0;i<17;i++)
-	assert( yep[i] != -1 );
-
-	return num_found == 12;
-}
-
 //todo: put all unit tests back in
 
 int main()
@@ -178,8 +105,7 @@ int main()
 		return -1;
 
 	int num_atoms = fsize / (_MAX_NBRS * sizeof(int32_t));
-	const int max_nbrs = 18;
-	const int num_diamond_nbrs = 16;
+	const int max_nbrs = 34;
 	//assert(num_atoms == 88737);
 	printf("num atoms: %d\n", num_atoms);
 
@@ -198,19 +124,11 @@ int main()
 		double nbr[max_nbrs+1][3];
 		get_neighbours((double (*)[3])positions, nbrs, max_nbrs, i, nbr);
 
-		double diamond_nbr[num_diamond_nbrs+1][3];
-		bool ok = get_diamond_neighbours((double (*)[3])positions, nbrs, max_nbrs, i, diamond_nbr);
-		if (!ok)
-		{
-			//toggle diamond flags;
-		}
-
 		int8_t mapping[_MAX_NBRS];
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
 		ptm_index(	local_handle, PTM_CHECK_ALL, max_nbrs + 1, nbr, NULL, topological_ordering,
-				num_diamond_nbrs + 1, diamond_nbr, NULL,
 				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
 
 		types[i] = type;

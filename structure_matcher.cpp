@@ -16,6 +16,9 @@
 #include "structure_matcher.hpp"
 #include "ptm_constants.h"
 
+#include <array>
+using namespace std;
+
 
 static double calc_rmsd(int num_points, const double (*ideal_points)[3], double (*normalized)[3], int8_t* mapping,
 			double G1, double G2, double E0, double* q, double* p_scale)
