@@ -93,5 +93,50 @@ const double penrose_bcc[PTM_NUM_POINTS_BCC][3] = {
 					{-2*k_bcc, 0, 0},
 					{2*k_bcc, 0, -0},
 				};
+
+//dcub
+#define kdcub 0.07095369570691034689
+const double penrose_dcub[PTM_NUM_POINTS_DCUB][3] = {
+					{     -kdcub,      kdcub,      kdcub },
+					{     -kdcub,     -kdcub,     -kdcub },
+					{      kdcub,     -kdcub,      kdcub },
+					{      kdcub,      kdcub,     -kdcub },
+					{ -2 * kdcub,          0,  2 * kdcub },
+					{ -2 * kdcub,  2 * kdcub,          0 },
+					{          0,  2 * kdcub,  2 * kdcub },
+					{ -2 * kdcub, -2 * kdcub,          0 },
+					{ -2 * kdcub,          0, -2 * kdcub },
+					{          0, -2 * kdcub, -2 * kdcub },
+					{          0, -2 * kdcub,  2 * kdcub },
+					{  2 * kdcub, -2 * kdcub,          0 },
+					{  2 * kdcub,          0,  2 * kdcub },
+					{          0,  2 * kdcub, -2 * kdcub },
+					{  2 * kdcub,          0, -2 * kdcub },
+				 	{  2 * kdcub,  2 * kdcub,          0 },
+					{          0,          0,          0 }
+				};
+
+
+#define kdhex 0.04730246380471011397
+const double penrose_dhex[PTM_NUM_POINTS_DHEX][3] = {
+					{     -kdcub,     -kdcub,      -kdcub },
+					{      kdcub,     -kdcub,       kdcub },
+					{     -kdcub,      kdcub,       kdcub },
+					{      kdcub,      kdcub,      -kdcub },
+					{     -kdhex, -4 * kdhex,      -kdhex },
+					{ -4 * kdhex,     -kdhex,      -kdhex },
+					{     -kdhex,     -kdhex,  -4 * kdhex },
+					{  2 * kdcub,          0,   2 * kdcub },
+					{  2 * kdcub, -2 * kdcub,           0 },
+					{          0, -2 * kdcub,   2 * kdcub },
+					{          0,  2 * kdcub,   2 * kdcub },
+					{ -2 * kdcub,  2 * kdcub,           0 },
+					{ -2 * kdcub,          0,   2 * kdcub },
+					{  2 * kdcub,  2 * kdcub,           0 },
+					{          0,  2 * kdcub,  -2 * kdcub },
+					{  2 * kdcub,          0,  -2 * kdcub },
+					{          0,          0,           0 },
+				};
 #endif
+
 

@@ -419,6 +419,11 @@ int num_found = 0;
 		ret = canonical_form_coloured(ch->num_facets, _facets, _num_nbrs, _degree, colours, canonical_labelling, &code[0], &hash);
 		if (ret != PTM_NO_ERROR)
 			return ret;
+
+		if (flags & PTM_CHECK_DCUB)	check_graphs(&structure_dcub, hash, code, canonical_labelling, normalized, res);
+		if (flags & PTM_CHECK_DHEX)	check_graphs(&structure_dhex, hash, code, canonical_labelling, normalized, res);
+
+		return PTM_NO_ERROR;
 	}
 
 	double normalized[PTM_MAX_POINTS][3];

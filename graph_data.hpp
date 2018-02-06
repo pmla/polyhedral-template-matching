@@ -20,6 +20,8 @@ typedef struct
 #define NUM_FCC_GRAPHS 8
 #define NUM_HCP_GRAPHS 16
 #define NUM_BCC_GRAPHS 218
+#define NUM_DCUB_GRAPHS 12
+#define NUM_DHEX_GRAPHS 24
 
 extern int8_t automorphisms[][PTM_MAX_POINTS];
 
@@ -28,6 +30,8 @@ extern graph_t graphs_fcc[NUM_FCC_GRAPHS];
 extern graph_t graphs_hcp[NUM_HCP_GRAPHS];
 extern graph_t graphs_ico[NUM_ICO_GRAPHS];
 extern graph_t graphs_bcc[NUM_BCC_GRAPHS];
+extern graph_t graphs_dcub[NUM_DCUB_GRAPHS];
+extern graph_t graphs_dhex[NUM_DHEX_GRAPHS];
 
 #endif
 

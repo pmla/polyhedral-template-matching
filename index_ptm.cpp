@@ -152,8 +152,9 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 		if (p_alloy_type != NULL && unpermuted_numbers != NULL)
 			*p_alloy_type = find_alloy_type(ref->type, res.mapping, numbers);
-/*
+
 		int bi = rotate_into_fundamental_zone(ref->type, res.q);
+/*
 		int8_t temp[PTM_MAX_POINTS];
 		for (int i=0;i<ref->num_nbrs+1;i++)
 			temp[ref->mapping[bi][i]] = res.mapping[i];
