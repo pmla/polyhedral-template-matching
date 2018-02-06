@@ -69,6 +69,8 @@ static int rotate_into_fundamental_zone(int type, double* q)
 	if (type == PTM_MATCH_BCC)	return rotate_quaternion_into_cubic_fundamental_zone(q);
 	if (type == PTM_MATCH_ICO)	return rotate_quaternion_into_icosahedral_fundamental_zone(q);
 	if (type == PTM_MATCH_HCP)	return rotate_quaternion_into_hcp_fundamental_zone(q);
+	if (type == PTM_MATCH_DCUB)	return rotate_quaternion_into_cubic_fundamental_zone(q);
+	if (type == PTM_MATCH_DHEX)	return rotate_quaternion_into_cubic_fundamental_zone(q);
 	return -1;
 }
 
@@ -94,8 +96,8 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
 		assert(num_points >= PTM_NUM_POINTS_FCC);
 
-	//if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
-	//	assert(num_dpoints >= PTM_NUM_POINTS_DCUB);
+	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
+		assert(num_dpoints >= PTM_NUM_POINTS_DCUB);
 
 	int ret = 0;
 	result_t res;
@@ -134,10 +136,13 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
 	{
-		normalize_vertices(num_points, points, ch_points);
+		normalize_vertices(num_dpoints, dpoints, ch_points);
 		ch.ok = false;
 
-		ret = match_dcub_dhex(ch_points, points, flags, &ch, &res);
+		ret = match_dcub_dhex(ch_points, dpoints, flags, &ch, &res);
+
+		for (int i=0;i<PTM_MAX_INPUT_POINTS;i++)
+			ordering[i] = i;
 	}
 
 	const refdata_t* ref = res.ref_struct;
@@ -147,7 +152,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 		if (p_alloy_type != NULL && unpermuted_numbers != NULL)
 			*p_alloy_type = find_alloy_type(ref->type, res.mapping, numbers);
-
+/*
 		int bi = rotate_into_fundamental_zone(ref->type, res.q);
 		int8_t temp[PTM_MAX_POINTS];
 		for (int i=0;i<ref->num_nbrs+1;i++)
@@ -184,6 +189,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 		if (p_lattice_constant != NULL)
 			*p_lattice_constant = lattice_constant;
+*/
 	}
 
 	*p_rmsd = res.rmsd;

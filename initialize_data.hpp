@@ -54,6 +54,9 @@ const refdata_t structure_bcc =  { PTM_MATCH_BCC,  14, 24, 8, NUM_BCC_GRAPHS,  g
 const refdata_t structure_dcub = { PTM_MATCH_DCUB, 16, 20, 7, -1, NULL, ptm_template_dcub, NULL, NULL, &map_dcub};
 const refdata_t structure_dhex = { PTM_MATCH_DHEX, 16, 20, 7, -1, NULL, ptm_template_dhex, NULL, NULL, &map_dhex};
 
+const refdata_t structure_diac = { PTM_MATCH_DCUB, 12, 20, 6, NUM_FCC_GRAPHS, graphs_fcc, ptm_template_fcc, penrose_fcc, mapping_fcc, &map_dcub};
+const refdata_t structure_diah = { PTM_MATCH_DHEX, 12, 20, 6, NUM_HCP_GRAPHS, graphs_hcp, ptm_template_hcp, penrose_hcp, mapping_hcp, &map_dhex};
+
 
 #ifdef __cplusplus
 extern "C" {
