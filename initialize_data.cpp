@@ -9,14 +9,6 @@
 #include "initialize_data.hpp"
 
 
-graphmap_t map_sc;
-graphmap_t map_fcc;
-graphmap_t map_hcp;
-graphmap_t map_ico;
-graphmap_t map_bcc;
-graphmap_t map_dcub;
-graphmap_t map_dhex;
-
 static void make_facets_clockwise(int num_facets, int8_t (*facets)[3], const double (*points)[3])
 {
 	double plane_normal[3];
@@ -39,11 +31,7 @@ static int initialize_graphs(const refdata_t* s, int8_t* colours)
 		make_facets_clockwise(s->num_facets, s->graphs[i].facets, &s->points[1]);
 		int ret = canonical_form_coloured(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree, colours, s->graphs[i].canonical_labelling, (int8_t*)&code[0], &s->graphs[i].hash);
 		if (ret != 0)
-			return ret;
-		
-		if (s->graphmap->find(code) == s->graphmap->end())
-			(*s->graphmap)[code] = std::vector< graph_t* >();
-		(*s->graphmap)[code].push_back(&s->graphs[i]);
+			return ret;		
 	}
 
 	return PTM_NO_ERROR;

@@ -20,18 +20,30 @@
 #include "ptm_constants.h"
 
 
+static double calculate_interatomic_distance(int type, double scale)
+{
+	assert(type >= 1 && type <= 7);
+	double c[8] = {0, 1, 1, (7. - 3.5 * sqrt(3)), 1, 1, 4 / (6 * sqrt(2) + sqrt(3)), 4 / (6 * sqrt(2) + sqrt(3))};
+	return c[type] / scale;
+}
+
 static double calculate_lattice_constant(int type, double interatomic_distance)
 {
-	assert(type >= 1 && type <= 5);
-	double c[6] = {0, 2 / sqrt(2), 2 / sqrt(2), 2. / sqrt(3), 2 / sqrt(2), 1};
+	assert(type >= 1 && type <= 7);
+	double c[8] = {0, 2 / sqrt(2), 2 / sqrt(2), 2. / sqrt(3), 2 / sqrt(2), 1, 4 / sqrt(3), 4 / sqrt(3)};
 	return c[type] * interatomic_distance;
 }
 
-static double calculate_interatomic_distance(int type, double scale)
+static int rotate_into_fundamental_zone(int type, double* q)
 {
-	assert(type >= 1 && type <= 5);
-	double c[6] = {0, 1, 1, (7. - 3.5 * sqrt(3)), 1, 1};
-	return c[type] / scale;
+	if (type == PTM_MATCH_SC)	return rotate_quaternion_into_cubic_fundamental_zone(q);
+	if (type == PTM_MATCH_FCC)	return rotate_quaternion_into_cubic_fundamental_zone(q);
+	if (type == PTM_MATCH_BCC)	return rotate_quaternion_into_cubic_fundamental_zone(q);
+	if (type == PTM_MATCH_ICO)	return rotate_quaternion_into_icosahedral_fundamental_zone(q);
+	if (type == PTM_MATCH_HCP)	return rotate_quaternion_into_hcp_fundamental_zone(q);
+	if (type == PTM_MATCH_DCUB)	return rotate_quaternion_into_diamond_cubic_fundamental_zone(q);
+	if (type == PTM_MATCH_DHEX)	return rotate_quaternion_into_diamond_hexagonal_fundamental_zone(q);
+	return -1;
 }
 
 static int order_points(ptm_local_handle_t local_handle, int num_points, double (*unpermuted_points)[3], int32_t* unpermuted_numbers, bool topological_ordering,
@@ -62,21 +74,7 @@ static int order_points(ptm_local_handle_t local_handle, int num_points, double 
 	return num_points;
 }
 
-static int rotate_into_fundamental_zone(int type, double* q)
-{
-	if (type == PTM_MATCH_SC)	return rotate_quaternion_into_cubic_fundamental_zone(q);
-	if (type == PTM_MATCH_FCC)	return rotate_quaternion_into_cubic_fundamental_zone(q);
-	if (type == PTM_MATCH_BCC)	return rotate_quaternion_into_cubic_fundamental_zone(q);
-	if (type == PTM_MATCH_ICO)	return rotate_quaternion_into_icosahedral_fundamental_zone(q);
-	if (type == PTM_MATCH_HCP)	return rotate_quaternion_into_hcp_fundamental_zone(q);
-	if (type == PTM_MATCH_DCUB)	return rotate_quaternion_into_cubic_fundamental_zone(q);
-	if (type == PTM_MATCH_DHEX)	return rotate_quaternion_into_cubic_fundamental_zone(q);
-	return -1;
-}
-
 extern bool ptm_initialized;
-
-//todo: put all unit tests back in
 
 int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 		int num_points, double (*unpermuted_points)[3], int32_t* unpermuted_numbers, bool topological_ordering,
@@ -154,7 +152,6 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 			*p_alloy_type = find_alloy_type(ref->type, res.mapping, numbers);
 
 		int bi = rotate_into_fundamental_zone(ref->type, res.q);
-/*
 		int8_t temp[PTM_MAX_POINTS];
 		for (int i=0;i<ref->num_nbrs+1;i++)
 			temp[ref->mapping[bi][i]] = res.mapping[i];
@@ -190,7 +187,6 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 		if (p_lattice_constant != NULL)
 			*p_lattice_constant = lattice_constant;
-*/
 	}
 
 	*p_rmsd = res.rmsd;

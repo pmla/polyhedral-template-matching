@@ -22,8 +22,6 @@ using namespace std;
 //diamond data
 #define _MAX_NBRS 50
 
-//#define DEBUG
-
 static int read_file(const char* path, uint8_t** p_buf, size_t* p_fsize)
 {
 	size_t fsize = 0, num_read = 0;
@@ -124,9 +122,6 @@ yep[1+i] = inner;
 						{
 							return std::get<0>(a) < std::get<0>(b);
 						});
-#ifdef DEBUG
-printf("@index: %d\n", central);
-#endif
 	int num_found = 0;
 	for ( auto t = data.begin(); t != data.end(); t++ )
 	{
@@ -134,22 +129,11 @@ printf("@index: %d\n", central);
 		int outer = std::get<2>(*t);
 		if (counts[inner] >= 3)
 			continue;
-#ifdef DEBUG
-printf("@: %f\t(%d, %d)\t%d\n", std::get<0>(*t), pos[inner], std::get<1>(*t), std::get<2>(*t));
-#endif
 
 		if (hit.find(outer) != hit.end())
 			continue;
 
 yep[1 + 4 + 3 * pos[inner] + counts[inner]] = outer;
-
-#ifdef DEBUG
-printf("@: ");
-for (int j=0;j<17;j++)
-	if (yep[j] == -1) printf(". ");
-	else	printf("%d ", yep[j]);
-printf("\n@\n");
-#endif
 
 		memcpy(nbr[1 + 4 + 3 * pos[inner] + counts[inner]], positions[outer], 3 * sizeof(double));
 
@@ -167,11 +151,13 @@ for (int i=0;i<17;i++)
 	return num_found == 12;
 }
 
+//todo: put all unit tests back in
+
 int main()
 {
 	ptm_initialize_global();
-//uint64_t res = run_tests();
-//assert(res == 0);
+	uint64_t res = run_tests();
+	assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
 	//return 0;
@@ -242,20 +228,7 @@ int main()
 				printf("%d ", counts[j]);
 			printf("]\n");
 		}
-
-/*
-#ifdef DEBUG
-if (type != PTM_MATCH_DCUB || rmsd > 0.05)
-	continue;
-
-printf("@type: %d\n", type);
-printf("@rmsd: %f\n", rmsd);
-for (int j=0;j<17;j++)
-{
-	printf("!!!%f %f %f\n", nbr[j][0], nbr[j][1], nbr[j][2]);
-}
-#endif
-*/	}
+	}
 
 	printf("rmsd sum: %f\n", rmsd_sum);
 
