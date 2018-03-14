@@ -3,7 +3,13 @@
 
 #include <cstdint>
 
-const int8_t mapping_sc[24][PTM_MAX_POINTS] = {
+#define NUM_CUBIC_MAPPINGS 24
+#define NUM_ICO_MAPPINGS 60
+#define NUM_HEX_MAPPINGS 6
+#define NUM_DCUB_MAPPINGS 12
+#define NUM_DHEX_MAPPINGS 3
+
+const int8_t mapping_sc[NUM_CUBIC_MAPPINGS][PTM_MAX_POINTS] = {
 					{0, 1, 2, 3, 4, 5, 6},
 					{0, 2, 1, 4, 3, 5, 6},
 					{0, 2, 1, 3, 4, 6, 5},
@@ -29,7 +35,7 @@ const int8_t mapping_sc[24][PTM_MAX_POINTS] = {
 					{0, 6, 5, 4, 3, 2, 1},
 					{0, 4, 3, 2, 1, 6, 5}	};
 
-const int8_t mapping_fcc[24][PTM_MAX_POINTS] = {
+const int8_t mapping_fcc[NUM_CUBIC_MAPPINGS][PTM_MAX_POINTS] = {
 					{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
 					{0, 2, 1, 4, 3, 7, 8, 5, 6, 11, 12, 9, 10},
 					{0, 3, 4, 1, 2, 6, 5, 8, 7, 12, 11, 10, 9},
@@ -55,7 +61,7 @@ const int8_t mapping_fcc[24][PTM_MAX_POINTS] = {
 					{0, 10, 9, 11, 12, 6, 5, 7, 8, 2, 1, 3, 4},
 					{0, 2, 1, 3, 4, 10, 9, 12, 11, 6, 5, 8, 7}	};
 
-const int8_t mapping_bcc[24][PTM_MAX_POINTS] = {
+const int8_t mapping_bcc[NUM_CUBIC_MAPPINGS][PTM_MAX_POINTS] = {
 					{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
 					{0, 4, 3, 2, 1, 7, 8, 5, 6, 10, 9, 12, 11, 13, 14},
 					{0, 6, 5, 7, 8, 2, 1, 3, 4, 10, 9, 11, 12, 14, 13},
@@ -81,7 +87,7 @@ const int8_t mapping_bcc[24][PTM_MAX_POINTS] = {
 					{0, 2, 1, 8, 7, 6, 5, 4, 3, 14, 13, 12, 11, 10, 9},
 					{0, 2, 1, 4, 3, 8, 7, 6, 5, 12, 11, 10, 9, 14, 13}	};
 
-const int8_t mapping_ico[60][PTM_MAX_POINTS] = {
+const int8_t mapping_ico[NUM_ICO_MAPPINGS][PTM_MAX_POINTS] = {
 					{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
 					{0, 10, 9, 8, 7, 5, 6, 2, 1, 12, 11, 3, 4},
 					{0, 1, 2, 9, 10, 7, 8, 11, 12, 5, 6, 3, 4},
@@ -143,7 +149,7 @@ const int8_t mapping_ico[60][PTM_MAX_POINTS] = {
 					{0, 3, 4, 1, 2, 7, 8, 5, 6, 10, 9, 12, 11},
 					{0, 4, 3, 2, 1, 6, 5, 8, 7, 11, 12, 9, 10}	};
 
-const int8_t mapping_hcp[6][PTM_MAX_POINTS] = {
+const int8_t mapping_hcp[NUM_HEX_MAPPINGS][PTM_MAX_POINTS] = {
 					{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
 					{0, 5, 6, 1, 2, 3, 4, 9, 10, 12, 11, 8, 7},
 					{0, 3, 4, 5, 6, 1, 2, 12, 11, 7, 8, 10, 9},
@@ -151,7 +157,7 @@ const int8_t mapping_hcp[6][PTM_MAX_POINTS] = {
 					{0, 2, 1, 6, 5, 4, 3, 8, 7, 11, 12, 9, 10},
 					{0, 6, 5, 4, 3, 2, 1, 10, 9, 8, 7, 12, 11}	};
 
-const int8_t mapping_dcub[12][PTM_MAX_POINTS] = {
+const int8_t mapping_dcub[NUM_DCUB_MAPPINGS][PTM_MAX_POINTS] = {
 					{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
 					{0, 2, 1, 4, 3, 9, 8, 10, 6, 5, 7, 14, 16, 15, 11, 13, 12},
 					{0, 4, 3, 2, 1, 15, 16, 14, 12, 13, 11, 10, 8, 9, 7, 5, 6},
@@ -165,7 +171,7 @@ const int8_t mapping_dcub[12][PTM_MAX_POINTS] = {
 					{0, 1, 3, 4, 2, 7, 5, 6, 13, 11, 12, 16, 15, 14, 8, 10, 9},
 					{0, 2, 3, 1, 4, 8, 10, 9, 11, 12, 13, 5, 7, 6, 15, 16, 14}	};
 
-const int8_t mapping_dhex[3][PTM_MAX_POINTS] = {
+const int8_t mapping_dhex[NUM_DHEX_MAPPINGS][PTM_MAX_POINTS] = {
 					{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
 					{0, 1, 3, 4, 2, 6, 7, 5, 11, 13, 12, 14, 16, 15, 8, 9, 10},
 					{0, 1, 4, 2, 3, 7, 5, 6, 14, 15, 16, 8, 10, 9, 11, 13, 12}	};

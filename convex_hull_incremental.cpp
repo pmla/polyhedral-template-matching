@@ -353,8 +353,7 @@ int get_convex_hull(int num_points, const double (*points)[3], convexhull_t* ch,
 		int b = ch->facets[i][1];
 		int c = ch->facets[i][2];
 		if (a == 0 || b == 0 || c == 0)
-			return -6;		//central atom contained in convex hull
-//todo: presence of central atom in convex hull is not an algorithm error.
+			return 1;		//central atom contained in convex hull
 
 		simplex[i][0] = a - 1;
 		simplex[i][1] = b - 1;

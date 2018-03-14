@@ -108,7 +108,7 @@ int match_general(const refdata_t* s, double (*ch_points)[3], double (*points)[3
 	int8_t facets[PTM_MAX_FACETS][3];
 
 	int ret = get_convex_hull(s->num_nbrs + 1, (const double (*)[3])ch_points, ch, facets);
-	ch->ok = ret == 0;
+	ch->ok = ret >= 0;
 	if (ret != 0)
 		return PTM_NO_ERROR;
 
@@ -149,7 +149,7 @@ int match_fcc_hcp_ico(double (*ch_points)[3], double (*points)[3], int32_t flags
 	int8_t facets[PTM_MAX_FACETS][3];
 
 	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, ch, facets);
-	ch->ok = ret == 0;
+	ch->ok = ret >= 0;
 	if (ret != 0)
 		return PTM_NO_ERROR;
 
@@ -185,7 +185,7 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 
 	int8_t facets[PTM_MAX_FACETS][3];
 	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, ch, facets);
-	ch->ok = ret == 0;
+	ch->ok = ret >= 0;
 	if (ret != 0)
 		return PTM_NO_ERROR;
 

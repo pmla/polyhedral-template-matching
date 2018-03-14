@@ -15,12 +15,13 @@
 
 using namespace std;
 
+#define ACTIVE_DIAMOND
 
-//non-diamond data
-//#define _MAX_NBRS 24
-
-//diamond data
-#define _MAX_NBRS 50
+#ifdef ACTIVE_DIAMOND
+	#define _MAX_NBRS 50
+#else
+	#define _MAX_NBRS 24
+#endif
 
 static int read_file(const char* path, uint8_t** p_buf, size_t* p_fsize)
 {
@@ -105,7 +106,13 @@ int main()
 		return -1;
 
 	int num_atoms = fsize / (_MAX_NBRS * sizeof(int32_t));
+
+#ifdef ACTIVE_DIAMOND
 	const int max_nbrs = 34;
+#else
+	const int max_nbrs = 19;
+#endif
+
 	//assert(num_atoms == 88737);
 	printf("num atoms: %d\n", num_atoms);
 
@@ -130,6 +137,14 @@ int main()
 		double q[4], F[9], F_res[3], U[9], P[9];
 		ptm_index(	local_handle, PTM_CHECK_ALL, max_nbrs + 1, nbr, NULL, topological_ordering,
 				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
+
+/*if (type == PTM_MATCH_BCC && rmsd < 0.1)
+{
+	printf("#scale %f\n", scale);
+	printf("#quat %f %f %f %f\n", q[0], q[1], q[2], q[3]);
+	for (int j=0;j<15;j++)
+		printf("!!!%f %f %f\n", nbr[j][0], nbr[j][1], nbr[j][2]);
+}*/
 
 		types[i] = type;
 		rmsds[i] = rmsd;
