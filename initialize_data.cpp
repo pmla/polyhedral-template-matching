@@ -47,7 +47,7 @@ int ptm_initialize_global()
 		return PTM_NO_ERROR;
 
 	int8_t colours[PTM_MAX_POINTS] = {0};
-	int8_t dcolours[PTM_MAX_POINTS] = {0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int8_t dcolours[PTM_MAX_POINTS] = {1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 	int ret = initialize_graphs(&structure_sc, colours);
 	ret |= initialize_graphs(&structure_fcc, colours);

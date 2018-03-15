@@ -181,7 +181,8 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 {
 	int num_nbrs = structure_dcub.num_nbrs;
 	int num_facets = structure_fcc.num_facets;
-	int max_degree = structure_fcc.max_degree;
+	int max_degree = structure_dcub.max_degree;
+
 
 	int8_t facets[PTM_MAX_FACETS][3];
 	int ret = get_convex_hull(num_nbrs + 1, (const double (*)[3])ch_points, ch, facets);
@@ -189,7 +190,28 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 	if (ret != 0)
 		return PTM_NO_ERROR;
 
-	if (ch->num_facets != num_facets)
+	//check for facets with multiple inner atoms
+	bool inverted[4] = {false, false, false, false};
+	for (int i=0;i<ch->num_facets;i++)
+	{
+		int n = 0;
+		for (int j=0;j<3;j++)
+		{
+			if (facets[i][j] <= 3)
+			{
+				inverted[facets[i][j]] = true;
+				n++;
+			}
+		}
+		if (n > 1)
+			return PTM_NO_ERROR;
+	}
+
+	int num_inverted = 0;
+	for (int i=0;i<4;i++)
+		num_inverted += inverted[i] ? 1 : 0;
+
+	if (ch->num_facets != num_facets + 2 * num_inverted)
 		return PTM_NO_ERROR;			//incorrect number of facets in convex hull
 
 	int8_t degree[PTM_MAX_NBRS];
@@ -204,9 +226,8 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 		int a = facets[i][0];
 		int b = facets[i][1];
 		int c = facets[i][2];
-
 		if (a <= 3 || b <= 3 || c <= 3)
-			return PTM_NO_ERROR;
+			continue;
 
 		int i0 = (a - 4) / 3;
 		int i1 = (b - 4) / 3;
@@ -214,7 +235,7 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 
 		if (i0 == i1 && i0 == i2)
 		{
-			if (num_found >= 4)
+			if (num_found + num_inverted >= 4)
 				return PTM_NO_ERROR;
 
 			toadd[num_found][0] = a;
@@ -228,10 +249,10 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 		}
 	}
 
-	if (num_found != 4)
+	if (num_found + num_inverted != 4)
 		return PTM_NO_ERROR;
 
-	for (int i=0;i<4;i++)
+	for (int i=0;i<num_found;i++)
 	{
 		int a = toadd[i][0];
 		int b = toadd[i][1];
@@ -255,11 +276,15 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 		ch->num_facets++;
 	}
 
+	_max_degree = graph_degree(ch->num_facets, facets, num_nbrs, degree);
+	if (_max_degree > max_degree)
+		return PTM_NO_ERROR;
+
 	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(num_nbrs + 1, points, normalized);
 
 	std::array<int8_t, 2 * PTM_MAX_EDGES> code;
-	int8_t colours[PTM_MAX_POINTS] = {0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int8_t colours[PTM_MAX_POINTS] = {1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;
 	ret = canonical_form_coloured(ch->num_facets, facets, num_nbrs, degree, colours, canonical_labelling, &code[0], &hash);

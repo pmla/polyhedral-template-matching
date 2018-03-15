@@ -82,8 +82,8 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 int main()
 {
 	ptm_initialize_global();
-	uint64_t res = run_tests();
-	assert(res == 0);
+	//uint64_t res = run_tests();
+	//assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
 	//return 0;
@@ -135,12 +135,10 @@ int main()
 		double q[4], F[9], F_res[3], U[9], P[9];
 		ptm_index(	local_handle, PTM_CHECK_ALL, max_nbrs + 1, nbr, NULL, topological_ordering,
 				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
-
-/*if (type == PTM_MATCH_BCC && rmsd < 0.1)
-{
+/*{
 	printf("#scale %f\n", scale);
 	printf("#quat %f %f %f %f\n", q[0], q[1], q[2], q[3]);
-	for (int j=0;j<15;j++)
+	for (int j=0;j<17;j++)
 		printf("!!!%f %f %f\n", nbr[j][0], nbr[j][1], nbr[j][2]);
 }*/
 
