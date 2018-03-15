@@ -51,16 +51,18 @@ typedef struct
 } structdata_t;
 
 //                              { .type = PTM_MATCH_SC,  .check = PTM_CHECK_SC,  .num_points =  7, .points = ptm_template_sc },
-structdata_t structdata[5] =  {	{ PTM_MATCH_FCC, PTM_CHECK_FCC, 13, ptm_template_fcc},
-				{ PTM_MATCH_HCP, PTM_CHECK_HCP, 13, ptm_template_hcp},
-				{ PTM_MATCH_BCC, PTM_CHECK_BCC, 15, ptm_template_bcc},
-				{ PTM_MATCH_ICO, PTM_CHECK_ICO, 13, ptm_template_ico},
-				{ PTM_MATCH_SC,  PTM_CHECK_SC,   7, ptm_template_sc } };
+structdata_t structdata[7] =  {	{ PTM_MATCH_FCC,  PTM_CHECK_FCC,  13, ptm_template_fcc  },
+				{ PTM_MATCH_HCP,  PTM_CHECK_HCP,  13, ptm_template_hcp  },
+				{ PTM_MATCH_BCC,  PTM_CHECK_BCC,  15, ptm_template_bcc  },
+				{ PTM_MATCH_ICO,  PTM_CHECK_ICO,  13, ptm_template_ico  },
+				{ PTM_MATCH_SC,   PTM_CHECK_SC,    7, ptm_template_sc   },
+				{ PTM_MATCH_DCUB, PTM_CHECK_DCUB, 17, ptm_template_dcub },
+				{ PTM_MATCH_DHEX, PTM_CHECK_DHEX, 17, ptm_template_dhex }, };
 
 typedef struct
 {
 	int32_t type;
-	int32_t numbers[15];
+	int32_t numbers[PTM_MAX_POINTS];
 } alloytest_t;
 
 alloytest_t sc_alloy_tests[] = {
@@ -119,6 +121,29 @@ alloytest_t bcc_alloy_tests[] = {
 	{ PTM_ALLOY_B2,     {4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4}},
 	{ PTM_ALLOY_B2,     {1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1}},
 };
+
+alloytest_t dcub_alloy_tests[] = {
+
+	{ PTM_ALLOY_NONE,   {-1}},	//no test
+
+	{ PTM_ALLOY_NONE,   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0}},	//pure -defect
+	{ PTM_ALLOY_NONE,   {4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},	//pure -defect
+	{ PTM_ALLOY_NONE,   {4, 0, 0, 0, 0, 4, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4}},	//SiC -defect
+	{ PTM_ALLOY_NONE,   {1, 2, 2, 2, 2, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1}},	//SiC -defect
+
+	{ PTM_ALLOY_PURE,   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+	{ PTM_ALLOY_PURE,   {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},
+	{ PTM_ALLOY_SIC,    {4, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},
+	{ PTM_ALLOY_SIC,    {1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
+
+};
+
+
+alloytest_t dhex_alloy_tests[] = {
+
+	{ PTM_ALLOY_NONE,   {-1}},	//no test
+};
+
 
 typedef struct
 {
@@ -222,7 +247,8 @@ quattest_t ico_qtest[] = {	{	false, {0.960379, 0.109103, 0.249483, -0.059392},	{
 				{	true,  {1.05, 0.0, 0.0, -0.05, 0.95, -0.0, -0.02, 0.06, 0.94},	{-1, -1, -1, -1}			}	};
 
 
-quattest_t hcp_qtest[] = {	{	false, {0.813035, -0.166389, 0.181571, -0.527562},	{0.813035, -0.166389, 0.181571, -0.527562}	},
+quattest_t hcp_qtest[] = {	{	false, {1.00, 0.00, -0.00, 0.00},			{1.00, 0.00, -0.00, 0.00}			},
+				{	false, {0.813035, -0.166389, 0.181571, -0.527562},	{0.813035, -0.166389, 0.181571, -0.527562}	},
 				{	false, {0.023227, -0.154944, -0.861953, -0.482172},	{0.761148, -0.255749, -0.582977, 0.124032}	},
 				{	false, {0.631878, 0.693281, 0.293658, -0.184001},	{0.717408, -0.208128, 0.269531, -0.607751}	},
 				{	false, {0.167480, -0.812443, 0.552710, 0.079998},	{0.921658, -0.056237, -0.334734, -0.187981}	},
@@ -290,7 +316,7 @@ static double matrix_determinant(double* A)
 static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3])
 {
 	//transform template
-	double transformed_template[15][3];
+	double transformed_template[PTM_MAX_POINTS][3];
 	for (int i=0;i<num;i++)
 	{
 		double row[3] = {0, 0, 0};
@@ -299,7 +325,7 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 	}
 
 	//translate and scale input points
-	double points[15][3];
+	double points[PTM_MAX_POINTS][3];
 	subtract_barycentre(num, input_points, points);
 	for (int i=0;i<num;i++)
 		for (int j=0;j<3;j++)
@@ -335,7 +361,7 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3], int8_t* mapping)
 {
 	//transform template
-	double transformed_template[15][3];
+	double transformed_template[PTM_MAX_POINTS][3];
 	for (int i=0;i<num;i++)
 	{
 		double row[3] = {0, 0, 0};
@@ -344,7 +370,7 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 	}
 
 	//translate and scale input points
-	double points[15][3];
+	double points[PTM_MAX_POINTS][3];
 	subtract_barycentre(num, input_points, points);
 	for (int i=0;i<num;i++)
 		for (int j=0;j<3;j++)
@@ -371,6 +397,8 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 	return sqrt(fabs(acc / num));
 }
 
+typedef double points_t[3];
+
 uint64_t run_tests()
 {
 	int ret = 0;
@@ -382,25 +410,33 @@ uint64_t run_tests()
 					sizeof(hcp_alloy_tests) / sizeof(alloytest_t),
 					sizeof(bcc_alloy_tests) / sizeof(alloytest_t),
 					sizeof(ico_alloy_tests) / sizeof(alloytest_t),
-					sizeof(sc_alloy_tests) / sizeof(alloytest_t)	};
+					sizeof(sc_alloy_tests) / sizeof(alloytest_t),
+					sizeof(dcub_alloy_tests) / sizeof(alloytest_t),
+					sizeof(dhex_alloy_tests) / sizeof(alloytest_t)	};
 
 	alloytest_t* alloy_test[] = {	fcc_alloy_tests,
 					hcp_alloy_tests,
 					bcc_alloy_tests,
 					ico_alloy_tests,
-					sc_alloy_tests	};
+					sc_alloy_tests,
+					dcub_alloy_tests,
+					dhex_alloy_tests  };
 
 	int num_quat_tests[] = {	sizeof(cubic_qtest) / sizeof(quattest_t),
 					sizeof(hcp_qtest) / sizeof(quattest_t),
 					sizeof(cubic_qtest) / sizeof(quattest_t),
 					sizeof(ico_qtest) / sizeof(quattest_t),
-					sizeof(cubic_qtest) / sizeof(quattest_t)	};
+					sizeof(cubic_qtest) / sizeof(quattest_t),
+					1,
+					1	};
 
 	quattest_t* quat_test[] = {	cubic_qtest,
 					hcp_qtest,
 					cubic_qtest,
 					ico_qtest,
-					cubic_qtest	};
+					cubic_qtest,
+					cubic_qtest,
+					hcp_qtest	};
 	int num_tests = 0;
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
@@ -437,8 +473,8 @@ uint64_t run_tests()
 int it = 2;
 	{
 		structdata_t* s = &structdata[it];
-		double points[15][3];
-		double rotated_points[15][3];
+		double points[PTM_MAX_POINTS][3];
+		double rotated_points[PTM_MAX_POINTS][3];
 
 		memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
 
@@ -519,8 +555,8 @@ exit(3);*/
 
 
 			structdata_t* s = &structdata[it];
-			double scaled_only[15][3] = {0};
-			double points[15][3];
+			double scaled_only[PTM_MAX_POINTS][3] = {0};
+			double points[PTM_MAX_POINTS][3];
 			memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
 
 			for (int i=0;i<s->num_points;i++)
@@ -558,7 +594,7 @@ exit(3);*/
 
 				for (int itop=0;itop<=1;itop++)
 				{
-					int8_t mapping[15];
+					int8_t mapping[PTM_MAX_POINTS];
 					bool topological = itop == 1;
 					int32_t type, alloy_type;
 					double scale, rmsd, interatomic_distance, lattice_constant;
@@ -665,23 +701,23 @@ exit(3);*/
 	}
 
 
-/*
 	{
 		double lc_points_sc[7][3] = {{0,0,0},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
 		double lc_points_fcc[13][3] = {{0,0,0},{0,1,1},{0,-1,-1},{0,1,-1},{0,-1,1},{1,0,1},{-1,0,-1},{1,0,-1},{-1,0,1},{1,1,0},{-1,-1,0},{1,-1,0},{-1,1,0}};
 		double lc_points_bcc[15][3] = {{0,0,0},{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1},{2,0,0},{-2,0,0},{0,2,0},{0,-2,0},{0,0,2},{0,0,-2}};
-		//double* pdata[3] = {lc_points_fcc, lc_points_bcc, lc_points_sc};
+		double lc_points_dcub[17][3] = {{0,0,0},{-0.5,0.5,0.5},{-0.5,-0.5,-0.5},{0.5,-0.5,0.5},{0.5,0.5,-0.5},{-1,0,1},{-1,1,0},{0,1,1},{-1,-1,0},{-1,0,-1},{0,-1,-1},{0,-1,1},{1,-1,0},{1,0,1},{0,1,-1},{1,0,-1},{1,1,0}};
+		points_t* pdata[4] = {lc_points_fcc, lc_points_bcc, lc_points_sc, lc_points_dcub};
 
-		double* (*pdata)[3] = {lc_points_fcc, lc_points_bcc, lc_points_sc};
+		//double* (*pdata)[3] = {lc_points_fcc, lc_points_bcc, lc_points_sc};
 
-		int lcdat[3] = {0, 2, 4};
-		for (int i=0;i<3;i++)
+		int lcdat[4] = {0, 2, 4, 5};
+		for (int i=0;i<4;i++)
 		{
 			structdata_t* s = &structdata[lcdat[i]];
 
 			int32_t type;
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4];
-			ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false, &type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, NULL, &interatomic_distance, &lattice_constant);
+			ret = ptm_index(local_handle, s->check, s->num_points, pdata[i], NULL, false, &type, NULL, &scale, &rmsd, q, NULL, NULL,  NULL, NULL, NULL, &interatomic_distance, &lattice_constant);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 
@@ -691,9 +727,9 @@ exit(3);*/
 			if (fabs(lattice_constant - 2) > tolerance)
 				CLEANUP("failed on lattice constant", -1);
 
-			double x = pdata[i][3 * 1 + 0];
-			double y = pdata[i][3 * 1 + 1];
-			double z = pdata[i][3 * 1 + 2];
+			double x = pdata[i][1][0];
+			double y = pdata[i][1][1];
+			double z = pdata[i][1][2];
 			double iad = sqrt(x*x + y*y + z*z);
 			if (fabs(iad - interatomic_distance) > tolerance)
 				CLEANUP("failed on interatomic distance", -1);
@@ -701,7 +737,6 @@ exit(3);*/
 			num_tests++;
 		}
 	}
-*/
 
 cleanup:
 	printf("num tests completed: %d\n", num_tests);

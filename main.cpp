@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#define ACTIVE_DIAMOND
+#define xACTIVE_DIAMOND
 
 #ifdef ACTIVE_DIAMOND
 	#define _MAX_NBRS 50
@@ -79,8 +79,6 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 	}
 }
 
-//todo: put all unit tests back in
-
 int main()
 {
 	ptm_initialize_global();
@@ -93,15 +91,15 @@ int main()
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;
 	double* positions = NULL;
-	//int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/fcc_positions.dat", (uint8_t**)&positions, &fsize);
-	int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
-	//ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
