@@ -93,7 +93,7 @@ int32_t find_alloy_type(const refdata_t* ref, int8_t* mapping, int32_t* numbers)
 		if (test_shell_structure(ref, mapping, numbers, 8))
 			return PTM_ALLOY_B2;
 
-	if (ref->type == PTM_MATCH_DCUB)
+	if (ref->type == PTM_MATCH_DCUB || ref->type == PTM_MATCH_DHEX)
 		if (test_shell_structure(ref, mapping, numbers, 4))
 			return PTM_ALLOY_SIC;
 
