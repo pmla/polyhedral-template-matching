@@ -2,6 +2,7 @@
 #define STRUCTURE_MATCHER_HPP
 
 #include <cstdint>
+#include "initialize_data.hpp"
 #include "ptm_constants.h"
 
 typedef struct

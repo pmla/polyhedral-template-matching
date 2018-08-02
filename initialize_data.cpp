@@ -54,7 +54,6 @@ int ptm_initialize_global()
 	ret |= initialize_graphs(&structure_hcp, colours);
 	ret |= initialize_graphs(&structure_ico, colours);
 	ret |= initialize_graphs(&structure_bcc, colours);
-
 	ret |= initialize_graphs(&structure_dcub, dcolours);
 	ret |= initialize_graphs(&structure_dhex, dcolours);
 

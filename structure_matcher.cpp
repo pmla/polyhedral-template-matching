@@ -11,8 +11,7 @@
 #include "graph_data.hpp"
 #include "graph_tools.hpp"
 #include "normalize_vertices.hpp"
-#include "qcprot/polar.hpp"
-#include "initialize_data.hpp"
+#include "polar.hpp"
 #include "structure_matcher.hpp"
 #include "ptm_constants.h"
 

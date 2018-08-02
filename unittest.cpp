@@ -34,7 +34,7 @@ done:
 #include <cstdbool>
 #include <algorithm>
 #include "normalize_vertices.hpp"
-#include "qcprot/quat.hpp"
+#include "quat.hpp"
 #include "ptm_functions.h"
 
 

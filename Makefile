@@ -13,8 +13,8 @@ CPP_FILES = main.cpp graph_data.cpp convex_hull_incremental.cpp \
 	structure_matcher.cpp \
 	canonical_coloured.cpp \
 	graph_tools.cpp \
-	qcprot/quat.cpp \
-	qcprot/polar.cpp \
+	quat.cpp \
+	polar.cpp \
 	unittest.cpp\
 	initialize_data.cpp \
 	neighbour_ordering.cpp voronoi/cell.cpp
@@ -34,8 +34,8 @@ HEADER_FILES = alloy_types.hpp convex_hull_incremental.hpp \
 	canonical_coloured.hpp \
 	graph_tools.hpp \
 	fundamental_mappings.hpp \
-	qcprot/quat.hpp \
-	qcprot/polar.hpp \
+	quat.hpp \
+	polar.hpp \
 	initialize_data.hpp \
 	neighbour_ordering.hpp \
 	voronoi/cell.hpp
