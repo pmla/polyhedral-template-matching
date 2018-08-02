@@ -30,8 +30,6 @@ done:
 #include <string.h>
 #include <cassert>
 #include <cmath>
-#include <cstdint>
-#include <cstdbool>
 #include <algorithm>
 #include "normalize_vertices.hpp"
 #include "quat.hpp"

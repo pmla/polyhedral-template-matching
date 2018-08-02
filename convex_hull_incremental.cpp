@@ -2,8 +2,6 @@
 #include <cfloat>
 #include <string.h>
 #include <cassert>
-#include <cstdint>
-#include <cstdbool>
 #include <algorithm>
 #include "convex_hull_incremental.hpp"
 #include "ptm_constants.h"

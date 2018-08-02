@@ -1,7 +1,7 @@
 #ifndef GRAPH_DATA_HPP
 #define GRAPH_DATA_HPP
 
-#include <cstdint>
+#include <stdint.h>
 #include "ptm_constants.h"
 
 

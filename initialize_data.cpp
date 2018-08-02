@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <string.h>
@@ -8,7 +7,6 @@
 #include <algorithm>
 #include "initialize_data.hpp"
 
-#include <array>
 using namespace std;
 
 
@@ -25,8 +23,7 @@ static int initialize_graphs(const refdata_t* s, int8_t* colours)
 {
 	for (int i = 0;i<s->num_graphs;i++)
 	{
-		std::array<int8_t, 2 * PTM_MAX_EDGES> code;
-
+		int8_t code[2 * PTM_MAX_EDGES];
 		int8_t degree[PTM_MAX_NBRS];
 		int _max_degree = graph_degree(s->num_facets, s->graphs[i].facets, s->num_nbrs, degree);
 		assert(_max_degree <= s->max_degree);

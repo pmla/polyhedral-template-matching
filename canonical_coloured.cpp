@@ -1,7 +1,5 @@
 #include <string.h>
-#include <cstdint>
 #include <climits>
-#include <cstdbool>
 #include <algorithm>
 #include "graph_tools.hpp"
 #include "ptm_constants.h"

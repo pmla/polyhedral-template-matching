@@ -2,8 +2,8 @@
 #define CONVEX_HULL_INCREMENTAL_HPP
 
 
-#include <cstdint>
-#include <cstdbool>
+#include <stdint.h>
+#include <stdbool.h>
 #include "ptm_constants.h"
 
 

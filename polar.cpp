@@ -85,10 +85,9 @@
  *  
  ******************************************************************************/
 
-#include <cstdbool>
 #include <cmath>
 #include <algorithm>
-#include <cstring>
+#include <string.h>
 #include "quat.hpp"
 
 

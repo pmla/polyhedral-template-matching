@@ -1,15 +1,9 @@
-#include <cstdint>
-#include <cstdbool>
+#include <stdint.h>
+#include <stdbool.h>
 #include <cstdio>
 #include <cstdlib>
 #include <string.h>
 #include <cassert>
-
-#include <map>
-#include <set>
-#include <tuple>
-#include <algorithm>
-
 #include "ptm_functions.h"
 #include "unittest.hpp"
 

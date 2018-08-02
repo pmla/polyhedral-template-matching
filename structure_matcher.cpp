@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <string.h>
@@ -15,7 +14,6 @@
 #include "structure_matcher.hpp"
 #include "ptm_constants.h"
 
-#include <array>
 using namespace std;
 
 
@@ -126,7 +124,7 @@ int match_general(const refdata_t* s, double (*ch_points)[3], double (*points)[3
 	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(s->num_nbrs + 1, points, normalized);
 
-	std::array<int8_t, 2 * PTM_MAX_EDGES> code;
+	int8_t code[2 * PTM_MAX_EDGES];
 	int8_t colours[PTM_MAX_POINTS] = {0};
 	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;
@@ -162,7 +160,7 @@ int match_fcc_hcp_ico(double (*ch_points)[3], double (*points)[3], int32_t flags
 	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(num_nbrs + 1, points, normalized);
 
-	std::array<int8_t, 2 * PTM_MAX_EDGES> code;
+	int8_t code[2 * PTM_MAX_EDGES];
 	int8_t colours[PTM_MAX_POINTS] = {0};
 	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;
@@ -282,7 +280,7 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
 	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(num_nbrs + 1, points, normalized);
 
-	std::array<int8_t, 2 * PTM_MAX_EDGES> code;
+	int8_t code[2 * PTM_MAX_EDGES];
 	int8_t colours[PTM_MAX_POINTS] = {1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	int8_t canonical_labelling[PTM_MAX_POINTS];
 	uint64_t hash = 0;

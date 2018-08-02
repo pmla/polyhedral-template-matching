@@ -2,7 +2,6 @@
 #define INITIALIZE_DATA_HPP
 
 
-#include <cstdint>
 #include "graph_data.hpp"
 #include "graph_tools.hpp"
 #include "deformation_gradient.hpp"

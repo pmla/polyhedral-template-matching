@@ -1,7 +1,7 @@
 #ifndef FUNDAMENTAL_MAPPINGS_HPP
 #define FUNDAMENTAL_MAPPINGS_HPP
 
-#include <cstdint>
+#include <stdint.h>
 
 #define NUM_CUBIC_MAPPINGS 24
 #define NUM_ICO_MAPPINGS 60

@@ -1,7 +1,7 @@
 #ifndef GRAPH_TOOLS_HPP
 #define GRAPH_TOOLS_HPP
 
-#include <cstdint>
+#include <stdint.h>
 #include "ptm_constants.h"
 
 bool build_facet_map(int num_facets, int8_t facets[][3], int8_t common[PTM_MAX_NBRS][PTM_MAX_NBRS]);

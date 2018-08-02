@@ -19,12 +19,10 @@ CPP_FILES = main.cpp graph_data.cpp convex_hull_incremental.cpp \
 	initialize_data.cpp \
 	neighbour_ordering.cpp voronoi/cell.cpp
 
-#COBJS := $(patsubst %.c, %.o, $(C_FILES))
 CPPOBJS := $(patsubst %.cpp, %.o, $(CPP_FILES))
 LDFLAGS =
 LDLIBS = -lm #-fno-omit-frame-pointer -fsanitize=address
 
-#CC = gcc
 CPP = g++
 
 HEADER_FILES = alloy_types.hpp convex_hull_incremental.hpp \
@@ -42,31 +40,16 @@ HEADER_FILES = alloy_types.hpp convex_hull_incremental.hpp \
 
 OBJDIR = .
 
-#C_OBJECT_FILES = $(C_SRC_FILES:%.c=$(OBJDIR)/%.o) 
 CPP_OBJECT_FILES = $(CPP_SRC_FILES:%.cpp=$(OBJDIR)/%.o) 
 C_OBJECT_MODULE_FILE = $(C_SRC_MODULE_FILE:%.c=$(OBJDIR)/%.o) 
 
-#CFLAGS = -std=c99 -g -O3 -Wall -Wextra
-CPPFLAGS = -g -O3 -std=c++11 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
+#CPPFLAGS = -g -O3 -std=c++11 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
+CPPFLAGS = -g -O3 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
 
 
 all: $(PROGRAM)
 
-#$(PROGRAM): $(COBJS) $(CPPOBJS)
-#	$(CC) -c $(CFLAGS) $(COBJS)
-#	$(CPP) -c $(CPPFLAGS) $(CPPOBJS)
-#	$(CPP) $(COBJS) $(CPPOBJS) -o $(PROGRAM) $(LDLIBS) $(LDFLAGS)
-
 $(PROGRAM): $(CPPOBJS)
 	$(CPP) -c $(CPPFLAGS) $(CPPOBJS)
 	$(CPP) $(CPPOBJS) -o $(PROGRAM) $(LDLIBS) $(LDFLAGS)
-
-# These are the pattern matching rules. In addition to the automatic
-# variables used here, the variable $* that matches whatever % stands for
-# can be useful in special cases.
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-%: %.c
-	$(CC) $(CFLAGS) -o $@ $<
 
