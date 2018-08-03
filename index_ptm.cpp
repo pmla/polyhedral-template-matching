@@ -5,16 +5,16 @@
 #include <cfloat>
 #include <cassert>
 #include <algorithm>
-#include "convex_hull_incremental.hpp"
-#include "graph_data.hpp"
-#include "deformation_gradient.hpp"
-#include "alloy_types.hpp"
-#include "neighbour_ordering.hpp"
-#include "normalize_vertices.hpp"
-#include "quat.hpp"
-#include "polar.hpp"
-#include "initialize_data.hpp"
-#include "structure_matcher.hpp"
+#include "convex_hull_incremental.h"
+#include "graph_data.h"
+#include "deformation_gradient.h"
+#include "alloy_types.h"
+#include "neighbour_ordering.h"
+#include "normalize_vertices.h"
+#include "quat.h"
+#include "polar.h"
+#include "initialize_data.h"
+#include "structure_matcher.h"
 #include "ptm_functions.h"
 #include "ptm_constants.h"
 

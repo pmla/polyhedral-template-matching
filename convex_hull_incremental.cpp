@@ -3,7 +3,7 @@
 #include <string.h>
 #include <cassert>
 #include <algorithm>
-#include "convex_hull_incremental.hpp"
+#include "convex_hull_incremental.h"
 #include "ptm_constants.h"
 
 

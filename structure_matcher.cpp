@@ -5,16 +5,14 @@
 #include <cfloat>
 #include <cassert>
 #include <algorithm>
-#include "convex_hull_incremental.hpp"
-#include "canonical_coloured.hpp"
-#include "graph_data.hpp"
-#include "graph_tools.hpp"
-#include "normalize_vertices.hpp"
-#include "polar.hpp"
-#include "structure_matcher.hpp"
+#include "convex_hull_incremental.h"
+#include "canonical_coloured.h"
+#include "graph_data.h"
+#include "graph_tools.h"
+#include "normalize_vertices.h"
+#include "polar.h"
+#include "structure_matcher.h"
 #include "ptm_constants.h"
-
-using namespace std;
 
 
 static double calc_rmsd(int num_points, const double (*ideal_points)[3], double (*normalized)[3], int8_t* mapping,

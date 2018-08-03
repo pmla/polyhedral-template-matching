@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "ptm_constants.h"
-#include "initialize_data.hpp"
+#include "initialize_data.h"
 
 
 #define NUM_ALLOY_TYPES 3

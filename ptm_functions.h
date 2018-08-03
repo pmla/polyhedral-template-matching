@@ -1,9 +1,9 @@
-#ifndef PTM_FUNCTIONS_HPP
-#define PTM_FUNCTIONS_HPP
+#ifndef PTM_FUNCTIONS_H
+#define PTM_FUNCTIONS_H
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "initialize_data.hpp"
+#include "initialize_data.h"
 #include "ptm_constants.h"
 
 
