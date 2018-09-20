@@ -5,7 +5,7 @@
 #include <cfloat>
 #include <cassert>
 #include <algorithm>
-#include "initialize_data.h"
+#include "ptm_initialize_data.h"
 
 
 static void make_facets_clockwise(int num_facets, int8_t (*facets)[3], const double (*points)[3])

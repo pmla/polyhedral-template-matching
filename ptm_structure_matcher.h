@@ -1,7 +1,7 @@
-#ifndef STRUCTURE_MATCHER_H
-#define STRUCTURE_MATCHER_H
+#ifndef PTM_STRUCTURE_MATCHER_H
+#define PTM_STRUCTURE_MATCHER_H
 
-#include "initialize_data.h"
+#include "ptm_initialize_data.h"
 #include "ptm_constants.h"
 
 typedef struct

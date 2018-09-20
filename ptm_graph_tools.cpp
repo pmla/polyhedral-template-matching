@@ -1,6 +1,6 @@
 #include <string.h>
 #include <algorithm>
-#include "graph_tools.h"
+#include "ptm_graph_tools.h"
 #include "ptm_constants.h"
 
 

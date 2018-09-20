@@ -4,7 +4,7 @@
 #include <cassert>
 #include <algorithm>
 #include "ptm_constants.h"
-#include "cell.h"
+#include "ptm_voronoi_cell.h"
 using namespace voro;
 
 

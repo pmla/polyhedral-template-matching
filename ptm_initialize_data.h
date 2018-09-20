@@ -1,14 +1,14 @@
-#ifndef INITIALIZE_DATA_H
-#define INITIALIZE_DATA_H
+#ifndef PTM_INITIALIZE_DATA_H
+#define PTM_INITIALIZE_DATA_H
 
 
-#include "graph_data.h"
-#include "graph_tools.h"
-#include "deformation_gradient.h"
-#include "fundamental_mappings.h"
-#include "neighbour_ordering.h"
-#include "canonical_coloured.h"
-#include "convex_hull_incremental.h"
+#include "ptm_graph_data.h"
+#include "ptm_graph_tools.h"
+#include "ptm_deformation_gradient.h"
+#include "ptm_fundamental_mappings.h"
+#include "ptm_neighbour_ordering.h"
+#include "ptm_canonical_coloured.h"
+#include "ptm_convex_hull_incremental.h"
 
 
 typedef struct

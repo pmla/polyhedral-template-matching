@@ -1,4 +1,4 @@
-#include "graph_data.h"
+#include "ptm_graph_data.h"
 
 
 int8_t automorphisms[65][17] = {

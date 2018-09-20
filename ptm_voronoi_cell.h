@@ -9,13 +9,13 @@
 /** \file cell.hh
  * \brief Header file for the voronoicell and related classes. */
 
-#ifndef VOROPP_CELL_HH
-#define VOROPP_CELL_HH
+#ifndef PTM_VOROPP_CELL_HH
+#define PTM_VOROPP_CELL_HH
 
 #include <vector>
 #include <cstdio>
 
-#include "config.h"
+#include "ptm_voronoi_config.h"
 
 namespace voro {
 

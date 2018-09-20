@@ -5,13 +5,13 @@
 #include <cfloat>
 #include <cassert>
 #include <algorithm>
-#include "convex_hull_incremental.h"
-#include "canonical_coloured.h"
-#include "graph_data.h"
-#include "graph_tools.h"
-#include "normalize_vertices.h"
-#include "polar.h"
-#include "structure_matcher.h"
+#include "ptm_convex_hull_incremental.h"
+#include "ptm_canonical_coloured.h"
+#include "ptm_graph_data.h"
+#include "ptm_graph_tools.h"
+#include "ptm_normalize_vertices.h"
+#include "ptm_polar.h"
+#include "ptm_structure_matcher.h"
 #include "ptm_constants.h"
 
 

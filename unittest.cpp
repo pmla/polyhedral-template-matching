@@ -31,8 +31,8 @@ done:
 #include <cassert>
 #include <cmath>
 #include <algorithm>
-#include "normalize_vertices.h"
-#include "quat.h"
+#include "ptm_normalize_vertices.h"
+#include "ptm_quat.h"
 #include "ptm_functions.h"
 
 

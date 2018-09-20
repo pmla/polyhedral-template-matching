@@ -88,7 +88,7 @@
 #include <cmath>
 #include <algorithm>
 #include <string.h>
-#include "quat.h"
+#include "ptm_quat.h"
 
 
 static void matmul_3x3(double* A, double* x, double* b)

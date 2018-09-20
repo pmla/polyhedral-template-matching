@@ -1,5 +1,5 @@
-#ifndef NEIGHBOUR_ORDERING_H
-#define NEIGHBOUR_ORDERING_H
+#ifndef PTM_NEIGHBOUR_ORDERING_H
+#define PTM_NEIGHBOUR_ORDERING_H
 
 int calculate_neighbour_ordering(void* voronoi_handle, int num_points, const double (*_points)[3], int8_t* ordering);
 

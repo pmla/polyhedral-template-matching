@@ -1,5 +1,5 @@
-#ifndef DEFORMATION_GRADIENT_H
-#define DEFORMATION_GRADIENT_H
+#ifndef PTM_DEFORMATION_GRADIENT_H
+#define PTM_DEFORMATION_GRADIENT_H
 
 #include <stdint.h>
 #include "ptm_constants.h"

@@ -1,5 +1,5 @@
-#ifndef GRAPH_TOOLS_H
-#define GRAPH_TOOLS_H
+#ifndef PTM_GRAPH_TOOLS_H
+#define PTM_GRAPH_TOOLS_H
 
 #include <stdint.h>
 #include "ptm_constants.h"

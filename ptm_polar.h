@@ -1,5 +1,5 @@
-#ifndef POLAR_H
-#define POLAR_H
+#ifndef PTM_POLAR_H
+#define PTM_POLAR_H
 
 #include <stdint.h>
 #include <stdbool.h>

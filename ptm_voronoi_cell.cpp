@@ -12,8 +12,8 @@
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
-#include "config.h"
-#include "cell.h"
+#include "ptm_voronoi_config.h"
+#include "ptm_voronoi_cell.h"
 
 namespace voro {
 

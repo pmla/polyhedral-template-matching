@@ -1,5 +1,5 @@
-#ifndef CANONICAL_COLOURED_H
-#define CANONICAL_COLOURED_H
+#ifndef PTM_CANONICAL_COLOURED_H
+#define PTM_CANONICAL_COLOURED_H
 
 #include <stdint.h>
 

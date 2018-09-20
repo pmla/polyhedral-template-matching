@@ -1,5 +1,5 @@
-#ifndef QUAT_H
-#define QUAT_H
+#ifndef PTM_QUAT_H
+#define PTM_QUAT_H
 
 int rotate_quaternion_into_cubic_fundamental_zone(double* q);
 int rotate_quaternion_into_diamond_cubic_fundamental_zone(double* q);
