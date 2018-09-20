@@ -36,6 +36,8 @@ done:
 #include "ptm_functions.h"
 
 
+namespace ptm {
+
 #define RADIANS(x) (2.0 * M_PI * (x) / 360.0)
 #define DEGREES(x) (360 * (x) / (2.0 * M_PI))
 
@@ -740,5 +742,7 @@ cleanup:
 	printf("num tests completed: %d\n", num_tests);
 	ptm_uninitialize_local(local_handle);
 	return ret;
+}
+
 }
 
