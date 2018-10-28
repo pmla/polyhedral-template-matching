@@ -34,15 +34,55 @@ static double calculate_lattice_constant(int type, double interatomic_distance)
 	return c[type] * interatomic_distance;
 }
 
-static int rotate_into_fundamental_zone(int type, double* q)
+static int rotate_into_fundamental_zone(int type, bool output_conventional_orientation, double* q)
 {
 	if (type == PTM_MATCH_SC)	return ptm::rotate_quaternion_into_cubic_fundamental_zone(q);
 	if (type == PTM_MATCH_FCC)	return ptm::rotate_quaternion_into_cubic_fundamental_zone(q);
 	if (type == PTM_MATCH_BCC)	return ptm::rotate_quaternion_into_cubic_fundamental_zone(q);
 	if (type == PTM_MATCH_ICO)	return ptm::rotate_quaternion_into_icosahedral_fundamental_zone(q);
-	if (type == PTM_MATCH_HCP)	return ptm::rotate_quaternion_into_hcp_fundamental_zone(q);
-	if (type == PTM_MATCH_DCUB)	return ptm::rotate_quaternion_into_diamond_cubic_fundamental_zone(q);
-	if (type == PTM_MATCH_DHEX)	return ptm::rotate_quaternion_into_diamond_hexagonal_fundamental_zone(q);
+
+	if (type == PTM_MATCH_HCP)
+	{
+		if (!output_conventional_orientation)
+		{
+			return ptm::rotate_quaternion_into_hcp_fundamental_zone(q);
+		}
+		else
+		{
+			ptm::rotate_quaternion_into_hcp_crystalline_fundamental_zone(q);
+			return -1;
+			//cannot create a meaningful mapping for non-template rotations
+		}
+	}
+
+	if (type == PTM_MATCH_DCUB)
+	{
+		if (!output_conventional_orientation)
+		{
+			return ptm::rotate_quaternion_into_diamond_cubic_fundamental_zone(q);
+		}
+		else
+		{
+			ptm::rotate_quaternion_into_cubic_fundamental_zone(q);
+			return -1;
+			//cannot create a meaningful mapping for non-template rotations
+		}
+	}
+
+	if (type == PTM_MATCH_DHEX)
+	{
+		if (!output_conventional_orientation)
+		{
+			return ptm::rotate_quaternion_into_diamond_hexagonal_fundamental_zone(q);
+		}
+		else
+		{
+			ptm::rotate_quaternion_into_hcp_crystalline_fundamental_zone(q);
+			return -1;
+			//cannot create a meaningful mapping for non-template rotations
+		}
+	}
+
 	return -1;
 }
 
@@ -72,6 +112,7 @@ static void order_points(ptm_local_handle_t local_handle, int num_points, double
 }
 
 static void output_data(ptm::result_t* res, int num_points, int32_t* unpermuted_numbers, double (*points)[3], int32_t* numbers, int8_t* ordering,
+			bool output_conventional_orientation,
 			int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res,
 			double* U, double* P, int8_t* mapping, double* p_interatomic_distance, double* p_lattice_constant)
 {
@@ -90,10 +131,12 @@ static void output_data(ptm::result_t* res, int num_points, int32_t* unpermuted_
 	if (p_alloy_type != NULL && unpermuted_numbers != NULL)
 		*p_alloy_type = ptm::find_alloy_type(ref, res->mapping, numbers);
 
-	int bi = rotate_into_fundamental_zone(ref->type, res->q);
 	int8_t temp[PTM_MAX_POINTS];
-	for (int i=0;i<ref->num_nbrs+1;i++)
-		temp[ref->mapping[bi][i]] = res->mapping[i];
+	memset(temp, -1, PTM_MAX_POINTS * sizeof(int8_t));
+	int bi = rotate_into_fundamental_zone(ref->type, output_conventional_orientation, res->q);
+	if (bi != -1)
+		for (int i=0;i<ref->num_nbrs+1;i++)
+			temp[ref->mapping[bi][i]] = res->mapping[i];
 
 	memcpy(res->mapping, temp, (ref->num_nbrs+1) * sizeof(int8_t));
 
@@ -137,6 +180,7 @@ extern bool ptm_initialized;
 
 int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 		int num_points, double (*unpermuted_points)[3], int32_t* unpermuted_numbers, bool topological_ordering,
+		bool output_conventional_orientation,
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res,
 		double* U, double* P, int8_t* mapping, double* p_interatomic_distance, double* p_lattice_constant)
 {
@@ -202,13 +246,13 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 	if (res.ref_struct != NULL && (res.ref_struct->type == PTM_MATCH_DCUB || res.ref_struct->type == PTM_MATCH_DHEX))
 	{
-		output_data(	&res, num_points, unpermuted_numbers, dpoints, dnumbers, dordering,
+		output_data(	&res, num_points, unpermuted_numbers, dpoints, dnumbers, dordering, output_conventional_orientation,
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
 				U, P, mapping, p_interatomic_distance, p_lattice_constant);
 	}
 	else
 	{
-		output_data(	&res, num_points, unpermuted_numbers, points, numbers, ordering,
+		output_data(	&res, num_points, unpermuted_numbers, points, numbers, ordering, output_conventional_orientation,
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
 				U, P, mapping, p_interatomic_distance, p_lattice_constant);
 	}
