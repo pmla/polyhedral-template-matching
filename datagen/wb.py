@@ -42,7 +42,7 @@ def walk(best_code, prev, cur, degree, m, common, vertex_colours, edge_colours):
 
 	return (code, index)
 
-def weinberg(facets, right_only=False, vertex_colours=None, edge_colours=None):
+def weinberg(facets, right_only=True, vertex_colours=None, edge_colours=None):
 
 	edges = []
 	for (a, b, c) in facets:

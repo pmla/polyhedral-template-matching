@@ -94,6 +94,75 @@ def get_sc():
 	return np.array(l)
 
 
+def get_equilateral_facets(points):
+
+	facets = np.sort(scipy.spatial.ConvexHull(points).simplices)
+
+	eq = []
+	for i, f in enumerate(facets):
+		p = points[f]
+		v = p[1:] - p[0]
+		v = [e / np.linalg.norm(e) for e in v]
+		dot = np.dot(*v)
+		dot = min(1, max(-1, dot))
+		angle = np.arccos(dot)
+		if abs(math.degrees(angle) - 60) < 1E-3:
+			eq += [i]
+
+	return facets[eq]
+
+def select_inner_facets(points, facets):
+
+	midpoints = np.mean(points[facets], axis=1)
+	cs = np.array(list(itertools.combinations(range(len(midpoints)), 4)))
+
+	data = []
+	for c in cs:
+		p = midpoints[c]
+		dots = [np.dot(p[i], p[j]) for i in range(len(c)) for j in range(i+1, len(c))]
+		mdev = max([abs(e - dots[0]) for e in dots])
+		data += [(mdev, list(c))]
+	data.sort()
+	_, c = data[0]
+	return facets[c]
+
+def get_inner_points(points, facets):
+
+	facets = select_inner_facets(points, facets)
+
+	z = [[0,0,0]]
+	inner = [np.mean(np.concatenate((z, points[f])), axis=0) for f in facets]
+	return np.array(inner)
+
+def colour_vertices(inner, points):
+
+	ds = scipy.spatial.distance.cdist(points, inner)
+	colours = np.argmin(ds, axis=1)
+	indices = np.argsort(colours)
+	points = points[indices]
+	colours = np.concatenate(([0, 1, 2, 3], colours[indices]))
+	return np.concatenate((inner, points)), colours
+
+def get_diamond_points(points):
+	facets = get_equilateral_facets(points)
+	inner = get_inner_points(points, facets)
+	return colour_vertices(inner, points)
+
+def get_diamond_cubic_points():
+	points, colours = get_diamond_points(ideal_fcc[:-1])
+	points /= np.mean(np.linalg.norm(points, axis=1))
+	points = np.concatenate((points, [[0, 0, 0]]))
+	colours = np.concatenate((colours, [-1]))
+	return points, colours
+
+def get_diamond_hexagonal_points():
+	points, colours = get_diamond_points(ideal_hcp[:-1])
+	points /= np.mean(np.linalg.norm(points, axis=1))
+	points = np.concatenate((points, [[0, 0, 0]]))
+	colours = np.concatenate((colours, [-1]))
+	return points, colours
+
+
 def facets_to_edges(facets):
 
 	edges = []
@@ -111,6 +180,13 @@ def calc_plane_norms(triangles):
 	plane_normals = np.cross(triangles[:,0] - triangles[:,2], triangles[:,1] - triangles[:,2])
 	plane_normals /= np.linalg.norm(plane_normals, axis=1)[:, np.newaxis]
 	return plane_normals
+
+def invert_array(t):
+
+	inverted = np.zeros(len(t)).astype(np.int)
+	for i, e in enumerate(t):
+		inverted[e] = i
+	return np.array(inverted)
 
 def get_paired_squares(facets, points):
 
@@ -191,6 +267,8 @@ ideal_hcp = get_hcp()
 ideal_bcc = get_bcc()
 ideal_ico = get_ico()
 ideal_sc = get_sc()
+ideal_dcub, _ = get_diamond_cubic_points()
+ideal_dhex, _ = get_diamond_hexagonal_points()
 
 def print_val(f):
 	e = " %.15f" % f
@@ -203,15 +281,15 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc][3:4]:
+	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][6:7]:
 
 		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
-		print
+		#print
 		#for row in structure:
 		#	print "{", ",".join([print_val(e) for e in row]), "},"
 
-		#fundamental_mappings.find(structure, generators.generator_ico)
-		#asdf
+		fundamental_mappings.find(structure, generators.generator_dhex)
+		asdf
 
 		M = np.dot(structure.T, structure)
 		mpi_scale = np.trace(M) / 3

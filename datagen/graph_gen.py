@@ -1,7 +1,59 @@
 import numpy as np
-from weinberg import weinberg
+from wb import weinberg
 from graph_tools import *
+import square_facets
 
+
+def clockwise(a, b, c):
+	return np.dot(np.cross(a, b), c) < 0
+
+def make_clockwise(points, a, b, c):
+	if not clockwise(points[a], points[b], points[c]):
+		return (b, a, c)
+	else:
+		return (a, b, c)
+
+def generate_triangulations(points, colours, sqfacets, eqfacets):
+
+	cs = np.array(list(itertools.product([0, 1], repeat=len(sqfacets))))
+
+	points = np.array([e / np.linalg.norm(e) for e in points])
+
+	triangulations = []
+	for ts in cs:
+		facets = []
+		for f in eqfacets:
+			unique = np.unique(colours[f])
+			if len(unique) > 1:
+				facets += [f]
+			else:
+				m = unique[0]
+				a, b, c = f
+				facets += [(m, a, b)]
+				facets += [(m, b, c)]
+				facets += [(m, c, a)]
+
+		for c, sqf in zip(ts, sqfacets):
+			indices = [0, 1, 2, 3]
+			f0 = sqf[np.roll(indices, 0 + c)[:3]]
+			f1 = sqf[np.roll(indices, 2 + c)[:3]]
+			facets += [f0, f1]
+		facets = np.array([make_clockwise(points, *f) for f in facets])
+		triangulations += [facets]
+	return np.array(triangulations)
+
+def is_equilateral(ps):
+
+	angles = []
+	for i in range(3):
+
+		anchor = ps[i]
+		vs = [ps[(i+1)%3] - anchor, ps[(i+2)%3] - anchor]
+		a, b = np.array([e / np.linalg.norm(e) for e in vs])
+		dot = min(1, max(-1, np.dot(a, b)))
+		angles += [np.arccos(dot)]
+	angles = np.rad2deg(angles)
+	return all([abs(e - 60) < 1E-3 for e in angles])
 
 def crap_calc_rmsd(P, Q):
 	delta = P - Q
@@ -13,13 +65,6 @@ def crap_kabsch(P, Q):
 	V, S, W = np.linalg.svd(A)
 	U = np.dot(V, W)
 	return U
-
-def invert_array(t):
-
-	inverted = np.zeros(len(t)).astype(np.int)
-	for i, e in enumerate(t):
-		inverted[e] = i
-	return np.array(inverted)
 
 def get_unique_graphs(points, shape=None):
 
@@ -123,8 +168,100 @@ def get_unique_graphs(points, shape=None):
 			colour_codes += [colour_code]
 	return data
 
+
+def get_unique_diamond_graphs(name):
+
+	assert name in ['dcub', 'dhex']
+	if name == 'dcub':
+		points, colours = get_diamond_cubic_points()
+	else:
+		points, colours = get_diamond_hexagonal_points()
+	points = points[:-1]
+	colours = colours[:-1]
+
+	sqfacets = square_facets.get_square_facets(points)
+	squares = points[sqfacets]
+	eqfacets = get_equilateral_facets(points)
+	triangulations = generate_triangulations(points, colours, sqfacets, eqfacets)
+
+	vertex_colours = np.array([0] * 4 + [1] * (len(points) - 4))
+
+	unique = set()
+	data = []
+	colour_codes = []
+	for t in triangulations:
+
+		#facets = t - np.min(t)
+		facets = t
+		colour_code, automorphisms = weinberg(facets, vertex_colours=vertex_colours, edge_colours=None)
+		new = colour_code not in colour_codes
+
+		m = automorphisms[0]
+		automorphisms = [np.array(list(invert_array(e)[m]) + [len(e)]) for e in automorphisms]
+
+		if not new:
+			continue
+
+		ideal_points = {'dcub': ideal_dcub, 'dhex': ideal_dhex}[name]
+
+		facets = [tuple(e) for e in np.sort(facets)]
+		d = {}
+		for i, k in enumerate(facets):
+			d[k] = 2 * sum([e < 4 for e in k]) + is_equilateral(ideal_points[list(k)])
+
+		clrs = []
+		auts = []
+		n = 0
+		for aut in automorphisms:
+
+			_facets = [tuple(sorted([aut[e] for e in f])) for f in facets]
+			for e in _facets:
+				assert(e in facets)
+
+			clr = tuple([d[f] for f in _facets])
+			if clr not in clrs:
+				clrs += [clr]
+				auts += [tuple(aut)]
+		print len(clrs), '/', len(automorphisms)
+
+		trial_points = ideal_points.copy()[:-1]
+		trial_points += random_perturbation[:len(trial_points)]
+		trial_points = add_centre_subtract_mean(trial_points)
+		trial_points = trial_points / np.mean(np.linalg.norm(trial_points, axis=1))
+
+		rmsds = []
+		for automorphism in automorphisms:
+			mapped = ideal_points[automorphism]
+
+			U = crap_kabsch(mapped, trial_points)
+			rmsd = crap_calc_rmsd(np.dot(mapped, U), trial_points)
+			rmsd = rmsd**0.5
+			rmsds += [int(round(1E9*rmsd))]
+
+		unique_rmsds = list(set(rmsds))
+		d = dict()
+		for i, rmsd in enumerate(rmsds):
+			if rmsd not in d:
+				d[rmsd] = []
+			d[rmsd] += [i]
+		unique_automorphisms = [automorphisms[min(e)] for e in d.values()]
+		unique_automorphisms = sorted([e.tolist() for e in unique_automorphisms])
+		unique_automorphisms = [np.array(e) for e in unique_automorphisms]
+		print "num unique:", len(unique_automorphisms)
+		assert(len(unique_automorphisms) == len(clrs))
+
+		for e in unique_automorphisms:
+			assert tuple(e.tolist()) in auts
+
+		unique_automorphisms = [np.array([0] + list((e[:-1]+1))) for e in unique_automorphisms]	#reorder automorphisms
+
+		data += [(colour_code, None, facets, unique_automorphisms)]
+		colour_codes += [colour_code]
+	return data
+
+
 _length = 0.02
-random_perturbation = np.random.uniform(-1, 1, (15, 3))
+random_perturbation = np.random.uniform(-1, 1, (17, 3))
 for i, e in enumerate(random_perturbation):
 	random_perturbation[i] = _length * e / np.linalg.norm(e)
 
@@ -186,6 +323,12 @@ def go():
 
 		s, auts = dat_to_string(dat, name, auts)
 		dump += [s]
+
+	for name in ['dcub', 'dhex']:
+		dat = get_unique_diamond_graphs(name)
+		s, auts = dat_to_string(dat, name, auts)
+		dump += [s]
+
 	print "sum:", n
 
 	for i, e in enumerate(auts):
@@ -202,6 +345,8 @@ def go():
 	open('dumped_data.txt', 'w').write(output_string)
 	checksum = md5('dumped_data.txt')
 	print checksum
-	assert checksum.lower() == 'c5257bc0f0de736c4632b24be661fe21'
-	print "ok"
-go()
+	#assert checksum.lower() == 'c5257bc0f0de736c4632b24be661fe21'
+	#print "ok"
+
+if __name__ == "__main__":
+	go()
