@@ -6,20 +6,21 @@ from numpy.core.umath_tests import inner1d
 from numpy import sqrt
 
 def get_ico():
-	p = (1 + math.sqrt(5)) / 2
-	l = [	[ 0, -1, -p],
-		[ 0, -1,  p],
-		[ 0,  1, -p],
-		[ 0,  1,  p],
-		[-1, -p,  0],
-		[-1,  p,  0],
-		[ 1, -p,  0],
-		[ 1,  p,  0],
-		[-p,  0, -1],
-		[-p,  0,  1],
-		[ p,  0, -1],
-		[ p,  0,  1],
-		[0, 0, 0]]
+	l = np.array([
+			[-0,  0,  1],
+			[ 0, -0, -1],
+			[-2 * np.sqrt(1./5 * (5./8 - np.sqrt(5) / 8)),  (1+np.sqrt(5)) / (2 * np.sqrt(5)), -np.sqrt(1./5)],
+			[ 2 * np.sqrt(1./5 * (5./8 - np.sqrt(5) / 8)), -(1+np.sqrt(5)) / (2 * np.sqrt(5)),  np.sqrt(1./5)],
+			[ 0, -np.sqrt(4./5), -np.sqrt(1./5)],
+			[ 0,  np.sqrt(4./5),  np.sqrt(1./5)],
+			[ 2 * np.sqrt(1./5 * (5./8 + np.sqrt(5)/8)), -(np.sqrt(5) - 1) / (2 * np.sqrt(5)), -np.sqrt(1./5)],
+			[-2 * np.sqrt(1./5 * (5./8 + np.sqrt(5)/8)),  (np.sqrt(5) - 1) / (2 * np.sqrt(5)),  np.sqrt(1./5)],
+			[-2 * np.sqrt(1./5 * (5./8 + np.sqrt(5)/8)), -(np.sqrt(5) - 1) / (2 * np.sqrt(5)), -np.sqrt(1./5)],
+			[ 2 * np.sqrt(1./5 * (5./8 + np.sqrt(5)/8)),  (np.sqrt(5) - 1) / (2 * np.sqrt(5)),  np.sqrt(1./5)],
+			[ 2 * np.sqrt(1./5 * (5./8 - np.sqrt(5)/8)),   (1+np.sqrt(5)) / (2 * np.sqrt(5)),  -np.sqrt(1./5)],
+			[-2 * np.sqrt(1./5 * (5./8 - np.sqrt(5)/8)),  -(1+np.sqrt(5)) / (2 * np.sqrt(5)),   np.sqrt(1./5)],
+			[ 0,  0,  0],
+		])
 	return np.array(l) / np.linalg.norm(l[0])
 
 def get_fcc():
@@ -91,6 +92,7 @@ def get_sc():
 		[ 0.,  0.,  0.]
 	]
 	return np.array(l)
+
 
 def facets_to_edges(facets):
 
@@ -198,10 +200,33 @@ def print_val(f):
 
 if __name__ == "__main__":
 
-	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc]:
+	import fundamental_mappings
+	import generators
+
+	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc][3:4]:
 
 		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
-		print 
-		for row in structure:
-			print "{", ",".join([print_val(e) for e in row]), "},"
+		print
+		#for row in structure:
+		#	print "{", ",".join([print_val(e) for e in row]), "},"
+
+		#fundamental_mappings.find(structure, generators.generator_ico)
+		#asdf
+
+		M = np.dot(structure.T, structure)
+		mpi_scale = np.trace(M) / 3
+
+		inv = structure / mpi_scale
+		pinv = np.linalg.pinv(structure).T
+		assert np.linalg.norm(inv - pinv) < 1E-9
+		#continue
+
+		lines = []
+		for p in structure / mpi_scale:
+			line = "{ " + ", ".join([("%.15f" % e).rjust(18) for e in p]) + " }"
+			#line = line.replace(".000000000000", ".            ")
+			#line = line.replace(".500000000000", ".5           ")
+			lines += [line]
+		print ",\n".join(lines)
+		print
 

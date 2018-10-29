@@ -1,0 +1,9 @@
+#exact templates
+exact penrose inverses
+exact quaternion generators
+diamond types
+
+graphite
+reduce number of neighbours
+better testing framework
+

@@ -76,8 +76,8 @@ static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, 
 int main()
 {
 	ptm_initialize_global();
-	//uint64_t res = run_tests();
-	//assert(res == 0);
+	uint64_t res = ptm::run_tests();
+	assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
 	//return 0;

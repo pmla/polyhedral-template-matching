@@ -130,12 +130,13 @@ for i, e in enumerate(random_perturbation):
 
 def print_graph_data(_id, num_vertices, edges, facets, automorphisms, automorphism_index, num_automorphisms):
 
-	lid = ".id = %d" % _id
-	l4 = "//.automorphisms = {" + ",\n//".join(["{" + ",".join([str(f) for f in list(e)]) + "}" for e in automorphisms]) + "}"
-	l5 = ".facets = {%s}" % (','.join(["{%d,%d,%d}" % (a, b, c) for (a, b, c) in facets]))
-	l6 = ".automorphism_index = %d" % automorphism_index
-	l7 = ".num_automorphisms = %d" % num_automorphisms
-	return "{" + ",\n".join([lid, l6, l7, l4, l5]) + "}"
+	lid = "%d" % _id
+	lhash = "0"
+	l1 = "%d" % automorphism_index
+	l2 = "%d" % num_automorphisms
+	lcan = "{" + ", ".join(["0"] * (num_vertices + 1)) + "}"
+	l3 = "{%s}" % (','.join(["{%d,%d,%d}" % (a, b, c) for (a, b, c) in facets]))
+	return "{" + ",\n".join([lid, lhash, l1, l2, lcan, l3]) + "}"
 
 def dat_to_string(dat, name, auts):
 
