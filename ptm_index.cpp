@@ -49,7 +49,7 @@ static int rotate_into_fundamental_zone(int type, bool output_conventional_orien
 		}
 		else
 		{
-			ptm::rotate_quaternion_into_hcp_crystalline_fundamental_zone(q);
+			ptm::rotate_quaternion_into_hcp_conventional_fundamental_zone(q);
 			return -1;
 			//cannot create a meaningful mapping for non-template rotations
 		}
@@ -77,7 +77,7 @@ static int rotate_into_fundamental_zone(int type, bool output_conventional_orien
 		}
 		else
 		{
-			ptm::rotate_quaternion_into_hcp_crystalline_fundamental_zone(q);
+			ptm::rotate_quaternion_into_hcp_conventional_fundamental_zone(q);
 			return -1;
 			//cannot create a meaningful mapping for non-template rotations
 		}

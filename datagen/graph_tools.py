@@ -281,14 +281,25 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][6:7]:
+	#for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][1:2]:
+	if 1:
+		#structure = np.array(list(structure[-1:]) + list(structure[:-1]))
 
-		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
+		structure = np.array([
+		[0,0,0],
+		[    3*sqrt(2),  -3*sqrt(6),           0 ],
+		[   -6*sqrt(2),           0,           0 ],
+		[   -3*sqrt(2),   3*sqrt(6),           0 ],
+		[    3*sqrt(2),   3*sqrt(6),           0 ],
+		[    6*sqrt(2),           0,           0 ],
+		[   -3*sqrt(2),  -3*sqrt(6),           0 ],
+		])
+
 		#print
 		#for row in structure:
 		#	print "{", ",".join([print_val(e) for e in row]), "},"
 
-		fundamental_mappings.find(structure, generators.generator_dhex)
+		fundamental_mappings.find(structure)#, generators.generator_dhex)
 		asdf
 
 		M = np.dot(structure.T, structure)
