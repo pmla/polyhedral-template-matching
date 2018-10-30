@@ -1,8 +1,16 @@
-#exact templates
+exact templates
 exact penrose inverses
 exact quaternion generators
+update ovito merge request
+update ovito documentation
+update LAMMPS
+update LAMMPS documentation
+make LAMMPS example
 
-graphite
+better diamond neighbour selection
 reduce number of neighbours
+graphite
 better testing framework
 
+
+clang format all code

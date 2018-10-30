@@ -97,6 +97,7 @@ def get_sc():
 def get_equilateral_facets(points):
 
 	facets = np.sort(scipy.spatial.ConvexHull(points).simplices)
+	facets = np.array(sorted([tuple(e) for e in facets]))
 
 	eq = []
 	for i, f in enumerate(facets):
@@ -111,24 +112,38 @@ def get_equilateral_facets(points):
 
 	return facets[eq]
 
-def select_inner_facets(points, facets):
+def select_inner_facets(points, facets, name):
+
+	if name == 'dhex':
+		return facets[[2,0,5,7]]
+	elif name == 'dcub':
+		return facets[[0,6,5,7]]
 
 	midpoints = np.mean(points[facets], axis=1)
 	cs = np.array(list(itertools.combinations(range(len(midpoints)), 4)))
 
+	print midpoints
+	print midpoints[[0,6,5,7]]
+	asdf
+
 	data = []
 	for c in cs:
 		p = midpoints[c]
+		if all([e[2] < np.max(midpoints[:,2]) * 0.99 for e in p]):
+			continue
+
 		dots = [np.dot(p[i], p[j]) for i in range(len(c)) for j in range(i+1, len(c))]
 		mdev = max([abs(e - dots[0]) for e in dots])
 		data += [(mdev, list(c))]
+	for e in sorted(data):
+		print e
 	data.sort()
 	_, c = data[0]
 	return facets[c]
 
-def get_inner_points(points, facets):
+def get_inner_points(points, facets, name):
 
-	facets = select_inner_facets(points, facets)
+	facets = select_inner_facets(points, facets, name)
 
 	z = [[0,0,0]]
 	inner = [np.mean(np.concatenate((z, points[f])), axis=0) for f in facets]
@@ -143,20 +158,20 @@ def colour_vertices(inner, points):
 	colours = np.concatenate(([0, 1, 2, 3], colours[indices]))
 	return np.concatenate((inner, points)), colours
 
-def get_diamond_points(points):
+def get_diamond_points(points, name):
 	facets = get_equilateral_facets(points)
-	inner = get_inner_points(points, facets)
+	inner = get_inner_points(points, facets, name)
 	return colour_vertices(inner, points)
 
 def get_diamond_cubic_points():
-	points, colours = get_diamond_points(ideal_fcc[:-1])
+	points, colours = get_diamond_points(ideal_fcc[:-1], 'dcub')
 	points /= np.mean(np.linalg.norm(points, axis=1))
 	points = np.concatenate((points, [[0, 0, 0]]))
 	colours = np.concatenate((colours, [-1]))
 	return points, colours
 
 def get_diamond_hexagonal_points():
-	points, colours = get_diamond_points(ideal_hcp[:-1])
+	points, colours = get_diamond_points(ideal_hcp[:-1], 'dhex')
 	points /= np.mean(np.linalg.norm(points, axis=1))
 	points = np.concatenate((points, [[0, 0, 0]]))
 	colours = np.concatenate((colours, [-1]))
@@ -281,10 +296,18 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	#for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][1:2]:
-	if 1:
-		#structure = np.array(list(structure[-1:]) + list(structure[:-1]))
+	print ideal_fcc
+	print ideal_hcp
+	print ideal_bcc
+	print ideal_ico
+	print ideal_sc
+	print ideal_dcub
+	print ideal_dhex
 
+	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][6:7]:
+		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
+
+		'''
 		structure = np.array([
 		[0,0,0],
 		[    3*sqrt(2),  -3*sqrt(6),           0 ],
@@ -294,12 +317,13 @@ if __name__ == "__main__":
 		[    6*sqrt(2),           0,           0 ],
 		[   -3*sqrt(2),  -3*sqrt(6),           0 ],
 		])
+		'''
 
 		#print
 		#for row in structure:
 		#	print "{", ",".join([print_val(e) for e in row]), "},"
 
-		fundamental_mappings.find(structure)#, generators.generator_dhex)
+		fundamental_mappings.find(structure, generators.generator_dhex)
 		asdf
 
 		M = np.dot(structure.T, structure)
