@@ -1,6 +1,3 @@
-exact templates
-exact penrose inverses
-exact quaternion generators
 update ovito merge request
 update ovito documentation
 update LAMMPS
