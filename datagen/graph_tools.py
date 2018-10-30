@@ -296,15 +296,7 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	print ideal_fcc
-	print ideal_hcp
-	print ideal_bcc
-	print ideal_ico
-	print ideal_sc
-	print ideal_dcub
-	print ideal_dhex
-
-	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][6:7]:
+	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][:]:
 		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
 
 		'''
@@ -323,16 +315,17 @@ if __name__ == "__main__":
 		#for row in structure:
 		#	print "{", ",".join([print_val(e) for e in row]), "},"
 
-		fundamental_mappings.find(structure, generators.generator_dhex)
-		asdf
+		#fundamental_mappings.find(structure, generators.generator_dhex)
+		#asdf
 
 		M = np.dot(structure.T, structure)
 		mpi_scale = np.trace(M) / 3
+		print mpi_scale
 
 		inv = structure / mpi_scale
 		pinv = np.linalg.pinv(structure).T
 		assert np.linalg.norm(inv - pinv) < 1E-9
-		#continue
+		continue
 
 		lines = []
 		for p in structure / mpi_scale:
