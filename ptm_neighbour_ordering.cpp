@@ -165,7 +165,7 @@ void voronoi_uninitialize_local(void* _ptr)
 	delete ptr;
 }
 
-int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int (get_neighbours)(void* vdata, int atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
+int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
 						int8_t* ordering, double (*points)[3], int32_t* numbers)
 {
 

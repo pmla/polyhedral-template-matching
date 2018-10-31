@@ -70,7 +70,7 @@ typedef struct
 } demonbrdata_t;
 
 
-static int get_neighbours(void* vdata, int atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
+static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
 {
 	demonbrdata_t* data = (demonbrdata_t*)vdata;
 	double (*positions)[3] = data->positions;
@@ -84,7 +84,7 @@ static int get_neighbours(void* vdata, int atom_index, int num, size_t* nbr_indi
 
 	for (int j=0;j<num - 1;j++)
 	{
-		int index = nbrs[atom_index * _MAX_NBRS + j];
+		size_t index = nbrs[atom_index * _MAX_NBRS + j];
 		nbr_indices[j+1] = index;
 		if (numbers != NULL)
 			numbers[j+1] = 0;
