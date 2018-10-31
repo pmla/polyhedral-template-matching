@@ -15,7 +15,8 @@ extern "C" {
 #endif
 
 
-int ptm_index(	ptm_local_handle_t local_handle, int32_t flags, int num_points, double (*atomic_positions)[3], int32_t* atomic_numbers, bool topological_ordering, bool output_conventional_orientation,	//inputs
+int ptm_index(	ptm_local_handle_t local_handle, int32_t flags, int num_points, double (*atomic_positions)[3], int32_t* atomic_numbers, bool topological_ordering, bool output_conventional_orientation,
+		size_t atom_index, int (get_neighbours)(void* vdata, int atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,	//inputs
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, int8_t* mapping, double* p_interatomic_distance, double* p_lattice_constant);	//outputs
 
 

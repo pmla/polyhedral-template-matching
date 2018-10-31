@@ -181,6 +181,7 @@ extern bool ptm_initialized;
 int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 		int num_points, double (*unpermuted_points)[3], int32_t* unpermuted_numbers, bool topological_ordering,
 		bool output_conventional_orientation,
+		size_t atom_index, int (get_neighbours)(void* vdata, int atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res,
 		double* U, double* P, int8_t* mapping, double* p_interatomic_distance, double* p_lattice_constant)
 {
@@ -234,7 +235,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
 	{
-		ret = ptm::calculate_diamond_neighbour_ordering(num_points, unpermuted_points, unpermuted_numbers, dordering, dpoints, dnumbers);
+		ret = ptm::calculate_diamond_neighbour_ordering((void*)local_handle, atom_index, get_neighbours, nbrlist, dordering, dpoints, dnumbers);
 		if (ret == 0)
 		{
 			ptm::normalize_vertices(PTM_NUM_NBRS_DCUB + 1, dpoints, ch_points);
@@ -246,7 +247,7 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 	if (res.ref_struct != NULL && (res.ref_struct->type == PTM_MATCH_DCUB || res.ref_struct->type == PTM_MATCH_DHEX))
 	{
-		output_data(	&res, num_points, unpermuted_numbers, dpoints, dnumbers, dordering, output_conventional_orientation,
+		output_data(	&res, num_points, unpermuted_numbers, dpoints, dnumbers, dordering, output_conventional_orientation,	//todo: update what dordering does
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
 				U, P, mapping, p_interatomic_distance, p_lattice_constant);
 	}

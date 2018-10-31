@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define xACTIVE_DIAMOND
+#define ACTIVE_DIAMOND
 
 #ifdef ACTIVE_DIAMOND
 	#define _MAX_NBRS 50
@@ -62,48 +62,66 @@ cleanup:
 	return ret;
 }
 
-static void get_neighbours(double (*positions)[3], int32_t* nbrs, int max_nbrs, int i, double (*nbr)[3])
+typedef struct
 {
-	memcpy(nbr[0], positions[i], 3 * sizeof(double));
+	double (*positions)[3];
+	int32_t* nbrs;
 
-	for (int j=0;j<max_nbrs;j++)
+} demonbrdata_t;
+
+
+static int get_neighbours(void* vdata, int atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
+{
+	demonbrdata_t* data = (demonbrdata_t*)vdata;
+	double (*positions)[3] = data->positions;
+	int32_t* nbrs = data->nbrs;
+
+
+	memcpy(nbr_pos[0], positions[atom_index], 3 * sizeof(double));
+	nbr_indices[0] = atom_index;
+	if (numbers != NULL)
+		numbers[0] = 0;
+
+	for (int j=0;j<num - 1;j++)
 	{
-		int index = nbrs[i * _MAX_NBRS + j];
-		memcpy(nbr[j+1], positions[index], 3 * sizeof(double));
+		int index = nbrs[atom_index * _MAX_NBRS + j];
+		nbr_indices[j+1] = index;
+		if (numbers != NULL)
+			numbers[j+1] = 0;
+
+		memcpy(nbr_pos[j+1], positions[index], 3 * sizeof(double));
 	}
+
+	return num;
 }
 
 int main()
 {
 	ptm_initialize_global();
-	uint64_t res = ptm::run_tests();
-	assert(res == 0);
+	//uint64_t res = ptm::run_tests();
+	//assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
 	//return 0;
 
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;
-	double* positions = NULL;
-	int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
+	double (*positions)[3] = NULL;
+	//int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/fcc_positions.dat", (uint8_t**)&positions, &fsize);
-	//int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
-	ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	//ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
 	int num_atoms = fsize / (_MAX_NBRS * sizeof(int32_t));
-
-#ifdef ACTIVE_DIAMOND
-	const int max_nbrs = 34;
-#else
+	demonbrdata_t nbrlist = {positions, nbrs};
 	const int max_nbrs = 19;
-#endif
 
 	//assert(num_atoms == 88737);
 	printf("num atoms: %d\n", num_atoms);
@@ -115,26 +133,27 @@ int main()
 
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
-//num_atoms = std::min(num_atoms, 100000);
 	bool topological_ordering = true;
 	double rmsd_sum = 0.0;
+//int i = 828133;
 	for (int i=0;i<num_atoms;i++)
 	{
-		double nbr[max_nbrs+1][3];
-		get_neighbours((double (*)[3])positions, nbrs, max_nbrs, i, nbr);
+		double nbr_pos[max_nbrs+1][3];
+		size_t nbr_indices[max_nbrs+1];
+		get_neighbours((void*)&nbrlist, i, max_nbrs+1, nbr_indices, NULL, nbr_pos);
 
 		int8_t mapping[_MAX_NBRS];
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
-		ptm_index(	local_handle, PTM_CHECK_ALL, max_nbrs + 1, nbr, NULL, topological_ordering, false,
+		ptm_index(	local_handle, PTM_CHECK_ALL, max_nbrs + 1, nbr_pos, NULL, topological_ordering, false, i, get_neighbours, (void*)&nbrlist,
 				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
-/*{
-	printf("#scale %f\n", scale);
-	printf("#quat %f %f %f %f\n", q[0], q[1], q[2], q[3]);
-	for (int j=0;j<17;j++)
-		printf("!!!%f %f %f\n", nbr[j][0], nbr[j][1], nbr[j][2]);
-}*/
+//{
+//	printf("#scale %f\n", scale);
+//	printf("#quat %f %f %f %f\n", q[0], q[1], q[2], q[3]);
+//	for (int j=0;j<32;j++)
+//		printf("!!!%f %f %f\n", nbr_pos[j][0], nbr_pos[j][1], nbr_pos[j][2]);
+//}
 
 		types[i] = type;
 		rmsds[i] = rmsd;

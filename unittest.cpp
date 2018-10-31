@@ -399,6 +399,35 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 
 typedef double points_t[3];
 
+
+/*
+typedef struct
+{
+	double (*positions)[3];
+	int32_t* nbrs;
+
+} unittest_nbrdata_t;
+
+
+static int get_neighbours(void* vdata, int atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
+{
+	unittest_nbrdata_t* data = (unittest_nbrdata_t*)vdata;
+	double (*positions)[3] = data->positions;
+
+
+	int n = std::min(num, 
+	for (int i=0;i<n;i++)
+	{
+		memcpy(nbr_pos[i], positions[i], 3 * sizeof(double));
+		nbr_indices[0] = i;
+		//if (numbers != NULL)
+		//	numbers[0] = 0;
+	}
+
+	return n;
+}*/
+
+
 uint64_t run_tests()
 {
 	int ret = 0;
@@ -599,7 +628,8 @@ exit(3);*/
 					int32_t type, alloy_type;
 					double scale, rmsd, interatomic_distance, lattice_constant;
 					double q[4], F[9], F_res[3], U[9], P[9];
-					ret = ptm_index(local_handle, tocheck, s->num_points, points, numbers, topological, false, &type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
+					//ret = ptm_index(local_handle, tocheck, s->num_points, points, numbers, topological, false, -1, -1, NULL,
+					//		&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
 					if (ret != PTM_NO_ERROR)
 						CLEANUP("indexing failed", ret);
 
@@ -721,7 +751,9 @@ printf("%08x\t%08x\n", alloy_type, alloy_test[it][ia].type);
 
 			int32_t type;
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4];
-			ret = ptm_index(local_handle, s->check, s->num_points, pdata[i], NULL, false, false, &type, NULL, &scale, &rmsd, q, NULL, NULL,  NULL, NULL, NULL, &interatomic_distance, &lattice_constant);
+			//ret = ptm_index(local_handle, s->check, s->num_points, pdata[i], NULL, false, false, -1, -1, NULL,
+			//		&type, NULL, &scale, &rmsd, q, NULL, NULL,  NULL, NULL, NULL, &interatomic_distance, &lattice_constant);
+ret = -1;
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 
