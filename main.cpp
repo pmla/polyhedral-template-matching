@@ -121,7 +121,6 @@ int main()
 
 	int num_atoms = fsize / (_MAX_NBRS * sizeof(int32_t));
 	demonbrdata_t nbrlist = {positions, nbrs};
-	const int max_nbrs = 19;
 
 	//assert(num_atoms == 88737);
 	printf("num atoms: %d\n", num_atoms);
@@ -133,21 +132,17 @@ int main()
 
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
-	bool topological_ordering = true;
 	double rmsd_sum = 0.0;
 //int i = 828133;
+//int i = 775040;
 	for (int i=0;i<num_atoms;i++)
 	{
-		double nbr_pos[max_nbrs+1][3];
-		size_t nbr_indices[max_nbrs+1];
-		get_neighbours((void*)&nbrlist, i, max_nbrs+1, nbr_indices, NULL, nbr_pos);
-
-		int8_t mapping[_MAX_NBRS];
+		size_t output_indices[_MAX_NBRS];
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
-		ptm_index(	local_handle, PTM_CHECK_ALL, max_nbrs + 1, nbr_pos, NULL, topological_ordering, false, i, get_neighbours, (void*)&nbrlist,
-				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
+		ptm_index(	local_handle, i, get_neighbours, (void*)&nbrlist, PTM_CHECK_ALL, false,
+				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, output_indices);
 //{
 //	printf("#scale %f\n", scale);
 //	printf("#quat %f %f %f %f\n", q[0], q[1], q[2], q[3]);

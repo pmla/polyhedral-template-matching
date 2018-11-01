@@ -1,3 +1,5 @@
+//todo: normalize vertices
+
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
@@ -7,6 +9,7 @@
 #include "ptm_constants.h"
 #include "ptm_voronoi_cell.h"
 #include "ptm_neighbour_ordering.h"
+#include "ptm_normalize_vertices.h"
 
 
 namespace ptm {
@@ -61,7 +64,7 @@ static int calculate_voronoi_face_areas(int num_points, const double (*_points)[
 	return 0;
 }
 
-static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const double (*_points)[3], sorthelper_t* data)
+static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, double (*_points)[3], sorthelper_t* data)
 {
 	assert(num_points <= PTM_MAX_INPUT_POINTS);
 
@@ -70,7 +73,8 @@ static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, 
 	double max_norm = 0;
 	double points[PTM_MAX_INPUT_POINTS][3];
 	double normsq[PTM_MAX_INPUT_POINTS];
-	for (int i = 0;i<num_points;i++)
+
+	for (int i=0;i<num_points;i++)
 	{
 		double x = _points[i][0] - _points[0][0];
 		double y = _points[i][1] - _points[0][1];
@@ -81,9 +85,6 @@ static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, 
 
 		normsq[i] = x*x + y*y + z*z;
 		max_norm = std::max(max_norm, normsq[i]);
-#ifdef DEBUG
-		printf("point %d: %f\t%f\t%f\t%f\n", i, x, y, z, x*x + y*y + z*z);
-#endif
 	}
 
 	max_norm = sqrt(max_norm);
@@ -114,27 +115,36 @@ static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, 
 	}
 
 	std::sort(data, data + num_points, &sorthelper_compare);
-
-#ifdef DEBUG
-	for (int i=0;i<num_points;i++)
-		printf("%d %f\n", data[i].index, data[i].area);
-#endif
-
 	return ret;
 }
 
-int calculate_neighbour_ordering(void* _voronoi_handle, int num_points, const double (*_points)[3], int8_t* ordering)
+int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int min_points, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
+					size_t* indices, double (*points)[3], int32_t* numbers)
 {
+	size_t nbr_indices[PTM_MAX_INPUT_POINTS];
+	int32_t nbr_numbers[PTM_MAX_INPUT_POINTS];
+	double nbr_pos[PTM_MAX_INPUT_POINTS][3];
+	int num_points = get_neighbours(nbrlist, atom_index, PTM_MAX_INPUT_POINTS, nbr_indices, nbr_numbers, nbr_pos);
+	if (num_points < min_points)
+		return -1;
+
 	sorthelper_t data[PTM_MAX_INPUT_POINTS];
-	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, _points, data);
+	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, nbr_pos, data);
+	if (ret != 0)
+		return ret;
 
 	for (int i=0;i<num_points;i++)
-		ordering[i] = data[i].index;
+	{
+		int index = data[i].index;
+		indices[i] = nbr_indices[index];
+		numbers[i] = nbr_numbers[index];
+		memcpy(&points[i], nbr_pos[index], 3 * sizeof(double));
+	}
 
-	return ret;
+	return num_points;
 }
 
-static int find_diamond_neighbours(void* _voronoi_handle, int num_points, const double (*_points)[3], size_t* nbr_indices, int num_solid_nbrs, solidnbr_t* nbrlist)
+static int find_diamond_neighbours(void* _voronoi_handle, int num_points, double (*_points)[3], size_t* nbr_indices, int num_solid_nbrs, solidnbr_t* nbrlist)
 {
 	assert( num_points >= num_solid_nbrs + 1);
 
@@ -166,7 +176,7 @@ void voronoi_uninitialize_local(void* _ptr)
 }
 
 int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
-						int8_t* ordering, double (*points)[3], int32_t* numbers)
+						size_t* nbr_indices, double (*points)[3], int32_t* numbers)
 {
 
 //printf("\n\n");
@@ -174,21 +184,22 @@ int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_ind
 
 	const int max_snbrs = 12;
 	size_t central_nbr_indices[max_snbrs + 1];
+	int32_t central_nbr_numbers[max_snbrs + 1];
 	double central_nbr_pos[max_snbrs + 1][3];
-	int num = get_neighbours(nbrlist, atom_index, max_snbrs + 1, central_nbr_indices, NULL, central_nbr_pos);
-	if (num < 0)
+	int num_points = get_neighbours(nbrlist, atom_index, max_snbrs + 1, central_nbr_indices, central_nbr_numbers, central_nbr_pos);
+	if (num_points < 0)
 		return -1;
 
 	solidnbr_t central_solid[max_snbrs];
-	int ret = find_diamond_neighbours(_voronoi_handle, num, central_nbr_pos, central_nbr_indices, max_snbrs, central_solid);
+	int ret = find_diamond_neighbours(_voronoi_handle, num_points, central_nbr_pos, central_nbr_indices, max_snbrs, central_solid);
 	if (ret != 0)
 		return ret;
 
 
-
 	sorthelper_t data[4 * 6];
 	int index = 0;
-	ordering[0] = atom_index;
+	nbr_indices[0] = atom_index;
+	numbers[0] = central_nbr_numbers[0];
 	memset(&points[0], 0, 3 * sizeof(double));
 
 	std::unordered_set<size_t> claimed;
@@ -206,19 +217,21 @@ int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_ind
 
 		//----------------------------------------------
 		size_t inner_nbr_indices[max_snbrs + 1];
+		int32_t inner_nbr_numbers[max_snbrs + 1];
 		double inner_nbr_pos[max_snbrs + 1][3];
-		int num = get_neighbours(nbrlist, inner_index, max_snbrs + 1, inner_nbr_indices, NULL, inner_nbr_pos);
-		if (num < 0)
+		int num_points = get_neighbours(nbrlist, inner_index, max_snbrs + 1, inner_nbr_indices, inner_nbr_numbers, inner_nbr_pos);
+		if (num_points < 0)
 			return -1;
 
 		solidnbr_t inner_solid[max_snbrs];
-		ret = find_diamond_neighbours(_voronoi_handle, num, inner_nbr_pos, inner_nbr_indices, max_snbrs, inner_solid);
+		ret = find_diamond_neighbours(_voronoi_handle, num_points, inner_nbr_pos, inner_nbr_indices, max_snbrs, inner_solid);
 		if (ret != 0)
 			return ret;
 		//----------------------------------------------
 
 
-		ordering[i+1] = inner_index;
+		nbr_indices[i+1] = inner_index;
+		numbers[i+1] = central_nbr_numbers[i+1];
 		memcpy(&points[i+1], central_solid[i].offset, 3 * sizeof(double));
 
 //printf("%d %f\t", i, central_solid[i].area);
@@ -259,7 +272,7 @@ int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_ind
 		if (counts[inner] >= 3 || already_claimed)
 			continue;
 
-		ordering[1 + 4 + 3 * inner + counts[inner]] = nbr_atom_index;
+		nbr_indices[1 + 4 + 3 * inner + counts[inner]] = nbr_atom_index;
 		memcpy(points[1 + 4 + 3 * inner + counts[inner]], &data[i].offset, 3 * sizeof(double));
 		//if (unpermuted_numbers != NULL)
 		//	numbers[i] = unpermuted_numbers[ordering[i]];

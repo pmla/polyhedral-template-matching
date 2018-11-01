@@ -86,49 +86,23 @@ static int rotate_into_fundamental_zone(int type, bool output_conventional_orien
 	return -1;
 }
 
-static void order_points(ptm_local_handle_t local_handle, int num_points, double (*unpermuted_points)[3], int32_t* unpermuted_numbers, bool topological_ordering,
-			int8_t* ordering, double (*points)[3], int32_t* numbers)
-{
-	if (topological_ordering)
-	{
-		double normalized_points[PTM_MAX_INPUT_POINTS][3];
-		ptm::normalize_vertices(num_points, unpermuted_points, normalized_points);
-		int ret = ptm::calculate_neighbour_ordering((void*)local_handle, num_points, (const double (*)[3])normalized_points, ordering);
-		if (ret != 0)
-			topological_ordering = false;
-	}
-
-	if (!topological_ordering)
-		for (int i=0;i<num_points;i++)
-			ordering[i] = i;
-
-	for (int i=0;i<num_points;i++)
-	{
-		memcpy(points[i], &unpermuted_points[ordering[i]], 3 * sizeof(double));
-
-		if (unpermuted_numbers != NULL)
-			numbers[i] = unpermuted_numbers[ordering[i]];
-	}
-}
-
-static void output_data(ptm::result_t* res, int num_points, int32_t* unpermuted_numbers, double (*points)[3], int32_t* numbers, int8_t* ordering,
-			bool output_conventional_orientation,
+static void output_data(ptm::result_t* res, int num_points, double (*points)[3], int32_t* numbers, size_t* ordering, bool output_conventional_orientation,
 			int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res,
-			double* U, double* P, int8_t* mapping, double* p_interatomic_distance, double* p_lattice_constant)
+			double* U, double* P, double* p_interatomic_distance, double* p_lattice_constant, size_t* output_indices)
 {
 	*p_type = PTM_MATCH_NONE;
 	if (p_alloy_type != NULL)
 		*p_alloy_type = PTM_ALLOY_NONE;
 
-	if (mapping != NULL)
-		memset(mapping, -1, num_points * sizeof(int8_t));
+	if (output_indices != NULL)
+		memset(output_indices, -1, num_points * sizeof(int8_t));
 
 	const ptm::refdata_t* ref = res->ref_struct;
 	if (ref == NULL)
 		return;
 
 	*p_type = ref->type;
-	if (p_alloy_type != NULL && unpermuted_numbers != NULL)
+	if (p_alloy_type != NULL)
 		*p_alloy_type = ptm::find_alloy_type(ref, res->mapping, numbers);
 
 	int8_t temp[PTM_MAX_POINTS];
@@ -157,9 +131,9 @@ static void output_data(ptm::result_t* res, int num_points, int32_t* unpermuted_
 			ptm::polar_decomposition_3x3(F, false, U, P);
 	}
 
-	if (mapping != NULL)
+	if (output_indices != NULL)
 		for (int i=0;i<ref->num_nbrs + 1;i++)
-			mapping[i] = ordering[res->mapping[i]];
+			output_indices[i] = ordering[res->mapping[i]];
 
 	double interatomic_distance = calculate_interatomic_distance(ref->type, res->scale);
 	double lattice_constant = calculate_lattice_constant(ref->type, interatomic_distance);
@@ -178,59 +152,54 @@ static void output_data(ptm::result_t* res, int num_points, int32_t* unpermuted_
 
 extern bool ptm_initialized;
 
-int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
-		int num_points, double (*unpermuted_points)[3], int32_t* unpermuted_numbers, bool topological_ordering,
-		bool output_conventional_orientation,
+int ptm_index(	ptm_local_handle_t local_handle,
 		size_t atom_index, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
+		int32_t flags, bool output_conventional_orientation,
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res,
-		double* U, double* P, int8_t* mapping, double* p_interatomic_distance, double* p_lattice_constant)
+		double* U, double* P, double* p_interatomic_distance, double* p_lattice_constant, size_t* output_indices)
 {
 	assert(ptm_initialized);
-	assert(num_points <= PTM_MAX_INPUT_POINTS);
-
-	if (flags & PTM_CHECK_SC)
-		assert(num_points >= PTM_NUM_POINTS_SC);
-
-	if (flags & PTM_CHECK_BCC)
-		assert(num_points >= PTM_NUM_POINTS_BCC);
-
-	if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
-		assert(num_points >= PTM_NUM_POINTS_FCC);
-
-	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
-		assert(num_points >= PTM_NUM_POINTS_DCUB);
 
 	int ret = 0;
 	ptm::result_t res;
 	res.ref_struct = NULL;
 	res.rmsd = INFINITY;
 
-	int8_t ordering[PTM_MAX_INPUT_POINTS];
-	double points[PTM_MAX_POINTS][3];
-	int32_t numbers[PTM_MAX_POINTS];
+	size_t ordering[PTM_MAX_INPUT_POINTS];
+	int32_t numbers[PTM_MAX_INPUT_POINTS];
+	double points[PTM_MAX_INPUT_POINTS][3];
 
-	int8_t dordering[PTM_MAX_INPUT_POINTS];
-	double dpoints[PTM_MAX_POINTS][3];
-	int32_t dnumbers[PTM_MAX_POINTS];
+	size_t dordering[PTM_MAX_INPUT_POINTS];
+	int32_t dnumbers[PTM_MAX_INPUT_POINTS];
+	double dpoints[PTM_MAX_INPUT_POINTS][3];
 
 	ptm::convexhull_t ch;
 	double ch_points[PTM_MAX_INPUT_POINTS][3];
+	int num_lpoints = 0;
 
 	if (flags & (PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC))
 	{
-		int num_lpoints = std::min(std::min(PTM_MAX_POINTS, 20), num_points);
-		order_points(local_handle, num_lpoints, unpermuted_points, unpermuted_numbers, topological_ordering, ordering, points, numbers);
-		ptm::normalize_vertices(num_lpoints, points, ch_points);
-		ch.ok = false;
-
-		if (flags & PTM_CHECK_SC)
-			ret = match_general(&ptm::structure_sc, ch_points, points, &ch, &res);
-
+		int min_points = PTM_NUM_POINTS_SC;
 		if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
-			ret = match_fcc_hcp_ico(ch_points, points, flags, &ch, &res);
-
+			min_points = PTM_NUM_POINTS_FCC;
 		if (flags & PTM_CHECK_BCC)
-			ret = match_general(&ptm::structure_bcc, ch_points, points, &ch, &res);
+			min_points = PTM_NUM_POINTS_BCC;
+
+		num_lpoints = ptm::calculate_neighbour_ordering(local_handle, atom_index, min_points, get_neighbours, nbrlist, ordering, points, numbers);
+		if (num_lpoints >= min_points)
+		{
+			ptm::normalize_vertices(num_lpoints, points, ch_points);
+			ch.ok = false;
+
+			if (flags & PTM_CHECK_SC)
+				ret = match_general(&ptm::structure_sc, ch_points, points, &ch, &res);
+
+			if (flags & (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO))
+				ret = match_fcc_hcp_ico(ch_points, points, flags, &ch, &res);
+
+			if (flags & PTM_CHECK_BCC)
+				ret = match_general(&ptm::structure_bcc, ch_points, points, &ch, &res);
+		}
 	}
 
 	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
@@ -247,15 +216,15 @@ int ptm_index(	ptm_local_handle_t local_handle, int32_t flags,
 
 	if (res.ref_struct != NULL && (res.ref_struct->type == PTM_MATCH_DCUB || res.ref_struct->type == PTM_MATCH_DHEX))
 	{
-		output_data(	&res, num_points, unpermuted_numbers, dpoints, dnumbers, dordering, output_conventional_orientation,	//todo: update what dordering does
+		output_data(	&res, num_lpoints, dpoints, dnumbers, dordering, output_conventional_orientation,
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
-				U, P, mapping, p_interatomic_distance, p_lattice_constant);
+				U, P, p_interatomic_distance, p_lattice_constant, output_indices);
 	}
 	else
 	{
-		output_data(	&res, num_points, unpermuted_numbers, points, numbers, ordering, output_conventional_orientation,
+		output_data(	&res, 17, points, numbers, ordering, output_conventional_orientation,
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
-				U, P, mapping, p_interatomic_distance, p_lattice_constant);
+				U, P, p_interatomic_distance, p_lattice_constant, output_indices);
 	}
 
 	return PTM_NO_ERROR;
