@@ -19,7 +19,7 @@
 #include "ptm_constants.h"
 
 
-//todo: verify that c == norm(template[1])
+//todo: add verification that c == norm(template[1]) to unit tests
 static double calculate_interatomic_distance(int type, double scale)
 {
 	assert(type >= 1 && type <= 7);
