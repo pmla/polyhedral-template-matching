@@ -57,7 +57,9 @@ structdata_t structdata[7] =  {	{ PTM_MATCH_FCC,  PTM_CHECK_FCC,  13, ptm_templa
 				{ PTM_MATCH_ICO,  PTM_CHECK_ICO,  13, ptm_template_ico  },
 				{ PTM_MATCH_SC,   PTM_CHECK_SC,    7, ptm_template_sc   },
 				{ PTM_MATCH_DCUB, PTM_CHECK_DCUB, 17, ptm_template_dcub },
-				{ PTM_MATCH_DHEX, PTM_CHECK_DHEX, 17, ptm_template_dhex }, };
+				{ PTM_MATCH_DHEX, PTM_CHECK_DHEX, 17, ptm_template_dhex },
+				//{ PTM_MATCH_GRAPHENE, PTM_CHECK_GRAPHENE, 10, ptm_template_graphene },
+};
 
 typedef struct
 {
@@ -138,10 +140,31 @@ alloytest_t dcub_alloy_tests[] = {
 
 };
 
-
 alloytest_t dhex_alloy_tests[] = {
 
 	{ PTM_ALLOY_NONE,   {-1}},	//no test
+
+	{ PTM_ALLOY_NONE,   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0}},	//pure -defect
+	{ PTM_ALLOY_NONE,   {4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},	//pure -defect
+
+	{ PTM_ALLOY_PURE,   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+	{ PTM_ALLOY_PURE,   {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},
+};
+
+
+alloytest_t graphene_alloy_tests[] = {
+
+	{ PTM_ALLOY_NONE,   {-1}},	//no test
+
+	{ PTM_ALLOY_NONE,   {0, 0, 0, 0, 0, 0, 1, 0, 0, 0}},	//pure -defect
+	{ PTM_ALLOY_NONE,   {4, 1, 4, 4, 4, 4, 4, 4, 4, 4}},	//pure -defect
+	//{ PTM_ALLOY_NONE,   {4, 0, 0, 0, 0, 4, 0, 0, 0, 4}},	//CN -defect
+	//{ PTM_ALLOY_NONE,   {1, 2, 2, 2, 2, 3, 2, 2, 2, 1}},	//CN -defect
+
+	//{ PTM_ALLOY_PURE,   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+	//{ PTM_ALLOY_PURE,   {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},
+	//{ PTM_ALLOY_CN,     {4, 0, 0, 0, 0, 4, 4, 4, 4, 4}},
+	//{ PTM_ALLOY_CN,     {1, 2, 2, 2, 2, 1, 1, 1, 1, 1}},
 };
 
 
@@ -481,7 +504,8 @@ uint64_t run_tests()
 					sizeof(ico_alloy_tests) / sizeof(alloytest_t),
 					sizeof(sc_alloy_tests) / sizeof(alloytest_t),
 					sizeof(dcub_alloy_tests) / sizeof(alloytest_t),
-					sizeof(dhex_alloy_tests) / sizeof(alloytest_t)	};
+					sizeof(dhex_alloy_tests) / sizeof(alloytest_t),
+					sizeof(graphene_alloy_tests) / sizeof(alloytest_t)	};
 
 	alloytest_t* alloy_test[] = {	fcc_alloy_tests,
 					hcp_alloy_tests,
@@ -489,13 +513,15 @@ uint64_t run_tests()
 					ico_alloy_tests,
 					sc_alloy_tests,
 					dcub_alloy_tests,
-					dhex_alloy_tests  };
+					dhex_alloy_tests,
+					graphene_alloy_tests  };
 
 	int num_quat_tests[] = {	sizeof(cubic_qtest) / sizeof(quattest_t),
 					sizeof(hcp_qtest) / sizeof(quattest_t),
 					sizeof(cubic_qtest) / sizeof(quattest_t),
 					sizeof(ico_qtest) / sizeof(quattest_t),
 					sizeof(cubic_qtest) / sizeof(quattest_t),
+					1,
 					1,
 					1	};
 
@@ -506,6 +532,7 @@ uint64_t run_tests()
 					cubic_qtest,
 					cubic_qtest,
 					hcp_qtest	};
+					//graphene_qtest };
 	int num_tests = 0;
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
@@ -674,7 +701,6 @@ exit(3);*/
 
 				num_tests++;
 
-#ifdef DEBUG
 				printf("type:\t\t%d\t(should be: %d)\n", type, s->type);
 				printf("alloy type:\t%d\n", alloy_type);
 				printf("scale:\t\t%f\n", scale);
@@ -688,6 +714,7 @@ exit(3);*/
 				printf("F:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8]);
 				//printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0] - U[0], rot[1] - U[1], rot[2] - U[2], rot[3] - U[3], rot[4] - U[4], rot[5] - U[5], rot[6] - U[6], rot[7] - U[7], rot[8] - U[8]);
 				printf("interatomic distance:\t\t%f\n", interatomic_distance);
+#ifdef DEBUG
 #endif
 
 				//check type

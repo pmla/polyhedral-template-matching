@@ -158,11 +158,11 @@ const int8_t mapping_ico[NUM_ICO_MAPPINGS][PTM_MAX_POINTS] = {
 
 const int8_t mapping_hcp[NUM_HEX_MAPPINGS][PTM_MAX_POINTS] = {
 					{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12},
-					{ 0,  9,  8, 11, 12, 10,  7,  6,  2,  1,  5,  3,  4},
 					{ 0,  2,  7,  4,  5,  3,  8,  1,  9,  6, 12, 10, 11},
 					{ 0,  7,  1,  5,  3,  4,  9,  2,  6,  8, 11, 12, 10},
 					{ 0,  6,  9, 10, 11, 12,  1,  8,  7,  2,  3,  4,  5},
 					{ 0,  8,  6, 12, 10, 11,  2,  9,  1,  7,  4,  5,  3},
+					{ 0,  9,  8, 11, 12, 10,  7,  6,  2,  1,  5,  3,  4},
 };
 
 const int8_t mapping_dcub[NUM_DCUB_MAPPINGS][PTM_MAX_POINTS] = {

@@ -314,7 +314,7 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex, ideal_graphene][7:8]:
+	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex, ideal_graphene][1:2]:
 		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
 
 		'''
@@ -333,7 +333,8 @@ if __name__ == "__main__":
 		#for row in structure:
 		#	print "{", ",".join([print_val(e) for e in row]), "},"
 
-		#fundamental_mappings.find(structure, generators.generator_graphene)
+		fundamental_mappings.find(structure, generators.generator_hcp)
+		asdf
 
 		M = np.dot(structure.T, structure)
 		mpi_scale = np.trace(M) / 3
