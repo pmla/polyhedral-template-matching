@@ -148,14 +148,12 @@ int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int 
 
 static int find_diamond_neighbours(void* _voronoi_handle, int num_points, double (*_points)[3], size_t* nbr_indices, int32_t* nbr_numbers, int num_solid_nbrs, solidnbr_t* nbrlist)
 {
-	assert( num_points >= num_solid_nbrs + 1);
-
 	sorthelper_t data[PTM_MAX_INPUT_POINTS];
 	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, _points, data);
 	if (ret != 0)
 		return ret;
 
-	int n = std::min(num_solid_nbrs, num_points);
+	int n = std::min(num_solid_nbrs, num_points - 1);
 	for (int i=0;i<n;i++)
 	{
 		nbrlist[i].index = nbr_indices[data[i+1].index];

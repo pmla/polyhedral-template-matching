@@ -4,18 +4,16 @@
 #include <cstdlib>
 #include <string.h>
 #include <cassert>
+#include <algorithm>
 #include "ptm_functions.h"
 #include "unittest.hpp"
 
 using namespace std;
 
-#define ACTIVE_DIAMOND
+//#define _MAX_NBRS 50	//diamond
+//#define _MAX_NBRS 24	//fcc, other
+#define _MAX_NBRS 6	//graphene
 
-#ifdef ACTIVE_DIAMOND
-	#define _MAX_NBRS 50
-#else
-	#define _MAX_NBRS 24
-#endif
 
 static int read_file(const char* path, uint8_t** p_buf, size_t* p_fsize)
 {
@@ -76,13 +74,13 @@ static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* nbr_i
 	double (*positions)[3] = data->positions;
 	int32_t* nbrs = data->nbrs;
 
-
 	memcpy(nbr_pos[0], positions[atom_index], 3 * sizeof(double));
 	nbr_indices[0] = atom_index;
 	if (numbers != NULL)
 		numbers[0] = 0;
 
-	for (int j=0;j<num - 1;j++)
+	int n = std::min(num - 1, _MAX_NBRS);
+	for (int j=0;j<n;j++)
 	{
 		size_t index = nbrs[atom_index * _MAX_NBRS + j];
 		nbr_indices[j+1] = index;
@@ -92,7 +90,7 @@ static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* nbr_i
 		memcpy(nbr_pos[j+1], positions[index], 3 * sizeof(double));
 	}
 
-	return num;
+	return n + 1;
 }
 
 int main()
@@ -109,13 +107,15 @@ int main()
 	double (*positions)[3] = NULL;
 	//int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/fcc_positions.dat", (uint8_t**)&positions, &fsize);
-	int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"test_data/graphene_pos.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
 	//ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"test_data/graphene_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
@@ -133,8 +133,6 @@ int main()
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
 	double rmsd_sum = 0.0;
-//int i = 828133;
-//int i = 775040;
 	for (int i=0;i<num_atoms;i++)
 	{
 		size_t output_indices[_MAX_NBRS];
