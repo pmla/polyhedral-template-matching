@@ -358,7 +358,7 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 	return sqrt(fabs(acc / num));
 }
 
-static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3], int8_t* mapping)
+static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3], size_t* mapping)
 {
 	//transform template
 	double transformed_template[PTM_MAX_POINTS][3];
@@ -400,33 +400,73 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 typedef double points_t[3];
 
 
-/*
 typedef struct
 {
+	int num_points;
 	double (*positions)[3];
-	int32_t* nbrs;
+	int32_t* numbers;
 
 } unittest_nbrdata_t;
 
-
-static int get_neighbours(void* vdata, int atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
+typedef struct
 {
-	unittest_nbrdata_t* data = (unittest_nbrdata_t*)vdata;
-	double (*positions)[3] = data->positions;
+	int index;
+	double dist;
+	double offset[3];
+	int32_t number;
+} sorthelper_t;
 
+static bool sorthelper_compare(sorthelper_t const& a, sorthelper_t const& b)
+{
+	return a.dist < b.dist;
+}
 
-	int n = std::min(num, 
+static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* output_indices, int32_t* output_numbers, double (*output_pos)[3])
+{
+	unittest_nbrdata_t* nbrdata = (unittest_nbrdata_t*)vdata;
+
+	int num_points = nbrdata->num_points;
+	double (*positions)[3] = nbrdata->positions;
+	int32_t* numbers = nbrdata->numbers;
+
+	sorthelper_t data[PTM_MAX_POINTS];
+	for (int i=0;i<num_points;i++)
+	{
+		double x0 = positions[atom_index][0];
+		double y0 = positions[atom_index][1];
+		double z0 = positions[atom_index][2];
+
+		double x1 = positions[i][0];
+		double y1 = positions[i][1];
+		double z1 = positions[i][2];
+
+		double dx = x1 - x0;
+		double dy = y1 - y0;
+		double dz = z1 - z0;
+		double dist = dx*dx + dy*dy + dz*dz;
+
+		data[i].dist = dist;
+		data[i].index = i;
+		data[i].number = numbers == NULL ? -1 : numbers[i];
+
+		for (int j=0;j<3;j++)
+			data[i].offset[j] = positions[i][j] - positions[atom_index][j];
+	}
+
+	std::sort(data, data + num_points, &sorthelper_compare);
+
+	int n = std::min(num_points, num);
 	for (int i=0;i<n;i++)
 	{
-		memcpy(nbr_pos[i], positions[i], 3 * sizeof(double));
-		nbr_indices[0] = i;
-		//if (numbers != NULL)
-		//	numbers[0] = 0;
+		output_indices[i] = data[i].index;
+		output_numbers[i] = data[i].number;
+
+		for (int j=0;j<3;j++)
+			output_pos[i][j] = data[i].offset[j];
 	}
 
 	return n;
-}*/
-
+}
 
 uint64_t run_tests()
 {
@@ -621,115 +661,110 @@ exit(3);*/
 				if (numbers[0] == -1)
 					numbers = NULL;
 
-				for (int itop=0;itop<=1;itop++)
-				{
-					int8_t mapping[PTM_MAX_POINTS];
-					bool topological = itop == 1;
-					int32_t type, alloy_type;
-					double scale, rmsd, interatomic_distance, lattice_constant;
-					double q[4], F[9], F_res[3], U[9], P[9];
-					//ret = ptm_index(local_handle, tocheck, s->num_points, points, numbers, topological, false, -1, -1, NULL,
-					//		&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, mapping, &interatomic_distance, &lattice_constant);
-					if (ret != PTM_NO_ERROR)
-						CLEANUP("indexing failed", ret);
+				unittest_nbrdata_t nbrlist = {s->num_points, points, numbers};
 
-					num_tests++;
+				size_t output_indices[PTM_MAX_POINTS];
+				int32_t type, alloy_type;
+				double scale, rmsd, interatomic_distance, lattice_constant;
+				double q[4], F[9], F_res[3], U[9], P[9];
+				ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, tocheck, false,
+						&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, output_indices);
+				if (ret != PTM_NO_ERROR)
+					CLEANUP("indexing failed", ret);
+
+				num_tests++;
 
 #ifdef DEBUG
-					printf("type:\t\t%d\t(should be: %d)\n", type, s->type);
-					printf("alloy type:\t%d\n", alloy_type);
-					printf("scale:\t\t%f\n", scale);
-					printf("rmsd:\t\t%f\n", rmsd);
-					printf("quat: \t\t%.6f %.6f %.6f %.6f\n", q[0], q[1], q[2], q[3]);
-					printf("qpre:\t\t%.6f %.6f %.6f %.6f\n", qpre[0], qpre[1], qpre[2], qpre[3]);
-					printf("qpost:\t\t%.6f %.6f %.6f %.6f\n", qpost[0], qpost[1], qpost[2], qpost[3]);
-					printf("rot: %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0], rot[1], rot[2], rot[3], rot[4], rot[5], rot[6], rot[7], rot[8]);
-					printf("U:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8]);
-					printf("P:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8]);
-					printf("F:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8]);
-					//printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0] - U[0], rot[1] - U[1], rot[2] - U[2], rot[3] - U[3], rot[4] - U[4], rot[5] - U[5], rot[6] - U[6], rot[7] - U[7], rot[8] - U[8]);
-					printf("interatomic distance:\t\t%f\n", interatomic_distance);
+				printf("type:\t\t%d\t(should be: %d)\n", type, s->type);
+				printf("alloy type:\t%d\n", alloy_type);
+				printf("scale:\t\t%f\n", scale);
+				printf("rmsd:\t\t%f\n", rmsd);
+				printf("quat: \t\t%.6f %.6f %.6f %.6f\n", q[0], q[1], q[2], q[3]);
+				printf("qpre:\t\t%.6f %.6f %.6f %.6f\n", qpre[0], qpre[1], qpre[2], qpre[3]);
+				printf("qpost:\t\t%.6f %.6f %.6f %.6f\n", qpost[0], qpost[1], qpost[2], qpost[3]);
+				printf("rot: %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0], rot[1], rot[2], rot[3], rot[4], rot[5], rot[6], rot[7], rot[8]);
+				printf("U:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", U[0], U[1], U[2], U[3], U[4], U[5], U[6], U[7], U[8]);
+				printf("P:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8]);
+				printf("F:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8]);
+				//printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0] - U[0], rot[1] - U[1], rot[2] - U[2], rot[3] - U[3], rot[4] - U[4], rot[5] - U[5], rot[6] - U[6], rot[7] - U[7], rot[8] - U[8]);
+				printf("interatomic distance:\t\t%f\n", interatomic_distance);
 #endif
 
-					//check type
-					if (type != s->type)
-						CLEANUP("failed on type", -1);
+				//check type
+				if (type != s->type)
+					CLEANUP("failed on type", -1);
 
-					//check alloy type
-					if (alloy_type != alloy_test[it][ia].type)
-{
-printf("%08x\t%08x\n", alloy_type, alloy_test[it][ia].type);
-						CLEANUP("failed on alloy type", -1);
-}
+				//check alloy type
+				if (alloy_type != alloy_test[it][ia].type)
+					CLEANUP("failed on alloy type", -1);
 
-					//check U-matrix is right handed
-					if (matrix_determinant(U) <= 0)
-						CLEANUP("failed on U-matrix right-handedness test", -1);
+				//check U-matrix is right handed
+				if (matrix_determinant(U) <= 0)
+					CLEANUP("failed on U-matrix right-handedness test", -1);
 
-					//check strain tensor is symmetric
-					if (fabs(P[1] - P[3]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
-					if (fabs(P[2] - P[6]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
-					if (fabs(P[5] - P[7]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
+				//check strain tensor is symmetric
+				if (fabs(P[1] - P[3]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
+				if (fabs(P[2] - P[6]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
+				if (fabs(P[5] - P[7]) > tolerance)	CLEANUP("failed on strain tensor symmetry test", -1);
 
-					//check polar decomposition
-					double _F[9];
-					matmul(P, U, _F);
-					if (!check_matrix_equality(_F, F, tolerance))
-						CLEANUP("failed on polar decomposition check", -1);
+				//check polar decomposition
+				double _F[9];
+				matmul(P, U, _F);
+				if (!check_matrix_equality(_F, F, tolerance))
+					CLEANUP("failed on polar decomposition check", -1);
 
-					double A[9];
-					if (!qtest[iq].strain)
-					{
-						//check rmsd
-						if (rmsd > tolerance)
-							CLEANUP("failed on rmsd", -1);
+				double A[9];
+				if (!qtest[iq].strain)
+				{
+					//check rmsd
+					if (rmsd > tolerance)
+						CLEANUP("failed on rmsd", -1);
 
-						//check scale
-						if (fabs(scale - 1 / rescale) > tolerance)
-							CLEANUP("failed on scale", -1);
+					//check scale
+					if (fabs(scale - 1 / rescale) > tolerance)
+						CLEANUP("failed on scale", -1);
 
-						//check deformation gradient equal to polar decomposition rotation
-						if (!check_matrix_equality(F, U, tolerance))
-							CLEANUP("failed on deformation gradient check", -1);
+					//check deformation gradient equal to polar decomposition rotation
+					if (!check_matrix_equality(F, U, tolerance))
+						CLEANUP("failed on deformation gradient check", -1);
 
-						//check strain tensor is identity
-						if (!check_matrix_equality(P, identity_matrix, tolerance))
-							CLEANUP("failed on P identity matrix check", -1);
+					//check strain tensor is identity
+					if (!check_matrix_equality(P, identity_matrix, tolerance))
+						CLEANUP("failed on P identity matrix check", -1);
 
-						//check rotation
-						if (quat_misorientation(q, qpost) > tolerance)
-							CLEANUP("failed on disorientation", -1);
+					//check rotation
+					if (quat_misorientation(q, qpost) > tolerance)
+						CLEANUP("failed on disorientation", -1);
 
-						//check deformation gradient disorientation
-						double qu[4];
-						rotation_matrix_to_quaternion(U, qu);
-						if (quat_misorientation(qu, qpost) > tolerance)
-							CLEANUP("failed on deformation gradient disorientation", -1);
+					//check deformation gradient disorientation
+					double qu[4];
+					rotation_matrix_to_quaternion(U, qu);
+					if (quat_misorientation(qu, qpost) > tolerance)
+						CLEANUP("failed on deformation gradient disorientation", -1);
 
-						quaternion_to_rotation_matrix(q, A);
+					quaternion_to_rotation_matrix(q, A);
 
-						double x = scaled_only[1][0];
-						double y = scaled_only[1][1];
-						double z = scaled_only[1][2];
-						double iad = sqrt(x*x + y*y + z*z);
-						if (fabs(iad - interatomic_distance) > tolerance)
-							CLEANUP("failed on interatomic distance", -1);
-					}
-					else
-					{
-						memcpy(A, F, 9 * sizeof(double));
-					}
-
-					//check nearest neighbour rmsd
-					double rmsd_approx = nearest_neighbour_rmsd(s->num_points, scale, A, points, s->points);
-					if (fabs(rmsd_approx) > tolerance)
-						CLEANUP("failed on rmsd nearest neighbour", -1);
-
-					//check mapped neighbour rmsd
-					double rmsd_mapped = mapped_neighbour_rmsd(s->num_points, scale, A, points, s->points, mapping);
-					if (fabs(rmsd_mapped) > tolerance)
-						CLEANUP("failed on rmsd mapped neighbour", -1);
+					double x = scaled_only[1][0];
+					double y = scaled_only[1][1];
+					double z = scaled_only[1][2];
+					double iad = sqrt(x*x + y*y + z*z);
+					if (fabs(iad - interatomic_distance) > tolerance)
+						CLEANUP("failed on interatomic distance", -1);
 				}
+				else
+				{
+					memcpy(A, F, 9 * sizeof(double));
+				}
+
+				//check nearest neighbour rmsd
+				double rmsd_approx = nearest_neighbour_rmsd(s->num_points, scale, A, points, s->points);
+				if (fabs(rmsd_approx) > tolerance)
+					CLEANUP("failed on rmsd nearest neighbour", -1);
+
+				//check mapped neighbour rmsd
+				double rmsd_mapped = mapped_neighbour_rmsd(s->num_points, scale, A, points, s->points, output_indices);
+				if (fabs(rmsd_mapped) > tolerance)
+					CLEANUP("failed on rmsd mapped neighbour", -1);
 			}
 		}
 	}
@@ -751,9 +786,13 @@ printf("%08x\t%08x\n", alloy_type, alloy_test[it][ia].type);
 
 			int32_t type;
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4];
-			//ret = ptm_index(local_handle, s->check, s->num_points, pdata[i], NULL, false, false, -1, -1, NULL,
-			//		&type, NULL, &scale, &rmsd, q, NULL, NULL,  NULL, NULL, NULL, &interatomic_distance, &lattice_constant);
-ret = -1;
+
+			unittest_nbrdata_t nbrlist = {s->num_points, pdata[i], NULL};
+			ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, s->check, false,
+					&type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
+			if (ret != PTM_NO_ERROR)
+				CLEANUP("indexing failed", ret);
+
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 

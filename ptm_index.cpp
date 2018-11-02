@@ -19,10 +19,11 @@
 #include "ptm_constants.h"
 
 
-//todo: add verification that c == norm(template[1]) to unit tests
 static double calculate_interatomic_distance(int type, double scale)
 {
 	assert(type >= 1 && type <= 7);
+
+	//these values should be equal to norm(template[1])
 	double c[8] = {0, 1, 1, (7. - 3.5 * sqrt(3)), 1, 1, sqrt(3) * 4. / (6 * sqrt(2) + sqrt(3)), sqrt(3) * 4. / (6 * sqrt(2) + sqrt(3))};
 	return c[type] / scale;
 }

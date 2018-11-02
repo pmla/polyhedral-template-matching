@@ -78,6 +78,10 @@ static int32_t canonical_alloy_representation(const refdata_t* ref, int8_t* mapp
 
 int32_t find_alloy_type(const refdata_t* ref, int8_t* mapping, int32_t* numbers)
 {
+	for (int i=0;i<ref->num_nbrs+1;i++)
+		if (numbers[i] == -1)
+			return PTM_ALLOY_NONE;
+
 	if (test_pure(ref->num_nbrs, numbers))
 		return PTM_ALLOY_PURE;
 

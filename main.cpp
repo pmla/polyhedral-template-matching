@@ -98,8 +98,8 @@ static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* nbr_i
 int main()
 {
 	ptm_initialize_global();
-	//uint64_t res = ptm::run_tests();
-	//assert(res == 0);
+	uint64_t res = ptm::run_tests();
+	assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
 	//return 0;
