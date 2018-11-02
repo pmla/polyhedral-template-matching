@@ -93,6 +93,23 @@ def get_sc():
 	]
 	return np.array(l)
 
+def get_graphene():
+
+	sqrt = np.sqrt
+	l = np.array([
+	[                   0,  -3./11+6*sqrt(3)/11,                   0 ],
+	[  -3*sqrt(3)/22+9./11,  -3*sqrt(3)/11+3./22,                   0 ],
+	[  -9./11+3*sqrt(3)/22,  -3*sqrt(3)/11+3./22,                   0 ],
+	[  -9./11+3*sqrt(3)/22,  -9./22+9*sqrt(3)/11,                   0 ],
+	[  -3*sqrt(3)/22+9./11,  -9./22+9*sqrt(3)/11,                   0 ],
+	[ -3*sqrt(3)/11+18./11,                   0,                   0 ],
+	[  -3*sqrt(3)/22+9./11,  -9*sqrt(3)/11+9./22,                   0 ],
+	[  -9./11+3*sqrt(3)/22,  -9*sqrt(3)/11+9./22,                   0 ],
+	[ -18./11+3*sqrt(3)/11,                   0,                   0 ],
+	[                   0,                   0,                   0 ],
+	])
+	return l
+
 
 def get_equilateral_facets(points):
 
@@ -284,6 +301,7 @@ ideal_ico = get_ico()
 ideal_sc = get_sc()
 ideal_dcub, _ = get_diamond_cubic_points()
 ideal_dhex, _ = get_diamond_hexagonal_points()
+ideal_graphene = get_graphene()
 
 def print_val(f):
 	e = " %.15f" % f
@@ -296,7 +314,7 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex][:]:
+	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex, ideal_graphene][7:8]:
 		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
 
 		'''
@@ -315,8 +333,7 @@ if __name__ == "__main__":
 		#for row in structure:
 		#	print "{", ",".join([print_val(e) for e in row]), "},"
 
-		#fundamental_mappings.find(structure, generators.generator_dhex)
-		#asdf
+		#fundamental_mappings.find(structure, generators.generator_graphene)
 
 		M = np.dot(structure.T, structure)
 		mpi_scale = np.trace(M) / 3

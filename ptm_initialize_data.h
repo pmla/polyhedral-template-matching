@@ -37,6 +37,8 @@ const refdata_t structure_bcc =  { PTM_MATCH_BCC,  14, 24, 8, NUM_BCC_GRAPHS,  N
 const refdata_t structure_dcub = { PTM_MATCH_DCUB, 16, 28, 8, NUM_DCUB_GRAPHS, NUM_DCUB_MAPPINGS,  graphs_dcub, ptm_template_dcub, penrose_dcub, mapping_dcub };
 const refdata_t structure_dhex = { PTM_MATCH_DHEX, 16, 28, 8, NUM_DHEX_GRAPHS, NUM_DHEX_MAPPINGS,  graphs_dhex, ptm_template_dhex, penrose_dhex, mapping_dhex };
 
+const refdata_t structure_graphene = { PTM_MATCH_GRAPHENE, 9, -1, -1, -1, -1,  NULL, ptm_template_graphene, penrose_graphene, mapping_graphene };
+
 }
 
 #ifdef __cplusplus

@@ -116,6 +116,19 @@ dhex = [
 								[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
 ]
 
+graphene = [
+		[                   0,  -3*sqrt(1)/11+6*sqrt(3)/11,                   0 ],
+		[  -3*sqrt(3)/22+9*sqrt(1)/11,  -3*sqrt(3)/11+3*sqrt(1)/22,                   0 ],
+		[  -9*sqrt(1)/11+3*sqrt(3)/22,  -3*sqrt(3)/11+3*sqrt(1)/22,                   0 ],
+		[  -9*sqrt(1)/11+3*sqrt(3)/22,  -9*sqrt(1)/22+9*sqrt(3)/11,                   0 ],
+		[  -3*sqrt(3)/22+9*sqrt(1)/11,  -9*sqrt(1)/22+9*sqrt(3)/11,                   0 ],
+		[ -3*sqrt(3)/11+18*sqrt(1)/11,                   0,                   0 ],
+		[  -3*sqrt(3)/22+9*sqrt(1)/11,  -9*sqrt(3)/11+9*sqrt(1)/22,                   0 ],
+		[  -9*sqrt(1)/11+3*sqrt(3)/22,  -9*sqrt(3)/11+9*sqrt(1)/22,                   0 ],
+		[ -18*sqrt(1)/11+3*sqrt(3)/11,                   0,                   0 ],
+		[                   0,                   0,                   0 ],
+]
+
 
 def format(n, penrose):
 
@@ -128,7 +141,7 @@ def format(n, penrose):
 
 def go():
 
-	for structure in [sc, fcc, hcp, ico, bcc, dcub, dhex]:
+	for structure in [sc, fcc, hcp, ico, bcc, dcub, dhex, graphene]:
 		#M = np.dot(structure.T, structure)
 		#mpi_scale = np.trace(M) / 3
 		#inv = structure / mpi_scale

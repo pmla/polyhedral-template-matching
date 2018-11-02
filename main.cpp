@@ -128,14 +128,14 @@ int main()
 	int8_t* types = (int8_t*)calloc(sizeof(int8_t), num_atoms);
 	double* rmsds = (double*)calloc(sizeof(double), num_atoms);
 	double* quats = (double*)calloc(4 * sizeof(double), num_atoms);
-	int counts[8] = {0};
+	int counts[9] = {0};
 
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 
 	double rmsd_sum = 0.0;
 	for (int i=0;i<num_atoms;i++)
 	{
-		size_t output_indices[_MAX_NBRS];
+		size_t output_indices[PTM_MAX_INPUT_POINTS];
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
@@ -159,7 +159,7 @@ int main()
 		if (i % 1000 == 0 || i == num_atoms - 1 || 0)
 		{
 			printf("counts: [");
-			for (int j = 0;j<8;j++)
+			for (int j = 0;j<9;j++)
 				printf("%d ", counts[j]);
 			printf("]\n");
 		}

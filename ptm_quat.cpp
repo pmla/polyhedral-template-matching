@@ -145,6 +145,16 @@ const double generator_icosahedral[60][4] = {
 	{                        0,                        0,   sqrt(50-10*sqrt(5))/10,     sqrt((5+sqrt(5))/10) },
 };
 
+const double generator_graphene[6][4] = {
+	{          1,          0,          0,          0 },
+	{        0.5,          0,          0,  sqrt(3)/2 },
+	{        0.5,         -0,         -0, -sqrt(3)/2 },
+	{          0,  sqrt(3)/2,        0.5,          0 },
+	{          0,  sqrt(3)/2,       -0.5,          0 },
+	{          0,          0,          1,          0 },
+};
+
+
 static void quat_rot(double* r, double* a, double* b)
 {
 	b[0] = (r[0] * a[0] - r[1] * a[1] - r[2] * a[2] - r[3] * a[3]);
@@ -210,6 +220,11 @@ int rotate_quaternion_into_hcp_conventional_fundamental_zone(double* q)
 int rotate_quaternion_into_diamond_hexagonal_fundamental_zone(double* q)
 {
 	return rotate_quaternion_into_fundamental_zone(3, generator_diamond_hexagonal, q);
+}
+
+int rotate_quaternion_into_graphene_fundamental_zone(double* q)
+{
+	return rotate_quaternion_into_fundamental_zone(6, generator_graphene, q);
 }
 
 double quat_dot(double* a, double* b)

@@ -185,7 +185,7 @@ int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_ind
 	int32_t central_nbr_numbers[max_snbrs + 1];
 	double central_nbr_pos[max_snbrs + 1][3];
 	int num_points = get_neighbours(nbrlist, atom_index, max_snbrs + 1, central_nbr_indices, central_nbr_numbers, central_nbr_pos);
-	if (num_points < 4)
+	if (num_points < 5)
 		return -1;
 
 	solidnbr_t central_solid[max_snbrs];
@@ -220,7 +220,7 @@ int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_ind
 		int32_t inner_nbr_numbers[max_snbrs + 1];
 		double inner_nbr_pos[max_snbrs + 1][3];
 		int num_points = get_neighbours(nbrlist, inner_index, max_snbrs + 1, inner_nbr_indices, inner_nbr_numbers, inner_nbr_pos);
-		if (num_points < 4)
+		if (num_points < 5)
 			return -1;
 
 		solidnbr_t inner_solid[max_snbrs];
@@ -276,6 +276,113 @@ int calculate_diamond_neighbour_ordering(	void* _voronoi_handle, size_t atom_ind
 	}
 
 	if (num_found != 12)
+		return -1;
+
+	return 0;
+}
+
+int calculate_graphene_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
+						size_t* nbr_indices, double (*points)[3], int32_t* numbers)
+{
+const int num_inner = 3;
+const int max_snbrs = 9;	//todo: probably overkill
+
+	size_t central_nbr_indices[max_snbrs + 1];
+	int32_t central_nbr_numbers[max_snbrs + 1];
+	double central_nbr_pos[max_snbrs + 1][3];
+	int num_points = get_neighbours(nbrlist, atom_index, max_snbrs + 1, central_nbr_indices, central_nbr_numbers, central_nbr_pos);
+	if (num_points < num_inner + 1)
+		return -1;
+
+	solidnbr_t central_solid[max_snbrs];
+	int ret = find_diamond_neighbours(_voronoi_handle, num_points, central_nbr_pos, central_nbr_indices, central_nbr_numbers, max_snbrs, central_solid);
+	if (ret != 0)
+		return ret;
+
+
+	sorthelper_t data[3 * 6];	//todo: num inner
+	nbr_indices[0] = atom_index;
+	numbers[0] = central_nbr_numbers[0];
+	memset(&points[0], 0, 3 * sizeof(double));
+
+	std::unordered_set<size_t> claimed;
+	claimed.insert(atom_index);
+	for (int i=0;i<num_inner;i++)
+	{
+		size_t inner_index = central_solid[i].index;
+		claimed.insert(inner_index);
+	}
+
+	int index = 0;
+	for (int i=0;i<num_inner;i++)
+	{
+		size_t inner_index = central_solid[i].index;
+		nbr_indices[i+1] = inner_index;
+		numbers[i+1] = central_nbr_numbers[i+1];
+		memcpy(&points[i+1], central_solid[i].offset, 3 * sizeof(double));
+
+		//----------------------------------------------
+		size_t inner_nbr_indices[max_snbrs + 1];
+		int32_t inner_nbr_numbers[max_snbrs + 1];
+		double inner_nbr_pos[max_snbrs + 1][3];
+		int num_points = get_neighbours(nbrlist, inner_index, max_snbrs + 1, inner_nbr_indices, inner_nbr_numbers, inner_nbr_pos);
+		if (num_points < num_inner + 1)
+			return -1;
+
+		solidnbr_t inner_solid[max_snbrs];
+		ret = find_diamond_neighbours(_voronoi_handle, num_points, inner_nbr_pos, inner_nbr_indices, inner_nbr_numbers, max_snbrs, inner_solid);
+		if (ret != 0)
+			return ret;
+		//----------------------------------------------
+
+		int n = std::min(6, num_points);
+		for (int j=0;j<n;j++)
+		{
+			bool already_claimed = claimed.find(inner_solid[j].index) != claimed.end();
+			if (already_claimed)
+				continue;
+
+			data[index].inner = i;
+			data[index].index = inner_solid[j].index;
+			data[index].area = inner_solid[j].area;
+			data[index].dist = 0;
+			data[index].number = inner_solid[j].number;
+
+			memcpy(data[index].offset, inner_solid[j].offset, 3 * sizeof(double));
+			for (int k=0;k<3;k++)
+				data[index].offset[k] += central_solid[i].offset[k];
+
+			index++;
+		}
+	}
+
+	int n = index;
+	std::sort(data, data + n, &sorthelper_compare);
+
+int num_outer = 2;
+	int num_found = 0;
+	int counts[3] = {0};
+	for (int i=0;i<n;i++)
+	{
+		int inner = data[i].inner;
+		int nbr_atom_index = data[i].index;
+
+		bool already_claimed = claimed.find(nbr_atom_index) != claimed.end();
+		if (counts[inner] >= num_outer || already_claimed)
+			continue;
+
+		nbr_indices[1 + num_inner + num_outer * inner + counts[inner]] = nbr_atom_index;
+		numbers[1 + num_inner + num_outer * inner + counts[inner]] = data[i].number;
+		memcpy(points[1 + num_inner + num_outer * inner + counts[inner]], &data[i].offset, 3 * sizeof(double));
+		claimed.insert(nbr_atom_index);
+
+		counts[inner]++;
+		num_found++;
+		if (num_found >= num_inner * num_outer)
+			break;
+	}
+
+	if (num_found != num_inner * num_outer)
 		return -1;
 
 	return 0;

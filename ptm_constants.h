@@ -9,24 +9,26 @@
 #define PTM_NO_ERROR	0
 
 
-#define PTM_CHECK_FCC	(1 << 0)
-#define PTM_CHECK_HCP	(1 << 1)
-#define PTM_CHECK_BCC	(1 << 2)
-#define PTM_CHECK_ICO	(1 << 3)
-#define PTM_CHECK_SC	(1 << 4)
-#define PTM_CHECK_DCUB	(1 << 5)
-#define PTM_CHECK_DHEX	(1 << 6)
-#define PTM_CHECK_NONDIAMOND	(PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC)
-#define PTM_CHECK_ALL	(PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC | PTM_CHECK_DCUB | PTM_CHECK_DHEX)
+#define PTM_CHECK_FCC		(1 << 0)
+#define PTM_CHECK_HCP		(1 << 1)
+#define PTM_CHECK_BCC		(1 << 2)
+#define PTM_CHECK_ICO		(1 << 3)
+#define PTM_CHECK_SC		(1 << 4)
+#define PTM_CHECK_DCUB		(1 << 5)
+#define PTM_CHECK_DHEX		(1 << 6)
+#define PTM_CHECK_GRAPHENE	(1 << 7)
+#define PTM_CHECK_DEFAULT	(PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC)
+#define PTM_CHECK_ALL	(PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC | PTM_CHECK_DCUB | PTM_CHECK_DHEX | PTM_CHECK_GRAPHENE)
 
-#define PTM_MATCH_NONE	0
-#define PTM_MATCH_FCC	1
-#define PTM_MATCH_HCP	2
-#define PTM_MATCH_BCC	3
-#define PTM_MATCH_ICO	4
-#define PTM_MATCH_SC	5
-#define PTM_MATCH_DCUB	6
-#define PTM_MATCH_DHEX	7
+#define PTM_MATCH_NONE		0
+#define PTM_MATCH_FCC		1
+#define PTM_MATCH_HCP		2
+#define PTM_MATCH_BCC		3
+#define PTM_MATCH_ICO		4
+#define PTM_MATCH_SC		5
+#define PTM_MATCH_DCUB		6
+#define PTM_MATCH_DHEX		7
+#define PTM_MATCH_GRAPHENE	8
 
 #define PTM_ALLOY_NONE		0
 #define PTM_ALLOY_PURE		1
@@ -54,16 +56,18 @@
 #define PTM_NUM_NBRS_SC  6
 #define PTM_NUM_NBRS_DCUB  16
 #define PTM_NUM_NBRS_DHEX  16
+#define PTM_NUM_NBRS_GRAPHENE  9
 
 #define PTM_NUM_POINTS_FCC  (PTM_NUM_NBRS_FCC + 1)
 #define PTM_NUM_POINTS_HCP  (PTM_NUM_NBRS_HCP + 1)
 #define PTM_NUM_POINTS_BCC  (PTM_NUM_NBRS_BCC + 1)
 #define PTM_NUM_POINTS_ICO  (PTM_NUM_NBRS_ICO + 1)
 #define PTM_NUM_POINTS_SC   (PTM_NUM_NBRS_SC  + 1)
-#define PTM_NUM_POINTS_DCUB (PTM_NUM_NBRS_DCUB  + 1)
-#define PTM_NUM_POINTS_DHEX (PTM_NUM_NBRS_DHEX  + 1)
+#define PTM_NUM_POINTS_DCUB (PTM_NUM_NBRS_DCUB + 1)
+#define PTM_NUM_POINTS_DHEX (PTM_NUM_NBRS_DHEX + 1)
+#define PTM_NUM_POINTS_GRAPHENE (PTM_NUM_NBRS_GRAPHENE + 1)
 
-const int ptm_num_nbrs[8] = {0, PTM_NUM_NBRS_FCC, PTM_NUM_NBRS_HCP, PTM_NUM_NBRS_BCC, PTM_NUM_NBRS_ICO, PTM_NUM_NBRS_SC, PTM_NUM_NBRS_DCUB, PTM_NUM_NBRS_DHEX};
+const int ptm_num_nbrs[9] = {0, PTM_NUM_NBRS_FCC, PTM_NUM_NBRS_HCP, PTM_NUM_NBRS_BCC, PTM_NUM_NBRS_ICO, PTM_NUM_NBRS_SC, PTM_NUM_NBRS_DCUB, PTM_NUM_NBRS_DHEX, PTM_NUM_NBRS_GRAPHENE};
 
 //------------------------------------
 //    template structures
@@ -185,6 +189,19 @@ const double ptm_template_dhex[PTM_NUM_POINTS_DHEX][3] = {
 								{                                   0,   -8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) },
 								{       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) },
 								{      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) },
+};
+
+const double ptm_template_graphene[PTM_NUM_POINTS_GRAPHENE][3] = {
+								{                    0,                    0,                    0 },
+								{                    0,  -3./11+6*sqrt(3)/11,                    0 },
+								{  -3*sqrt(3)/22+9./11,  -3*sqrt(3)/11+3./22,                    0 },
+								{  -9./11+3*sqrt(3)/22,  -3*sqrt(3)/11+3./22,                    0 },
+								{  -9./11+3*sqrt(3)/22,  -9./22+9*sqrt(3)/11,                    0 },
+								{  -3*sqrt(3)/22+9./11,  -9./22+9*sqrt(3)/11,                    0 },
+								{ -3*sqrt(3)/11+18./11,                    0,                    0 },
+								{  -3*sqrt(3)/22+9./11,  -9*sqrt(3)/11+9./22,                    0 },
+								{  -9./11+3*sqrt(3)/22,  -9*sqrt(3)/11+9./22,                    0 },
+								{ -18./11+3*sqrt(3)/11,                    0,                    0 },
 };
 
 #endif

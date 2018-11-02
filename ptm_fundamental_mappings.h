@@ -10,6 +10,7 @@ namespace ptm {
 #define NUM_HEX_MAPPINGS 6
 #define NUM_DCUB_MAPPINGS 12
 #define NUM_DHEX_MAPPINGS 3
+#define NUM_GRAPHENE_MAPPINGS 6
 
 const int8_t mapping_sc[NUM_CUBIC_MAPPINGS][PTM_MAX_POINTS] = {
 					{ 0,  1,  2,  3,  4,  5,  6},
@@ -183,6 +184,15 @@ const int8_t mapping_dhex[NUM_DHEX_MAPPINGS][PTM_MAX_POINTS] = {
 					{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
 					{ 0,  3,  1,  2,  4, 12, 11, 13,  5,  6,  7,  9,  8, 10, 16, 14, 15},
 					{ 0,  2,  3,  1,  4,  8,  9, 10, 12, 11, 13,  6,  5,  7, 15, 16, 14},
+};
+
+const int8_t mapping_graphene[NUM_GRAPHENE_MAPPINGS][PTM_MAX_POINTS] = {
+					{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9},
+					{ 0,  2,  3,  1,  6,  7,  8,  9,  4,  5},
+					{ 0,  3,  1,  2,  8,  9,  4,  5,  6,  7},
+					{ 0,  2,  1,  3,  7,  6,  5,  4,  9,  8},
+					{ 0,  3,  2,  1,  9,  8,  7,  6,  5,  4},
+					{ 0,  1,  3,  2,  5,  4,  9,  8,  7,  6},
 };
 
 }
