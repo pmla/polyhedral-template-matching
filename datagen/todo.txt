@@ -4,10 +4,9 @@ update LAMMPS
 update LAMMPS documentation
 make LAMMPS example
 
-better diamond neighbour selection
-reduce number of neighbours
-graphite
+add elemental numbers to ovito neighbourlist function
+update python interface for OVITO
+add unit tests for graphite
 better testing framework
-
 
 clang format all code

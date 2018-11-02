@@ -84,12 +84,24 @@ static int rotate_into_fundamental_zone(int type, bool output_conventional_orien
 		}
 	}
 
-	if (type == PTM_MATCH_GRAPHENE)	return ptm::rotate_quaternion_into_graphene_fundamental_zone(q);
+	if (type == PTM_MATCH_GRAPHENE)
+	{
+		if (!output_conventional_orientation)
+		{
+			return ptm::rotate_quaternion_into_graphene_fundamental_zone(q);
+		}
+		else
+		{
+			ptm::rotate_quaternion_into_hcp_conventional_fundamental_zone(q);
+			return -1;
+			//cannot create a meaningful mapping for non-template rotations
+		}
+	}
 
 	return -1;
 }
 
-static void output_data(ptm::result_t* res, int num_points, double (*points)[3], int32_t* numbers, size_t* ordering, bool output_conventional_orientation,
+static void output_data(ptm::result_t* res, double (*points)[3], int32_t* numbers, size_t* ordering, bool output_conventional_orientation,
 			int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res,
 			double* U, double* P, double* p_interatomic_distance, double* p_lattice_constant, size_t* output_indices)
 {
@@ -239,19 +251,19 @@ int ptm_index(	ptm_local_handle_t local_handle,
 
 	if (res.ref_struct->type == PTM_MATCH_DCUB || res.ref_struct->type == PTM_MATCH_DHEX)
 	{
-		output_data(	&res, PTM_NUM_POINTS_DCUB, dpoints, dnumbers, dordering, output_conventional_orientation,
+		output_data(	&res, dpoints, dnumbers, dordering, output_conventional_orientation,
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
 				U, P, p_interatomic_distance, p_lattice_constant, output_indices);
 	}
 	else if (res.ref_struct->type == PTM_MATCH_GRAPHENE)
 	{
-		output_data(	&res, PTM_NUM_POINTS_GRAPHENE, gpoints, gnumbers, gordering, output_conventional_orientation,
+		output_data(	&res, gpoints, gnumbers, gordering, output_conventional_orientation,
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
 				U, P, p_interatomic_distance, p_lattice_constant, output_indices);
 	}
 	else
 	{
-		output_data(	&res, num_lpoints, points, numbers, ordering, output_conventional_orientation,
+		output_data(	&res, points, numbers, ordering, output_conventional_orientation,
 				p_type, p_alloy_type, p_scale, p_rmsd, q, F, F_res,
 				U, P, p_interatomic_distance, p_lattice_constant, output_indices);
 	}

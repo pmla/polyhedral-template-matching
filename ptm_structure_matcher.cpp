@@ -339,7 +339,7 @@ int match_graphene(double (*points)[3], result_t* res)
 	double normalized[PTM_MAX_POINTS][3];
 	subtract_barycentre(num_points, points, normalized);
 
-	int8_t mapping[structure_graphene.num_nbrs+1];
+	int8_t mapping[PTM_MAX_POINTS];
 	for (int i=0;i<num_points;i++)
 		mapping[i] = i;
 
