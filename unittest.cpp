@@ -51,14 +51,14 @@ typedef struct
 } structdata_t;
 
 //                              { .type = PTM_MATCH_SC,  .check = PTM_CHECK_SC,  .num_points =  7, .points = ptm_template_sc },
-structdata_t structdata[7] =  {	{ PTM_MATCH_FCC,  PTM_CHECK_FCC,  13, ptm_template_fcc  },
+structdata_t structdata[8] =  {	{ PTM_MATCH_FCC,  PTM_CHECK_FCC,  13, ptm_template_fcc  },
 				{ PTM_MATCH_HCP,  PTM_CHECK_HCP,  13, ptm_template_hcp  },
 				{ PTM_MATCH_BCC,  PTM_CHECK_BCC,  15, ptm_template_bcc  },
 				{ PTM_MATCH_ICO,  PTM_CHECK_ICO,  13, ptm_template_ico  },
 				{ PTM_MATCH_SC,   PTM_CHECK_SC,    7, ptm_template_sc   },
 				{ PTM_MATCH_DCUB, PTM_CHECK_DCUB, 17, ptm_template_dcub },
 				{ PTM_MATCH_DHEX, PTM_CHECK_DHEX, 17, ptm_template_dhex },
-				//{ PTM_MATCH_GRAPHENE, PTM_CHECK_GRAPHENE, 10, ptm_template_graphene },
+				{ PTM_MATCH_GRAPHENE, PTM_CHECK_GRAPHENE, 10, ptm_template_graphene },
 };
 
 typedef struct
@@ -158,13 +158,13 @@ alloytest_t graphene_alloy_tests[] = {
 
 	{ PTM_ALLOY_NONE,   {0, 0, 0, 0, 0, 0, 1, 0, 0, 0}},	//pure -defect
 	{ PTM_ALLOY_NONE,   {4, 1, 4, 4, 4, 4, 4, 4, 4, 4}},	//pure -defect
-	//{ PTM_ALLOY_NONE,   {4, 0, 0, 0, 0, 4, 0, 0, 0, 4}},	//CN -defect
-	//{ PTM_ALLOY_NONE,   {1, 2, 2, 2, 2, 3, 2, 2, 2, 1}},	//CN -defect
+	{ PTM_ALLOY_NONE,   {4, 0, 0, 0, 4, 4, 0, 4, 4, 4}},	//BN -defect
+	{ PTM_ALLOY_NONE,   {1, 2, 2, 2, 2, 3, 2, 2, 2, 1}},	//BN -defect
 
-	//{ PTM_ALLOY_PURE,   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-	//{ PTM_ALLOY_PURE,   {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},
-	//{ PTM_ALLOY_CN,     {4, 0, 0, 0, 0, 4, 4, 4, 4, 4}},
-	//{ PTM_ALLOY_CN,     {1, 2, 2, 2, 2, 1, 1, 1, 1, 1}},
+	{ PTM_ALLOY_PURE,   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+	{ PTM_ALLOY_PURE,   {4, 4, 4, 4, 4, 4, 4, 4, 4, 4}},
+	{ PTM_ALLOY_BN,     {4, 0, 0, 0, 4, 4, 4, 4, 4, 4}},
+	{ PTM_ALLOY_BN,     {1, 2, 2, 2, 1, 1, 1, 1, 1, 1}},
 };
 
 
@@ -531,8 +531,8 @@ uint64_t run_tests()
 					ico_qtest,
 					cubic_qtest,
 					cubic_qtest,
-					hcp_qtest	};
-					//graphene_qtest };
+					hcp_qtest,
+					hcp_qtest };
 	int num_tests = 0;
 	ptm_local_handle_t local_handle = ptm_initialize_local();
 

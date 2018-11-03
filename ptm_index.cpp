@@ -122,7 +122,8 @@ static void output_data(ptm::result_t* res, double (*points)[3], int32_t* number
 		}
 
 		ptm::calculate_deformation_gradient(ref->num_nbrs + 1, ref->points, res->mapping, scaled_points, ref->penrose, F, F_res);
-//todo: for graphene, check last component
+		if (ref->type == PTM_MATCH_GRAPHENE)	//hack for pseudo-2d structures
+			F[8] = 1;
 
 		if (P != NULL && U != NULL)
 			ptm::polar_decomposition_3x3(F, false, U, P);

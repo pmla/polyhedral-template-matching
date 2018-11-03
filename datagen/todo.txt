@@ -6,9 +6,6 @@ make LAMMPS example
 
 add elemental numbers to ovito neighbourlist function
 update python interface for OVITO
-add unit tests for graphene
-	add ordering types- pure, carbon nitride
-	check deformation gradient
 better testing framework
 
 clang format all code

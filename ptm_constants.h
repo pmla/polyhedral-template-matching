@@ -37,6 +37,7 @@
 #define PTM_ALLOY_L12_AU	4
 #define PTM_ALLOY_B2		5
 #define PTM_ALLOY_SIC		6
+#define PTM_ALLOY_BN		7
 
 
 #define PTM_MAX_INPUT_POINTS 19
