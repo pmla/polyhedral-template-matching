@@ -236,7 +236,7 @@ int ptm_index(	ptm_local_handle_t local_handle,
 		*p_alloy_type = PTM_ALLOY_NONE;
 
 	if (output_indices != NULL)
-		memset(output_indices, -1, PTM_MAX_INPUT_POINTS * sizeof(int8_t));
+		memset(output_indices, -1, PTM_MAX_INPUT_POINTS * sizeof(size_t));
 
 	if (res.ref_struct == NULL)
 		return PTM_NO_ERROR;
