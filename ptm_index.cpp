@@ -206,7 +206,10 @@ int ptm_index(	ptm_local_handle_t local_handle,
 
 	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX))
 	{
-		ret = ptm::calculate_diamond_neighbour_ordering((void*)local_handle, atom_index, get_neighbours, nbrlist, dordering, dpoints, dnumbers);
+		const int num_inner = 4, num_outer = 3, max_snbrs = 12;
+		ret = ptm::calculate_two_shell_neighbour_ordering((void*)local_handle, atom_index, get_neighbours, nbrlist,
+									num_inner, num_outer, max_snbrs,
+									dordering, dpoints, dnumbers);
 		if (ret == 0)
 		{
 			ptm::normalize_vertices(PTM_NUM_NBRS_DCUB + 1, dpoints, ch_points);
@@ -218,7 +221,10 @@ int ptm_index(	ptm_local_handle_t local_handle,
 
 	if (flags & PTM_CHECK_GRAPHENE)
 	{
-		ret = ptm::calculate_graphene_neighbour_ordering((void*)local_handle, atom_index, get_neighbours, nbrlist, gordering, gpoints, gnumbers);
+		const int num_inner = 3, num_outer = 2, max_snbrs = 8;
+		ret = ptm::calculate_two_shell_neighbour_ordering((void*)local_handle, atom_index, get_neighbours, nbrlist,
+									num_inner, num_outer, max_snbrs,
+									gordering, gpoints, gnumbers);
 		if (ret == 0)
 		{
 			ret = match_graphene(gpoints, &res);

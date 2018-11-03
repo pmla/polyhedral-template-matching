@@ -701,6 +701,7 @@ exit(3);*/
 
 				num_tests++;
 
+#ifdef DEBUG
 				printf("type:\t\t%d\t(should be: %d)\n", type, s->type);
 				printf("alloy type:\t%d\n", alloy_type);
 				printf("scale:\t\t%f\n", scale);
@@ -714,7 +715,6 @@ exit(3);*/
 				printf("F:   %f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", F[0], F[1], F[2], F[3], F[4], F[5], F[6], F[7], F[8]);
 				//printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", rot[0] - U[0], rot[1] - U[1], rot[2] - U[2], rot[3] - U[3], rot[4] - U[4], rot[5] - U[5], rot[6] - U[6], rot[7] - U[7], rot[8] - U[8]);
 				printf("interatomic distance:\t\t%f\n", interatomic_distance);
-#ifdef DEBUG
 #endif
 
 				//check type
