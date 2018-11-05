@@ -47,8 +47,35 @@ static bool sorthelper_compare(sorthelper_t const& a, sorthelper_t const& b)
 	return false;
 }
 
+static double dot_product(double* a, double* b)
+{
+	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+static void cross_product(double* a, double* b, double* c)
+{
+	c[0] = a[1] * b[2] - a[2] * b[1];
+	c[1] = a[2] * b[0] - a[0] * b[2];
+	c[2] = a[0] * b[1] - a[1] * b[0];
+}
+
+static double calculate_solid_angle(double* R1, double* R2, double* R3)	//norms of R1-R3 must be 1
+{
+	double R2R3[3];
+	cross_product(R2, R3, R2R3);
+	double numerator = dot_product(R1, R2R3);
+
+	double r1r2 = dot_product(R1, R2);
+	double r2r3 = dot_product(R2, R3);
+	double r3r1 = dot_product(R3, R1);
+
+	double denominator = 1 + r1r2 + r3r1 + r2r3;
+	return fabs(2 * atan2(numerator, denominator));
+}
+
 //todo: change voronoi code to return errors rather than exiting
-static int calculate_voronoi_face_areas(int num_points, const double (*_points)[3], double* normsq, double max_norm, ptm_voro::voronoicell_neighbor* v, std::vector<int>& nbr_indices, std::vector<double>& face_areas)
+static int calculate_voronoi_face_areas(int num_points, const double (*_points)[3], double* normsq, double max_norm, ptm_voro::voronoicell_neighbor* v, bool calc_solid_angles,
+						std::vector<int>& nbr_indices, std::vector<double>& face_areas)
 {
 	const double k = 10 * max_norm;
 	v->init(-k,k,-k,k,-k,k);
@@ -62,11 +89,84 @@ static int calculate_voronoi_face_areas(int num_points, const double (*_points)[
 	}
 
 	v->neighbors(nbr_indices);
-	v->face_areas(face_areas);
-	return 0;
+
+//v->face_areas(face_areas);
+	if (!calc_solid_angles)
+	{
+		v->face_areas(face_areas);
+		return 0;
+	}
+	else
+	{
+		std::vector<int> face_vertices;
+		std::vector<double> vertices;
+
+		v->face_vertices(face_vertices);
+		v->vertices(0, 0, 0, vertices);
+
+		size_t num_vertices = vertices.size() / 3;
+		for (size_t i=0;i<num_vertices;i++)
+		{
+			double x = vertices[i * 3 + 0];
+			double y = vertices[i * 3 + 1];
+			double z = vertices[i * 3 + 2];
+
+			double s = sqrt(x*x + y*y + z*z);
+			vertices[i * 3 + 0] /= s;
+			vertices[i * 3 + 1] /= s;
+			vertices[i * 3 + 2] /= s;
+		}
+
+		int num_faces = v->number_of_faces();
+
+#ifdef DEBUG
+		printf("number of voronoi faces: %d\n", num_faces);
+#endif
+
+//std::vector<double> solids(face_areas.size()+1);
+
+		size_t c = 0;
+		for (int current_face=0;current_face<num_faces;current_face++)
+		{
+			int num = face_vertices[c++];
+
+			int point_index = nbr_indices[current_face];
+			if (point_index > 0)
+			{
+				double solid_angle = 0;
+				int u = face_vertices[c];
+				int v = face_vertices[c+1];
+				for (int i=2;i<num;i++)
+				{
+					int w = face_vertices[c+i];
+					double omega = calculate_solid_angle(&vertices[u*3], &vertices[v*3], &vertices[w*3]);
+					solid_angle += omega;
+
+					v = w;
+				}
+
+				face_areas[current_face] = solid_angle;
+//solids[current_face] = solid_angle;
+				//face_areas[point_index] = solid_angle;
+			}
+
+			c += num;
+		}
+
+#ifdef DEBUG
+printf("\n");
+for (int i=0;i<solids.size();i++)
+{
+	printf("%d\t%f\t%f\n", i, solids[i], face_areas[i]);
+}
+#endif
+
+		assert(c == face_vertices.size());
+		return 0;
+	}
 }
 
-static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, double (*_points)[3], sorthelper_t* data)
+static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, double (*_points)[3], bool calc_solid_angles, sorthelper_t* data)
 {
 	assert(num_points <= PTM_MAX_INPUT_POINTS);
 
@@ -93,7 +193,7 @@ static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, 
 
 	std::vector<int> nbr_indices(num_points + 6);
 	std::vector<double> face_areas(num_points + 6);
-	int ret = calculate_voronoi_face_areas(num_points, points, normsq, max_norm, voronoi_handle, nbr_indices, face_areas);
+	int ret = calculate_voronoi_face_areas(num_points, points, normsq, max_norm, voronoi_handle, calc_solid_angles, nbr_indices, face_areas);
 	if (ret != 0)
 		return ret;
 
@@ -120,7 +220,8 @@ static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_points, 
 	return ret;
 }
 
-int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int min_points, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
+int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int min_points, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers,
+					double (*nbr_pos)[3]), void* nbrlist, bool calc_solid_angles,
 					size_t* indices, double (*points)[3], int32_t* numbers)
 {
 	size_t nbr_indices[PTM_MAX_INPUT_POINTS];
@@ -131,7 +232,7 @@ int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int 
 		return -1;
 
 	sorthelper_t data[PTM_MAX_INPUT_POINTS];
-	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, nbr_pos, data);
+	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, nbr_pos, calc_solid_angles, data);
 	if (ret != 0)
 		return ret;
 
@@ -146,10 +247,10 @@ int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int 
 	return num_points;
 }
 
-static int find_diamond_neighbours(void* _voronoi_handle, int num_points, double (*_points)[3], size_t* nbr_indices, int32_t* nbr_numbers, int num_solid_nbrs, solidnbr_t* nbrlist)
+static int find_diamond_neighbours(void* _voronoi_handle, int num_points, double (*_points)[3], size_t* nbr_indices, int32_t* nbr_numbers, int num_solid_nbrs, bool calc_solid_angles, solidnbr_t* nbrlist)
 {
 	sorthelper_t data[PTM_MAX_INPUT_POINTS];
-	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, _points, data);
+	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, _points, calc_solid_angles, data);
 	if (ret != 0)
 		return ret;
 
@@ -181,7 +282,7 @@ void voronoi_uninitialize_local(void* _ptr)
 #define MAX_SNBRS 12
 
 int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
-						int num_inner, int num_outer, int max_snbrs,
+						int num_inner, int num_outer, int max_snbrs, bool calc_solid_angles,
 						size_t* nbr_indices, double (*points)[3], int32_t* numbers)
 {
 	assert(num_inner <= MAX_INNER);
@@ -194,7 +295,7 @@ int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, size_t atom_i
 		return -1;
 
 	solidnbr_t central_solid[MAX_SNBRS];
-	int ret = find_diamond_neighbours(_voronoi_handle, num_points, central_nbr_pos, central_nbr_indices, central_nbr_numbers, max_snbrs, central_solid);
+	int ret = find_diamond_neighbours(_voronoi_handle, num_points, central_nbr_pos, central_nbr_indices, central_nbr_numbers, max_snbrs, calc_solid_angles, central_solid);
 	if (ret != 0)
 		return ret;
 
@@ -229,7 +330,7 @@ int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, size_t atom_i
 			return -1;
 
 		solidnbr_t inner_solid[MAX_SNBRS];
-		ret = find_diamond_neighbours(_voronoi_handle, num_points, inner_nbr_pos, inner_nbr_indices, inner_nbr_numbers, max_snbrs, inner_solid);
+		ret = find_diamond_neighbours(_voronoi_handle, num_points, inner_nbr_pos, inner_nbr_indices, inner_nbr_numbers, max_snbrs, calc_solid_angles, inner_solid);
 		if (ret != 0)
 			return ret;
 		//----------------------------------------------

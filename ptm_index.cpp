@@ -187,7 +187,7 @@ int ptm_index(	ptm_local_handle_t local_handle,
 		if (flags & PTM_CHECK_BCC)
 			min_points = PTM_NUM_POINTS_BCC;
 
-		num_lpoints = ptm::calculate_neighbour_ordering(local_handle, atom_index, min_points, get_neighbours, nbrlist, ordering, points, numbers);
+		num_lpoints = ptm::calculate_neighbour_ordering(local_handle, atom_index, min_points, get_neighbours, nbrlist, false, ordering, points, numbers);
 		if (num_lpoints >= min_points)
 		{
 			ptm::normalize_vertices(num_lpoints, points, ch_points);
@@ -208,7 +208,7 @@ int ptm_index(	ptm_local_handle_t local_handle,
 	{
 		const int num_inner = 4, num_outer = 3, max_snbrs = 12;
 		ret = ptm::calculate_two_shell_neighbour_ordering((void*)local_handle, atom_index, get_neighbours, nbrlist,
-									num_inner, num_outer, max_snbrs,
+									num_inner, num_outer, max_snbrs, false,
 									dordering, dpoints, dnumbers);
 		if (ret == 0)
 		{
@@ -221,9 +221,9 @@ int ptm_index(	ptm_local_handle_t local_handle,
 
 	if (flags & PTM_CHECK_GRAPHENE)
 	{
-		const int num_inner = 3, num_outer = 2, max_snbrs = 8;
+		const int num_inner = 3, num_outer = 2, max_snbrs = 12;
 		ret = ptm::calculate_two_shell_neighbour_ordering((void*)local_handle, atom_index, get_neighbours, nbrlist,
-									num_inner, num_outer, max_snbrs,
+									num_inner, num_outer, max_snbrs, true,
 									gordering, gpoints, gnumbers);
 		if (ret == 0)
 		{
