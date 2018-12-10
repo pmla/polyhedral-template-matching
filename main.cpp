@@ -139,7 +139,7 @@ int main()
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
-		ptm_index(	local_handle, i, get_neighbours, (void*)&nbrlist, PTM_CHECK_ALL, false,
+		ptm_index(	local_handle, i, get_neighbours, (void*)&nbrlist, PTM_CHECK_ALL, true,
 				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, output_indices);
 //{
 //	printf("#scale %f\n", scale);

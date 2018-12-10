@@ -88,7 +88,7 @@ const refdata_t structure_hcp = {	PTM_MATCH_HCP,			//.type
 					NULL,				//.points_alt2
 					NULL,				//.points_alt3
 					penrose_hcp,			//.penrose
-					NULL,				//.penrose_alt1
+					penrose_hcp_alt1,		//.penrose_alt1
 					NULL,				//.penrose_alt2
 					NULL,				//.penrose_alt3
 					NUM_HEX_MAPPINGS,		//.num_mappings
