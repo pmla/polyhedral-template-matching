@@ -820,9 +820,6 @@ exit(3);*/
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 
-			if (ret != PTM_NO_ERROR)
-				CLEANUP("indexing failed", ret);
-
 			if (type != s->type)
 				CLEANUP("failed on type", -1);
 
@@ -837,6 +834,80 @@ exit(3);*/
 				CLEANUP("failed on interatomic distance", -1);
 
 			num_tests++;
+		}
+	}
+
+	//conventional deformation gradients
+	for (int i=0;i<8;i++)
+	{
+		structdata_t* s = &structdata[i];
+
+		int32_t type;
+		double scale, rmsd, interatomic_distance, lattice_constant, q[4], F[9], F_res[3];
+
+		double points[PTM_MAX_POINTS][3];
+		memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
+		unittest_nbrdata_t nbrlist = {s->num_points, points, NULL};
+
+		ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, s->check, true,
+				&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
+		if (ret != PTM_NO_ERROR)
+			CLEANUP("indexing failed", ret);
+
+		//check type
+		if (type != s->type)
+			CLEANUP("failed on type", -1);
+
+		//check rmsd
+		if (rmsd > tolerance)
+			CLEANUP("failed on rmsd", -1);
+
+		//check deformation gradient residual
+		double d = sqrt(F_res[0] * F_res[0] + F_res[1] * F_res[1] + F_res[2] * F_res[2]);
+		if (d > tolerance)
+			CLEANUP("failed on deformation gradient residual", -1)
+
+		//check deformation gradient is identity
+		if (!check_matrix_equality(F, identity_matrix, tolerance))
+			CLEANUP("failed on F identity matrix check", -1);
+	}
+
+	{
+		const void* alt_templates[6] = { ptm_template_hcp_alt1, ptm_template_dcub_alt1, ptm_template_dhex_alt1, ptm_template_dhex_alt2, ptm_template_dhex_alt3, ptm_template_graphene_alt1};
+		int num_points[6] = {13, 17, 17, 17, 17, 10};
+		int32_t checks[6] = {PTM_CHECK_HCP, PTM_CHECK_DCUB, PTM_CHECK_DHEX, PTM_CHECK_DHEX, PTM_CHECK_DHEX, PTM_CHECK_GRAPHENE};
+		int32_t types[6] = {PTM_MATCH_HCP, PTM_MATCH_DCUB, PTM_MATCH_DHEX, PTM_MATCH_DHEX, PTM_MATCH_DHEX, PTM_MATCH_GRAPHENE};
+
+		for (int i=0;i<6;i++)
+		{
+			int32_t type;
+			double scale, rmsd, interatomic_distance, lattice_constant, q[4], F[9], F_res[3];
+
+			double points[PTM_MAX_POINTS][3];
+			memcpy(points, alt_templates[i], 3 * sizeof(double) * num_points[i]);
+			unittest_nbrdata_t nbrlist = {num_points[i], points, NULL};
+
+			ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, checks[i], true,
+					&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
+			if (ret != PTM_NO_ERROR)
+				CLEANUP("indexing failed", ret);
+
+			//check type
+			if (type != types[i])
+				CLEANUP("failed on type", -1);
+
+			//check rmsd
+			if (rmsd > tolerance)
+				CLEANUP("failed on rmsd", -1);
+
+			//check deformation gradient residual
+			double d = sqrt(F_res[0] * F_res[0] + F_res[1] * F_res[1] + F_res[2] * F_res[2]);
+			if (d > tolerance)
+				CLEANUP("failed on deformation gradient residual", -1)
+
+			//check deformation gradient is identity
+			if (!check_matrix_equality(F, identity_matrix, tolerance))
+				CLEANUP("failed on F identity matrix check", -1);
 		}
 	}
 
