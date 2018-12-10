@@ -1,6 +1,8 @@
 #ifndef PTM_NEIGHBOUR_ORDERING_H
 #define PTM_NEIGHBOUR_ORDERING_H
 
+#include <cstddef>
+
 namespace ptm {
 
 int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int min_points, int (get_neighbours)(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers,

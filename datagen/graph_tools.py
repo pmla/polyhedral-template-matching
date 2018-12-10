@@ -303,6 +303,24 @@ ideal_dcub, _ = get_diamond_cubic_points()
 ideal_dhex, _ = get_diamond_hexagonal_points()
 ideal_graphene = get_graphene()
 
+import quat_utils
+U0 = quat_utils.quaternion_to_rotation_matrix([ sqrt(3)/2, 0, 0, 0.5 ])
+U1 = quat_utils.quaternion_to_rotation_matrix([ 0, sqrt(3)/2, 0.5, 0 ])
+U2 = quat_utils.quaternion_to_rotation_matrix([ 0, 0.5, sqrt(3)/2, 0 ])
+
+U3 = quat_utils.quaternion_to_rotation_matrix([ sqrt(2)/2, sqrt(2)/2, 0, 0 ])
+
+
+ideal_hcp_alt = np.dot(ideal_hcp, U0.T)
+ideal_graphene_alt = np.dot(ideal_graphene, U0.T)
+
+ideal_dhex_alt1 = np.dot(ideal_dhex, U0.T)
+ideal_dhex_alt2 = np.dot(ideal_dhex, U1.T)
+ideal_dhex_alt3 = np.dot(ideal_dhex, U2.T)
+
+ideal_dcub_alt1 = np.dot(ideal_dcub, U3.T)
+
+
 def print_val(f):
 	e = " %.15f" % f
 	if f >= 0:
@@ -314,8 +332,9 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	for structure in [ideal_fcc, ideal_hcp, ideal_bcc, ideal_ico, ideal_sc, ideal_dcub, ideal_dhex, ideal_graphene][1:2]:
-		structure = np.array(list(structure[-1:]) + list(structure[:-1]))
+	for structures in [[ideal_fcc], [ideal_hcp, ideal_hcp_alt], [ideal_bcc], [ideal_ico], [ideal_sc], [ideal_dcub, ideal_dcub_alt1], [ideal_dhex, ideal_dhex_alt1, ideal_dhex_alt2, ideal_dhex_alt3], [ideal_graphene, ideal_graphene_alt]][6:7]:
+
+		structures = [np.array(list(structure[-1:]) + list(structure[:-1])) for structure in structures]
 
 		'''
 		structure = np.array([
@@ -333,7 +352,7 @@ if __name__ == "__main__":
 		#for row in structure:
 		#	print "{", ",".join([print_val(e) for e in row]), "},"
 
-		fundamental_mappings.find(structure, generators.generator_hcp)
+		fundamental_mappings.find(structures, generators.generator_hcp_conventional)
 		asdf
 
 		M = np.dot(structure.T, structure)

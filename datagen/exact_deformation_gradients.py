@@ -117,6 +117,7 @@ dhex = [
 ]
 
 graphene = [
+		[                   0,                   0,                   0 ],
 		[                   0,  -3*sqrt(1)/11+6*sqrt(3)/11,                   0 ],
 		[  -3*sqrt(3)/22+9*sqrt(1)/11,  -3*sqrt(3)/11+3*sqrt(1)/22,                   0 ],
 		[  -9*sqrt(1)/11+3*sqrt(3)/22,  -3*sqrt(3)/11+3*sqrt(1)/22,                   0 ],
@@ -126,7 +127,115 @@ graphene = [
 		[  -3*sqrt(3)/22+9*sqrt(1)/11,  -9*sqrt(3)/11+9*sqrt(1)/22,                   0 ],
 		[  -9*sqrt(1)/11+3*sqrt(3)/22,  -9*sqrt(3)/11+9*sqrt(1)/22,                   0 ],
 		[ -18*sqrt(1)/11+3*sqrt(3)/11,                   0,                   0 ],
-		[                   0,                   0,                   0 ],
+]
+
+graphene_alt = [
+		[                    0,                    0,                    0 ],
+		[   3*sqrt(3)/22-9*sqrt(1)/11,  -3*sqrt(1)/22+3*sqrt(3)/11,                    0 ],
+		[   9*sqrt(1)/11-3*sqrt(3)/22,  -3*sqrt(1)/22+3*sqrt(3)/11,                    0 ],
+		[                    0,  -6*sqrt(3)/11+3*sqrt(1)/11,                    0 ],
+		[ -18*sqrt(1)/11+3*sqrt(3)/11,                    0,                    0 ],
+		[   3*sqrt(3)/22-9*sqrt(1)/11,  -9*sqrt(1)/22+9*sqrt(3)/11,                    0 ],
+		[   9*sqrt(1)/11-3*sqrt(3)/22,  -9*sqrt(1)/22+9*sqrt(3)/11,                    0 ],
+		[ -3*sqrt(3)/11+18*sqrt(1)/11,                    0,                    0 ],
+		[   9*sqrt(1)/11-3*sqrt(3)/22,  -9*sqrt(3)/11+9*sqrt(1)/22,                    0 ],
+		[   3*sqrt(3)/22-9*sqrt(1)/11,  -9*sqrt(3)/11+9*sqrt(1)/22,                    0 ],
+]
+
+hcp_alt = [
+		[          0,          0,          0 ],
+		[          1,          0,          0 ],
+		[       -sqrt(1)/2, -sqrt(3)/2,          0 ],
+		[       -sqrt(1)/2, -sqrt(3)/6, -sqrt(6)/3 ],
+		[          0,  sqrt(3)/3, -sqrt(6)/3 ],
+		[        sqrt(1)/2, -sqrt(3)/6, -sqrt(6)/3 ],
+		[         -1,          0,          0 ],
+		[       -sqrt(1)/2,  sqrt(3)/2,          0 ],
+		[        sqrt(1)/2,  sqrt(3)/2,          0 ],
+		[        sqrt(1)/2, -sqrt(3)/2,          0 ],
+		[        sqrt(1)/2, -sqrt(3)/6,  sqrt(6)/3 ],
+		[          0,  sqrt(3)/3,  sqrt(6)/3 ],
+		[       -sqrt(1)/2, -sqrt(3)/6,  sqrt(6)/3 ],
+]
+
+dcub_alt = [
+		[                      0,                      0,                      0 ],
+		[  4/(sqrt(3)+6*sqrt(2)), -4/(sqrt(3)+6*sqrt(2)),  4/(sqrt(3)+6*sqrt(2)) ],
+		[  4/(sqrt(3)+6*sqrt(2)),  4/(sqrt(3)+6*sqrt(2)), -4/(sqrt(3)+6*sqrt(2)) ],
+		[ -4/(sqrt(3)+6*sqrt(2)), -4/(sqrt(3)+6*sqrt(2)), -4/(sqrt(3)+6*sqrt(2)) ],
+		[ -4/(sqrt(3)+6*sqrt(2)),  4/(sqrt(3)+6*sqrt(2)),  4/(sqrt(3)+6*sqrt(2)) ],
+		[  8/(sqrt(3)+6*sqrt(2)),                      0,  8/(sqrt(3)+6*sqrt(2)) ],
+		[                      0, -8/(sqrt(3)+6*sqrt(2)),  8/(sqrt(3)+6*sqrt(2)) ],
+		[  8/(sqrt(3)+6*sqrt(2)), -8/(sqrt(3)+6*sqrt(2)),                      0 ],
+		[                      0,  8/(sqrt(3)+6*sqrt(2)), -8/(sqrt(3)+6*sqrt(2)) ],
+		[  8/(sqrt(3)+6*sqrt(2)),                      0, -8/(sqrt(3)+6*sqrt(2)) ],
+		[  8/(sqrt(3)+6*sqrt(2)),  8/(sqrt(3)+6*sqrt(2)),                      0 ],
+		[ -8/(sqrt(3)+6*sqrt(2)),                      0, -8/(sqrt(3)+6*sqrt(2)) ],
+		[                      0, -8/(sqrt(3)+6*sqrt(2)), -8/(sqrt(3)+6*sqrt(2)) ],
+		[ -8/(sqrt(3)+6*sqrt(2)), -8/(sqrt(3)+6*sqrt(2)),                      0 ],
+		[ -8/(sqrt(3)+6*sqrt(2)),  8/(sqrt(3)+6*sqrt(2)),                      0 ],
+		[ -8/(sqrt(3)+6*sqrt(2)),                      0,  8/(sqrt(3)+6*sqrt(2)) ],
+		[                      0,  8/(sqrt(3)+6*sqrt(2)),  8/(sqrt(3)+6*sqrt(2)) ],
+]
+
+dhex_alt1 = [
+	[                                   0,                                   0,                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),   -4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),   -4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[                                   0,    8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)),   -4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[                                   0,                                   0,       4*sqrt(3)/(sqrt(3)+6*sqrt(2)) ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),      -4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[      -8*sqrt(2)/(sqrt(3)+6*sqrt(2)),                                   0,                                   0 ],
+	[       8*sqrt(2)/(sqrt(3)+6*sqrt(2)),                                   0,                                   0 ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),      -4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[                                   0,    8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),       4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),       4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[                                   0,    8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+]
+
+dhex_alt2 = [
+	[                                   0,                                   0,                                   0 ],
+	[                                   0,   -8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)),    4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),    4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),    4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[                                   0,                                   0,      -4*sqrt(3)/(sqrt(3)+6*sqrt(2)) ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),      -4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[                                   0,   -8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),      -4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),       4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[      -8*sqrt(2)/(sqrt(3)+6*sqrt(2)),                                   0,                                   0 ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[       8*sqrt(2)/(sqrt(3)+6*sqrt(2)),                                   0,                                   0 ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),       4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),   4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[                                   0,   -8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+]
+
+dhex_alt3 = [
+	[                                   0,                                   0,                                   0 ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),    4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),    4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[                                   0,    8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)),    4*sqrt(3)/(3*sqrt(3)+18*sqrt(2)) ],
+	[                                   0,                                   0,      -4*sqrt(3)/(sqrt(3)+6*sqrt(2)) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),      -4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[       8*sqrt(2)/(sqrt(3)+6*sqrt(2)),                                   0,                                   0 ],
+	[      -8*sqrt(2)/(sqrt(3)+6*sqrt(2)),                                   0,                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),      -4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[                                   0,    8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)),  16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),       4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),       4*sqrt(6)/(sqrt(3)+6*sqrt(2)),                                   0 ],
+	[      -4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[                                   0,    8*sqrt(6)/(3*sqrt(3)+18*sqrt(2)), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
+	[       4*sqrt(2)/(sqrt(3)+6*sqrt(2)),  -4*sqrt(6)/(3*(sqrt(3)+6*sqrt(2))), -16*sqrt(3)/(3*(sqrt(3)+6*sqrt(2))) ],
 ]
 
 
@@ -141,7 +250,7 @@ def format(n, penrose):
 
 def go():
 
-	for structure in [sc, fcc, hcp, ico, bcc, dcub, dhex, graphene]:
+	for structure in [sc, fcc, hcp, ico, bcc, dcub, dhex, graphene, graphene_alt, hcp_alt, dcub_alt, dhex_alt1, dhex_alt2, dhex_alt3]:
 		#M = np.dot(structure.T, structure)
 		#mpi_scale = np.trace(M) / 3
 		#inv = structure / mpi_scale

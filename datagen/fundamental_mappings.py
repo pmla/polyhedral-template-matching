@@ -80,3 +80,71 @@ def find(structure, generators=None):
 	for q in qs:
 		print "{" + ", ".join([("%.14f" % e).rjust(18) for e in q]) + "},"
 
+
+def get_mappings(ref, structure):
+
+	n = len(structure)
+	cs = itertools.permutations(range(n), 3)
+
+	keeps = {}
+
+	for c in cs:
+		Q = rmsd.kabsch(ref[:3], structure[list(c)]).T
+		assert np.linalg.det(Q) > 0.5
+
+		rotated = np.dot(structure, Q.T)
+		ds = scipy.spatial.distance.cdist(rotated, ref)
+
+		_, res = scipy.optimize.linear_sum_assignment(ds)
+		res = invert_array(res)
+		obj = rmsd.rmsd(rotated[res], structure)
+		if obj > 1E-3:
+			continue
+
+		key = tuple(res)
+		if key not in keeps:
+			keeps[key] = Q
+
+	return keeps
+
+
+def find(structures, generators=None):
+
+	generators = np.array(generators)
+	structures = [structure[1:] for structure in structures]
+	ref = structures[0]
+
+	data = []
+	for j, structure in enumerate(structures):
+
+		for i, q in enumerate(generators):
+			U = quat_utils.quaternion_to_rotation_matrix(q)
+			rotated = np.dot(structure, U.T)
+			ds = scipy.spatial.distance.cdist(ref, rotated)
+			_, mapping = scipy.optimize.linear_sum_assignment(ds)
+			obj = rmsd.rmsd(ref, rotated[mapping])
+			if obj > 1E-3:
+				continue
+
+			data += [(i, j, mapping, q)]
+
+	indices, js, _, qs = zip(*sorted(data))
+	print js
+
+	assert indices == tuple(range(len(indices)))
+	for index, js, mapping, q in sorted(data):
+
+		mapping = [0] + list(np.array(mapping) + 1)
+		print "{" + ", ".join([str(e).rjust(2) for e in mapping]) + "},"#, q
+
+	_qs = []
+	for q in qs:
+		t = [1, 0.1, 0.01, 0.001]
+		if np.dot(-q, t) > np.dot(q, t):
+			q = -q
+		_qs += [(np.dot(q, t), tuple(q))]
+	_qs = sorted(_qs, reverse=True)
+	qs = np.array([e[1] for e in _qs])
+	for q in qs:
+		print "{" + ", ".join([("%.14f" % e).rjust(18) for e in q]) + "},"
+
