@@ -55,28 +55,26 @@ static int rotate_into_fundamental_zone(int type,
 		return ptm::rotate_quaternion_into_icosahedral_fundamental_zone(q);
 
 	if (type == PTM_MATCH_HCP || type == PTM_MATCH_GRAPHENE) {
-		if (!output_conventional_orientation) {
-			return ptm::rotate_quaternion_into_hcp_fundamental_zone(q);
-		} else {
+		if (output_conventional_orientation) {
 			return ptm::rotate_quaternion_into_hcp_conventional_fundamental_zone(q);
+		} else {
+			return ptm::rotate_quaternion_into_hcp_fundamental_zone(q);
 		}
 	}
 
 	if (type == PTM_MATCH_DCUB) {
-		if (!output_conventional_orientation) {
-			return ptm::rotate_quaternion_into_diamond_cubic_fundamental_zone(q);
-		} else {
+		if (output_conventional_orientation) {
 			return ptm::rotate_quaternion_into_cubic_fundamental_zone(q);
+		} else {
+			return ptm::rotate_quaternion_into_diamond_cubic_fundamental_zone(q);
 		}
 	}
 
 	if (type == PTM_MATCH_DHEX) {
-		if (!output_conventional_orientation) {
-			return ptm::rotate_quaternion_into_diamond_hexagonal_fundamental_zone(q);
+		if (output_conventional_orientation) {
+			return ptm::rotate_quaternion_into_hcp_conventional_fundamental_zone(q);			
 		} else {
-			ptm::rotate_quaternion_into_hcp_conventional_fundamental_zone(q);
-			return -1;
-			// cannot create a meaningful mapping for non-template rotations
+			return ptm::rotate_quaternion_into_diamond_hexagonal_fundamental_zone(q);
 		}
 	}
 

@@ -320,6 +320,9 @@ ideal_dhex_alt3 = np.dot(ideal_dhex, U2.T)
 
 ideal_dcub_alt1 = np.dot(ideal_dcub, U3.T)
 
+print ideal_hcp_alt
+asdf
+
 
 def print_val(f):
 	e = " %.15f" % f
@@ -332,7 +335,7 @@ if __name__ == "__main__":
 	import fundamental_mappings
 	import generators
 
-	for structures in [[ideal_fcc], [ideal_hcp, ideal_hcp_alt], [ideal_bcc], [ideal_ico], [ideal_sc], [ideal_dcub, ideal_dcub_alt1], [ideal_dhex, ideal_dhex_alt1, ideal_dhex_alt2, ideal_dhex_alt3], [ideal_graphene, ideal_graphene_alt]][6:7]:
+	for structures in [[ideal_fcc], [ideal_hcp, ideal_hcp_alt], [ideal_bcc], [ideal_ico], [ideal_sc], [ideal_dcub, ideal_dcub_alt1], [ideal_dhex, ideal_dhex_alt1, ideal_dhex_alt2, ideal_dhex_alt3], [ideal_graphene, ideal_graphene_alt]][1:2]:
 
 		structures = [np.array(list(structure[-1:]) + list(structure[:-1])) for structure in structures]
 

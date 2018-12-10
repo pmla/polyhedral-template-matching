@@ -51,6 +51,7 @@ const double penrose_hcp[PTM_NUM_POINTS_HCP][3] = {
 };
 
 const double penrose_hcp_alt1[PTM_NUM_POINTS_HCP][3] = {
+	{           0,           0,           0 },
 	{        1./4,           0,           0 },
 	{       -1./8,  -sqrt(3)/8,           0 },
 	{       -1./8, -sqrt(3)/24, -sqrt(6)/12 },
@@ -63,7 +64,6 @@ const double penrose_hcp_alt1[PTM_NUM_POINTS_HCP][3] = {
 	{        1./8, -sqrt(3)/24,  sqrt(6)/12 },
 	{           0,  sqrt(3)/12,  sqrt(6)/12 },
 	{       -1./8, -sqrt(3)/24,  sqrt(6)/12 },
-	{           0,           0,           0 },
 };
 
 const double penrose_ico[PTM_NUM_POINTS_ICO][3] = {
