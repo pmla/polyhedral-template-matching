@@ -41,7 +41,7 @@ double normalize_vertices(int num, double (*points)[3], double (*normalized)[3])
 		double norm = sqrt(x*x + y*y + z*z);
 		scale += norm;
 	}
-	scale /= num;
+	scale /= (num - 1);
 
 	//scale vertices such that mean length is 1
 	for (int i=0;i<num;i++)
