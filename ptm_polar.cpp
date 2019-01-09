@@ -121,7 +121,7 @@ static void flip_matrix(double* A)
 		A[i] = -A[i];
 }
 
-static bool optimal_quaternion(double* A, bool polar, double E0, double* p_nrmsdsq, double* qopt)
+static bool optimal_quaternion(double* A, bool polar, double E0, bool calc_rotation, double* p_nrmsdsq, double* qopt)
 {
 	const double evecprec = 1e-6;
 	const double evalprec = 1e-11;
@@ -181,6 +181,8 @@ static bool optimal_quaternion(double* A, bool polar, double E0, double* p_nrmsd
 	}
 
 	(*p_nrmsdsq) = std::max(0.0, 2.0 * (E0 - mxEigenV));
+	if (!calc_rotation)
+		return true;
 
 	double a11 = SxxpSyy + Szz - mxEigenV;
 	double a12 = SyzmSzy;
@@ -285,7 +287,7 @@ int polar_decomposition_3x3(double* _A, bool right_sided, double* U, double* P)
 
 	double q[4];
 	double nrmsdsq = 0;
-	optimal_quaternion(A, true, -1, &nrmsdsq, q);
+	optimal_quaternion(A, true, -1, true, &nrmsdsq, q);
 	q[0] = -q[0];
 	quaternion_to_rotation_matrix(q, U);
 
@@ -332,9 +334,102 @@ void InnerProduct(double *A, int num, const double (*coords1)[3], double (*coord
 
 int FastCalcRMSDAndRotation(double *A, double E0, double *p_nrmsdsq, double *q, double* U)
 {
-	optimal_quaternion(A, false, E0, p_nrmsdsq, q);
+	optimal_quaternion(A, false, E0, true, p_nrmsdsq, q);
 	quaternion_to_rotation_matrix(q, U);
 	return 0;
+}
+
+int FastCalcRMSD(double *A, double E0, double *p_nrmsdsq)
+{
+	optimal_quaternion(A, false, E0, false, p_nrmsdsq, NULL);
+	return 0;
+}
+
+void increment_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], uint8_t* perm_P, uint8_t* perm_Q, double* p_G1, double* p_G2)
+{
+	double x1 = P[perm_P[i]][0];
+	double y1 = P[perm_P[i]][1];
+	double z1 = P[perm_P[i]][2];
+
+	double x2 = Q[perm_Q[i]][0];
+	double y2 = Q[perm_Q[i]][1];
+	double z2 = Q[perm_Q[i]][2];
+
+	*p_G1 += x1 * x1 + y1 * y1 + z1 * z1;
+	*p_G2 += x2 * x2 + y2 * y2 + z2 * z2;
+
+	A[0] += x1 * x2;
+	A[1] += x1 * y2;
+	A[2] += x1 * z2;
+
+	A[3] += y1 * x2;
+	A[4] += y1 * y2;
+	A[5] += y1 * z2;
+
+	A[6] += z1 * x2;
+	A[7] += z1 * y2;
+	A[8] += z1 * z2;  
+}
+
+void decrement_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], uint8_t* perm_P, uint8_t* perm_Q, double* p_G1, double* p_G2)
+{
+	double x1 = P[perm_P[i]][0];
+	double y1 = P[perm_P[i]][1];
+	double z1 = P[perm_P[i]][2];
+
+	double x2 = Q[perm_Q[i]][0];
+	double y2 = Q[perm_Q[i]][1];
+	double z2 = Q[perm_Q[i]][2];
+
+	*p_G1 -= x1 * x1 + y1 * y1 + z1 * z1;
+	*p_G2 -= x2 * x2 + y2 * y2 + z2 * z2;
+
+	A[0] -= x1 * x2;
+	A[1] -= x1 * y2;
+	A[2] -= x1 * z2;
+
+	A[3] -= y1 * x2;
+	A[4] -= y1 * y2;
+	A[5] -= y1 * z2;
+
+	A[6] -= z1 * x2;
+	A[7] -= z1 * y2;
+	A[8] -= z1 * z2;  
+}
+
+void full_innerproduct(double *A, int num, double (*P)[3], double (*Q)[3], uint8_t* perm_P, uint8_t* perm_Q, double* p_G1, double* p_G2)
+{
+	double G1 = 0.0, G2 = 0.0;
+	A[0] = A[1] = A[2] = A[3] = A[4] = A[5] = A[6] = A[7] = A[8] = 0.0;
+
+	for (int i = 0; i < num; ++i)
+	{
+		double x1 = P[perm_P[i]][0];
+		double y1 = P[perm_P[i]][1];
+		double z1 = P[perm_P[i]][2];
+
+		double x2 = Q[perm_Q[i]][0];
+		double y2 = Q[perm_Q[i]][1];
+		double z2 = Q[perm_Q[i]][2];
+
+		G1 += x1 * x1 + y1 * y1 + z1 * z1;
+		G2 += x2 * x2 + y2 * y2 + z2 * z2;
+
+		A[0] += x1 * x2;
+		A[1] += x1 * y2;
+		A[2] += x1 * z2;
+
+		A[3] += y1 * x2;
+		A[4] += y1 * y2;
+		A[5] += y1 * z2;
+
+		A[6] += z1 * x2;
+		A[7] += z1 * y2;
+		A[8] += z1 * z2;  
+	}
+
+	*p_G1 = G1;
+	*p_G2 = G2;
 }
 
 }

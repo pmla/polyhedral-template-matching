@@ -110,6 +110,37 @@ def get_graphene():
 	])
 	return l
 
+def get_fluorite_ca():
+
+	sqrt = np.sqrt
+
+	l = np.array([
+			[ 1,  1,  1],
+			[ 1,  1, -1],
+			[ 1, -1,  1],
+			[ 1, -1, -1],
+			[-1,  1,  1],
+			[-1,  1, -1],
+			[-1, -1,  1],
+			[-1, -1, -1],
+			[ 2,  2,  0],
+			[ 0,  2,  2],
+			[ 2,  0,  2],
+			[-2, -2,  0],
+			[ 0, -2, -2],
+			[-2,  0, -2],
+			[-2,  2,  0],
+			[ 0, -2,  2],
+			[-2,  0,  2],
+			[ 2, -2,  0],
+			[ 0,  2, -2],
+			[ 2,  0, -2],
+			[ 0,  0,  0],
+		])
+
+	factor = 2 * (sqrt(2) * 3 + sqrt(3)) / 5
+	return l / factor
+
 
 def get_equilateral_facets(points):
 
@@ -302,6 +333,7 @@ ideal_sc = get_sc()
 ideal_dcub, _ = get_diamond_cubic_points()
 ideal_dhex, _ = get_diamond_hexagonal_points()
 ideal_graphene = get_graphene()
+ideal_fluorite_ca = get_fluorite_ca()
 
 import quat_utils
 U0 = quat_utils.quaternion_to_rotation_matrix([ sqrt(3)/2, 0, 0, 0.5 ])
@@ -319,9 +351,6 @@ ideal_dhex_alt2 = np.dot(ideal_dhex, U1.T)
 ideal_dhex_alt3 = np.dot(ideal_dhex, U2.T)
 
 ideal_dcub_alt1 = np.dot(ideal_dcub, U3.T)
-
-print ideal_hcp_alt
-asdf
 
 
 def print_val(f):

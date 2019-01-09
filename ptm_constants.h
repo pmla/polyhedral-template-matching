@@ -58,6 +58,7 @@
 #define PTM_NUM_NBRS_DCUB  16
 #define PTM_NUM_NBRS_DHEX  16
 #define PTM_NUM_NBRS_GRAPHENE  9
+#define PTM_NUM_NBRS_FLUORITE_CA  20
 
 #define PTM_NUM_POINTS_FCC  (PTM_NUM_NBRS_FCC + 1)
 #define PTM_NUM_POINTS_HCP  (PTM_NUM_NBRS_HCP + 1)
@@ -67,8 +68,9 @@
 #define PTM_NUM_POINTS_DCUB (PTM_NUM_NBRS_DCUB + 1)
 #define PTM_NUM_POINTS_DHEX (PTM_NUM_NBRS_DHEX + 1)
 #define PTM_NUM_POINTS_GRAPHENE (PTM_NUM_NBRS_GRAPHENE + 1)
+#define PTM_NUM_POINTS_FLUORITE_CA (PTM_NUM_POINTS_FLUORITE_CA + 1)
 
-const int ptm_num_nbrs[9] = {0, PTM_NUM_NBRS_FCC, PTM_NUM_NBRS_HCP, PTM_NUM_NBRS_BCC, PTM_NUM_NBRS_ICO, PTM_NUM_NBRS_SC, PTM_NUM_NBRS_DCUB, PTM_NUM_NBRS_DHEX, PTM_NUM_NBRS_GRAPHENE};
+const int ptm_num_nbrs[10] = {0, PTM_NUM_NBRS_FCC, PTM_NUM_NBRS_HCP, PTM_NUM_NBRS_BCC, PTM_NUM_NBRS_ICO, PTM_NUM_NBRS_SC, PTM_NUM_NBRS_DCUB, PTM_NUM_NBRS_DHEX, PTM_NUM_NBRS_GRAPHENE, PTM_NUM_NBRS_FLUORITE_CA};
 
 //------------------------------------
 //    template structures
@@ -203,6 +205,30 @@ const double ptm_template_graphene[PTM_NUM_POINTS_GRAPHENE][3] = {
 								{  -3*sqrt(3)/22+9./11,  -9*sqrt(3)/11+9./22,                    0 },
 								{  -9./11+3*sqrt(3)/22,  -9*sqrt(3)/11+9./22,                    0 },
 								{ -18./11+3*sqrt(3)/11,                    0,                    0 },
+};
+
+const double ptm_template_fluorite_ca[PTM_NUM_POINTS_FLUORITE_CA][3] = {
+								{                          0,                          0,                          0 },
+								{  5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))) },
+								{  5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))) },
+								{  5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))) },
+								{  5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))) },
+								{ -5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))) },
+								{ -5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))) },
+								{ -5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))),  5/(2*(sqrt(3)+3*sqrt(2))) },
+								{ -5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))), -5/(2*(sqrt(3)+3*sqrt(2))) },
+								{      5/(sqrt(3)+3*sqrt(2)),      5/(sqrt(3)+3*sqrt(2)),                          0 },
+								{                          0,      5/(sqrt(3)+3*sqrt(2)),      5/(sqrt(3)+3*sqrt(2)) },
+								{      5/(sqrt(3)+3*sqrt(2)),                          0,      5/(sqrt(3)+3*sqrt(2)) },
+								{     -5/(sqrt(3)+3*sqrt(2)),     -5/(sqrt(3)+3*sqrt(2)),                          0 },
+								{                          0,     -5/(sqrt(3)+3*sqrt(2)),     -5/(sqrt(3)+3*sqrt(2)) },
+								{     -5/(sqrt(3)+3*sqrt(2)),                          0,     -5/(sqrt(3)+3*sqrt(2)) },
+								{     -5/(sqrt(3)+3*sqrt(2)),      5/(sqrt(3)+3*sqrt(2)),                          0 },
+								{                          0,     -5/(sqrt(3)+3*sqrt(2)),      5/(sqrt(3)+3*sqrt(2)) },
+								{     -5/(sqrt(3)+3*sqrt(2)),                          0,      5/(sqrt(3)+3*sqrt(2)) },
+								{      5/(sqrt(3)+3*sqrt(2)),     -5/(sqrt(3)+3*sqrt(2)),                          0 },
+								{                          0,      5/(sqrt(3)+3*sqrt(2)),     -5/(sqrt(3)+3*sqrt(2)) },
+								{      5/(sqrt(3)+3*sqrt(2)),                          0,     -5/(sqrt(3)+3*sqrt(2)) },
 };
 
 #endif
