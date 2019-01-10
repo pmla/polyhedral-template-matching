@@ -345,15 +345,15 @@ int FastCalcRMSD(double *A, double E0, double *p_nrmsdsq)
 	return 0;
 }
 
-void increment_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], uint8_t* perm_P, uint8_t* perm_Q, double* p_G1, double* p_G2)
+void increment_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], uint8_t* perm_P, double* p_G1, double* p_G2)
 {
 	double x1 = P[perm_P[i]][0];
 	double y1 = P[perm_P[i]][1];
 	double z1 = P[perm_P[i]][2];
 
-	double x2 = Q[perm_Q[i]][0];
-	double y2 = Q[perm_Q[i]][1];
-	double z2 = Q[perm_Q[i]][2];
+	double x2 = Q[i][0];
+	double y2 = Q[i][1];
+	double z2 = Q[i][2];
 
 	*p_G1 += x1 * x1 + y1 * y1 + z1 * z1;
 	*p_G2 += x2 * x2 + y2 * y2 + z2 * z2;
@@ -371,15 +371,15 @@ void increment_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], ui
 	A[8] += z1 * z2;  
 }
 
-void decrement_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], uint8_t* perm_P, uint8_t* perm_Q, double* p_G1, double* p_G2)
+void decrement_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], uint8_t* perm_P, double* p_G1, double* p_G2)
 {
 	double x1 = P[perm_P[i]][0];
 	double y1 = P[perm_P[i]][1];
 	double z1 = P[perm_P[i]][2];
 
-	double x2 = Q[perm_Q[i]][0];
-	double y2 = Q[perm_Q[i]][1];
-	double z2 = Q[perm_Q[i]][2];
+	double x2 = Q[i][0];
+	double y2 = Q[i][1];
+	double z2 = Q[i][2];
 
 	*p_G1 -= x1 * x1 + y1 * y1 + z1 * z1;
 	*p_G2 -= x2 * x2 + y2 * y2 + z2 * z2;
@@ -397,7 +397,7 @@ void decrement_innerproduct(double *A, int i, double (*P)[3], double (*Q)[3], ui
 	A[8] -= z1 * z2;  
 }
 
-void full_innerproduct(double *A, int num, double (*P)[3], double (*Q)[3], uint8_t* perm_P, uint8_t* perm_Q, double* p_G1, double* p_G2)
+void full_innerproduct(double *A, int num, double (*P)[3], double (*Q)[3], uint8_t* perm_P, double* p_G1, double* p_G2)
 {
 	double G1 = 0.0, G2 = 0.0;
 	A[0] = A[1] = A[2] = A[3] = A[4] = A[5] = A[6] = A[7] = A[8] = 0.0;
@@ -408,9 +408,9 @@ void full_innerproduct(double *A, int num, double (*P)[3], double (*Q)[3], uint8
 		double y1 = P[perm_P[i]][1];
 		double z1 = P[perm_P[i]][2];
 
-		double x2 = Q[perm_Q[i]][0];
-		double y2 = Q[perm_Q[i]][1];
-		double z2 = Q[perm_Q[i]][2];
+		double x2 = Q[i][0];
+		double y2 = Q[i][1];
+		double z2 = Q[i][2];
 
 		G1 += x1 * x1 + y1 * y1 + z1 * z1;
 		G2 += x2 * x2 + y2 * y2 + z2 * z2;

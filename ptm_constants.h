@@ -17,8 +17,9 @@
 #define PTM_CHECK_DCUB		(1 << 5)
 #define PTM_CHECK_DHEX		(1 << 6)
 #define PTM_CHECK_GRAPHENE	(1 << 7)
+#define PTM_CHECK_FLUORITE	(1 << 8)
 #define PTM_CHECK_DEFAULT	(PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC)
-#define PTM_CHECK_ALL	(PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC | PTM_CHECK_DCUB | PTM_CHECK_DHEX | PTM_CHECK_GRAPHENE)
+#define PTM_CHECK_ALL	(PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC | PTM_CHECK_DCUB | PTM_CHECK_DHEX | PTM_CHECK_GRAPHENE | PTM_CHECK_FLUORITE)
 
 #define PTM_MATCH_NONE		0
 #define PTM_MATCH_FCC		1
@@ -29,6 +30,7 @@
 #define PTM_MATCH_DCUB		6
 #define PTM_MATCH_DHEX		7
 #define PTM_MATCH_GRAPHENE	8
+#define PTM_MATCH_FLUORITE	9
 
 #define PTM_ALLOY_NONE		0
 #define PTM_ALLOY_PURE		1
@@ -59,6 +61,7 @@
 #define PTM_NUM_NBRS_DHEX  16
 #define PTM_NUM_NBRS_GRAPHENE  9
 #define PTM_NUM_NBRS_FLUORITE_CA  20
+#define PTM_NUM_NBRS_FLUORITE_F  22
 
 #define PTM_NUM_POINTS_FCC  (PTM_NUM_NBRS_FCC + 1)
 #define PTM_NUM_POINTS_HCP  (PTM_NUM_NBRS_HCP + 1)
@@ -68,9 +71,12 @@
 #define PTM_NUM_POINTS_DCUB (PTM_NUM_NBRS_DCUB + 1)
 #define PTM_NUM_POINTS_DHEX (PTM_NUM_NBRS_DHEX + 1)
 #define PTM_NUM_POINTS_GRAPHENE (PTM_NUM_NBRS_GRAPHENE + 1)
-#define PTM_NUM_POINTS_FLUORITE_CA (PTM_NUM_POINTS_FLUORITE_CA + 1)
+#define PTM_NUM_POINTS_FLUORITE_CA (PTM_NUM_NBRS_FLUORITE_CA + 1)
+#define PTM_NUM_POINTS_FLUORITE_F (PTM_NUM_NBRS_FLUORITE_F + 1)
 
-const int ptm_num_nbrs[10] = {0, PTM_NUM_NBRS_FCC, PTM_NUM_NBRS_HCP, PTM_NUM_NBRS_BCC, PTM_NUM_NBRS_ICO, PTM_NUM_NBRS_SC, PTM_NUM_NBRS_DCUB, PTM_NUM_NBRS_DHEX, PTM_NUM_NBRS_GRAPHENE, PTM_NUM_NBRS_FLUORITE_CA};
+const int ptm_num_nbrs[11] = {0, PTM_NUM_NBRS_FCC, PTM_NUM_NBRS_HCP, PTM_NUM_NBRS_BCC, PTM_NUM_NBRS_ICO, PTM_NUM_NBRS_SC,
+				PTM_NUM_NBRS_DCUB, PTM_NUM_NBRS_DHEX, PTM_NUM_NBRS_GRAPHENE,
+				PTM_NUM_NBRS_FLUORITE_CA, PTM_NUM_NBRS_FLUORITE_F};
 
 //------------------------------------
 //    template structures
@@ -229,6 +235,32 @@ const double ptm_template_fluorite_ca[PTM_NUM_POINTS_FLUORITE_CA][3] = {
 								{      5/(sqrt(3)+3*sqrt(2)),     -5/(sqrt(3)+3*sqrt(2)),                          0 },
 								{                          0,      5/(sqrt(3)+3*sqrt(2)),     -5/(sqrt(3)+3*sqrt(2)) },
 								{      5/(sqrt(3)+3*sqrt(2)),                          0,     -5/(sqrt(3)+3*sqrt(2)) },
+};
+
+const double ptm_template_fluorite_f[PTM_NUM_POINTS_FLUORITE_F][3] = {
+								{                             0,                             0,                             0 },
+								{  11/(2*(sqrt(3)+3+6*sqrt(2))),  11/(2*(sqrt(3)+3+6*sqrt(2))),  11/(2*(sqrt(3)+3+6*sqrt(2))) },
+								{ -11/(2*(sqrt(3)+3+6*sqrt(2))),  11/(2*(sqrt(3)+3+6*sqrt(2))), -11/(2*(sqrt(3)+3+6*sqrt(2))) },
+								{  11/(2*(sqrt(3)+3+6*sqrt(2))), -11/(2*(sqrt(3)+3+6*sqrt(2))), -11/(2*(sqrt(3)+3+6*sqrt(2))) },
+								{ -11/(2*(sqrt(3)+3+6*sqrt(2))), -11/(2*(sqrt(3)+3+6*sqrt(2))),  11/(2*(sqrt(3)+3+6*sqrt(2))) },
+								{                             0,                             0,     -11/(sqrt(3)+3+6*sqrt(2)) },
+								{                             0,     -11/(sqrt(3)+3+6*sqrt(2)),                             0 },
+								{     -11/(sqrt(3)+3+6*sqrt(2)),                             0,                             0 },
+								{                             0,                             0,      11/(sqrt(3)+3+6*sqrt(2)) },
+								{                             0,      11/(sqrt(3)+3+6*sqrt(2)),                             0 },
+								{      11/(sqrt(3)+3+6*sqrt(2)),                             0,                             0 },
+								{                             0,     -11/(sqrt(3)+3+6*sqrt(2)),     -11/(sqrt(3)+3+6*sqrt(2)) },
+								{     -11/(sqrt(3)+3+6*sqrt(2)),                             0,     -11/(sqrt(3)+3+6*sqrt(2)) },
+								{     -11/(sqrt(3)+3+6*sqrt(2)),     -11/(sqrt(3)+3+6*sqrt(2)),                             0 },
+								{     -11/(sqrt(3)+3+6*sqrt(2)),      11/(sqrt(3)+3+6*sqrt(2)),                             0 },
+								{      11/(sqrt(3)+3+6*sqrt(2)),     -11/(sqrt(3)+3+6*sqrt(2)),                             0 },
+								{     -11/(sqrt(3)+3+6*sqrt(2)),                             0,      11/(sqrt(3)+3+6*sqrt(2)) },
+								{      11/(sqrt(3)+3+6*sqrt(2)),                             0,     -11/(sqrt(3)+3+6*sqrt(2)) },
+								{                             0,     -11/(sqrt(3)+3+6*sqrt(2)),      11/(sqrt(3)+3+6*sqrt(2)) },
+								{                             0,      11/(sqrt(3)+3+6*sqrt(2)),     -11/(sqrt(3)+3+6*sqrt(2)) },
+								{                             0,      11/(sqrt(3)+3+6*sqrt(2)),      11/(sqrt(3)+3+6*sqrt(2)) },
+								{      11/(sqrt(3)+3+6*sqrt(2)),                             0,      11/(sqrt(3)+3+6*sqrt(2)) },
+								{      11/(sqrt(3)+3+6*sqrt(2)),      11/(sqrt(3)+3+6*sqrt(2)),                             0 },
 };
 
 #endif

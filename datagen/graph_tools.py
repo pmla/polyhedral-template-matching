@@ -113,7 +113,6 @@ def get_graphene():
 def get_fluorite_ca():
 
 	sqrt = np.sqrt
-
 	l = np.array([
 			[ 1,  1,  1],
 			[ 1,  1, -1],
@@ -141,6 +140,37 @@ def get_fluorite_ca():
 	factor = 2 * (sqrt(2) * 3 + sqrt(3)) / 5
 	return l / factor
 
+def get_fluorite_f():
+
+	sqrt = np.sqrt
+	l = np.array([
+			[ 1,  1,  1],
+			[-1,  1, -1],
+			[ 1, -1, -1],
+			[-1, -1,  1],
+			[ 0,  0, -2],
+			[ 0, -2,  0],
+			[-2,  0,  0],
+			[ 0,  0,  2],
+			[ 0,  2,  0],
+			[ 2,  0,  0],
+			[ 0, -2, -2],
+			[-2,  0, -2],
+			[-2, -2,  0],
+			[-2,  2,  0],
+			[ 2, -2,  0],
+			[-2,  0,  2],
+			[ 2,  0, -2],
+			[ 0, -2,  2],
+			[ 0,  2, -2],
+			[ 0,  2,  2],
+			[ 2,  0,  2],
+			[ 2,  2,  0],
+			[ 0,  0,  0],
+		])
+
+	factor = (2 * sqrt(3) + 6 + 12 * sqrt(2)) / 11
+	return l / factor
 
 def get_equilateral_facets(points):
 
@@ -334,6 +364,7 @@ ideal_dcub, _ = get_diamond_cubic_points()
 ideal_dhex, _ = get_diamond_hexagonal_points()
 ideal_graphene = get_graphene()
 ideal_fluorite_ca = get_fluorite_ca()
+ideal_fluorite_f = get_fluorite_f()
 
 import quat_utils
 U0 = quat_utils.quaternion_to_rotation_matrix([ sqrt(3)/2, 0, 0, 0.5 ])
@@ -363,6 +394,7 @@ if __name__ == "__main__":
 
 	import fundamental_mappings
 	import generators
+
 
 	for structures in [[ideal_fcc], [ideal_hcp, ideal_hcp_alt], [ideal_bcc], [ideal_ico], [ideal_sc], [ideal_dcub, ideal_dcub_alt1], [ideal_dhex, ideal_dhex_alt1, ideal_dhex_alt2, ideal_dhex_alt3], [ideal_graphene, ideal_graphene_alt]][1:2]:
 
