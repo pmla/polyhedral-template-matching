@@ -10,8 +10,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #ifndef UNITTEST_HPP
 #define UNITTEST_HPP
 
-#include <cstdint>
-
 namespace ptm {
 
 uint64_t run_tests();

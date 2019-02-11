@@ -58,7 +58,7 @@ CPP_OBJECT_FILES = $(CPP_SRC_FILES:%.cpp=$(OBJDIR)/%.o)
 C_OBJECT_MODULE_FILE = $(C_SRC_MODULE_FILE:%.c=$(OBJDIR)/%.o) 
 
 #CFLAGS = -std=c99 -g -O3 -Wall -Wextra
-CPPFLAGS = -g -O3 -std=c++11 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
+CPPFLAGS = -g -O3 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
 
 
 all: $(PROGRAM)
