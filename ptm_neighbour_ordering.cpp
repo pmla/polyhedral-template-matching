@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <cstring>
 #include <cassert>
 #include <algorithm>
-#include <unordered_set>
+#include <set>
 #include "ptm_constants.h"
 #include "ptm_voronoi_cell.h"
 #include "ptm_neighbour_ordering.h"
@@ -314,7 +314,7 @@ int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, size_t atom_i
 	numbers[0] = central_nbr_numbers[0];
 	memset(&points[0], 0, 3 * sizeof(double));
 
-	std::unordered_set<size_t> claimed;
+	std::set<size_t> claimed;
 	claimed.insert(atom_index);
 	for (int i=0;i<num_inner;i++)
 	{
