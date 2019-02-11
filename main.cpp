@@ -12,7 +12,8 @@ using namespace std;
 
 //#define _MAX_NBRS 50	//diamond
 //#define _MAX_NBRS 24	//fcc, other
-#define _MAX_NBRS 6	//graphene
+//#define _MAX_NBRS 6	//graphene
+#define _MAX_NBRS 22	//fluorite_f
 
 
 static int read_file(const char* path, uint8_t** p_buf, size_t* p_fsize)
@@ -96,8 +97,8 @@ static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* nbr_i
 int main()
 {
 	ptm_initialize_global();
-	uint64_t res = ptm::run_tests();
-	assert(res == 0);
+	//uint64_t res = ptm::run_tests();
+	//assert(res == 0);
 	//printf("=========================================================\n");
 	//printf("unit test result: %lu\n", res);
 	//return 0;
@@ -120,6 +121,12 @@ int main()
 		return -1;
 
 	int num_atoms = fsize / (_MAX_NBRS * sizeof(int32_t));
+
+num_atoms = 1;
+positions = (double (*)[3])ptm_template_fluorite_f;
+for (int i=0;i<22;i++)
+	nbrs[i] = i+1;
+
 	demonbrdata_t nbrlist = {positions, nbrs};
 
 	//assert(num_atoms == 88737);
@@ -139,6 +146,7 @@ int main()
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
+
 		ptm_index(	local_handle, i, get_neighbours, (void*)&nbrlist, PTM_CHECK_ALL, true,
 				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, output_indices);
 //{
@@ -163,6 +171,7 @@ int main()
 				printf("%d ", counts[j]);
 			printf("]\n");
 		}
+exit(3);
 	}
 
 	printf("rmsd sum: %f\n", rmsd_sum);

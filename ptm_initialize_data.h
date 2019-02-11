@@ -196,6 +196,46 @@ const refdata_t structure_graphene = {	PTM_MATCH_GRAPHENE,		//.type
 					mapping_graphene_conventional,	//.mapping_conventional
 					template_indices_graphene,	//.template_indices
 				};
+
+const refdata_t structure_fluorite_ca = {PTM_MATCH_FLUORITE_CA,		//.type
+					20,				//.num_nbrs
+					-1,				//.num_facets
+					-1,				//.max_degree
+					-1,				//.num_graphs
+					NULL,				//.graphs
+					ptm_template_fluorite_ca,	//.points
+					NULL,				//.points_alt1
+					NULL,				//.points_alt2
+					NULL,				//.points_alt3
+					NULL,//penrose_graphene,		//.penrose
+					NULL,				//.penrose_alt1
+					NULL,				//.penrose_alt2
+					NULL,				//.penrose_alt3
+					-1,				//.num_mappings
+					NULL,//mapping_graphene,		//.mapping
+					NULL,//mapping_graphene_conventional,	//.mapping_conventional
+					NULL,//template_indices_graphene,	//.template_indices
+				};
+
+const refdata_t structure_fluorite_f = {PTM_MATCH_FLUORITE_F,		//.type
+					22,				//.num_nbrs
+					-1,				//.num_facets
+					-1,				//.max_degree
+					-1,				//.num_graphs
+					NULL,				//.graphs
+					ptm_template_fluorite_f,	//.points
+					NULL,				//.points_alt1
+					NULL,				//.points_alt2
+					NULL,				//.points_alt3
+					NULL,//penrose_graphene,	//.penrose
+					NULL,				//.penrose_alt1
+					NULL,				//.penrose_alt2
+					NULL,				//.penrose_alt3
+					-1,				//.num_mappings
+					NULL,//mapping_graphene,		//.mapping
+					NULL,//mapping_graphene_conventional,	//.mapping_conventional
+					NULL,//template_indices_graphene,	//.template_indices
+				};
 }
 
 #ifdef __cplusplus

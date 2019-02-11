@@ -16,6 +16,15 @@ int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, size_t atom_i
 void* voronoi_initialize_local();
 void voronoi_uninitialize_local(void* ptr);
 
+
+int multishell_ordering(	void* _voronoi_handle, size_t atom_index,
+				int(get_neighbours)(void *vdata, size_t atom_index, int num,
+							size_t *nbr_indices, int32_t *numbers,
+							double (*nbr_pos)[3]),
+				void *nbrlist,
+				int template_size, int num_shells, int* shell_sizes,
+				size_t* ordering, int32_t* numbers, double (*points)[3]);
+
 }
 
 #endif

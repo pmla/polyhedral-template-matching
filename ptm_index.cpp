@@ -10,6 +10,10 @@
 #include "ptm_polar.h"
 #include "ptm_quat.h"
 #include "ptm_structure_matcher.h"
+
+#include "ptm_arb_register_dfs.h"
+#include "ptm_arb_treefilter.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cfloat>
@@ -178,6 +182,54 @@ static void output_data(ptm::result_t *res, double (*points)[3],
 	memcpy(q, res->q, 4 * sizeof(double));
 }
 
+static int arb_index(	double (*points)[3], const ptm::refdata_t* s, const ptm::treefilter_t* filter,
+			ptm::result_t* res)
+{
+	int num_points = s->num_nbrs + 1;
+	double ch_points[PTM_MAX_INPUT_POINTS][3];
+	ptm::normalize_vertices(num_points, points, ch_points);
+
+	double max_rmsd = 0.15;
+	int num_nodes_dfs = 0;
+	double rmsd_dfs = INFINITY;
+	uint8_t best_permutation[PTM_MAX_INPUT_POINTS];
+	int match_found = ptm::register_points_dfs(num_points, (double(*)[3])s->points, ch_points, max_rmsd, filter,
+							best_permutation, &rmsd_dfs, &num_nodes_dfs);
+	if (match_found && rmsd_dfs < res->rmsd)
+	{
+		res->rmsd = rmsd_dfs;
+		//res->scale = scale;
+		res->ref_struct = s;
+		//memcpy(res->q, q, 4 * sizeof(double));
+		memcpy(res->mapping, best_permutation, sizeof(int8_t) * num_points);
+	}
+
+	return match_found;
+}
+
+static int index_fluorite(	size_t atom_index,
+				int(get_neighbours)(void *vdata, size_t atom_index, int num,
+							size_t *nbr_indices, int32_t *numbers,
+							double (*nbr_pos)[3]),
+				void *nbrlist,
+				ptm::result_t* res)
+{
+
+	//int min_points = std::max(PTM_NUM_POINTS_FLUORITE_CA, PTM_NUM_POINTS_FLUORITE_F);
+	int min_points = PTM_MAX_INPUT_POINTS;
+
+	size_t indices[PTM_MAX_INPUT_POINTS];
+	int32_t numbers[PTM_MAX_INPUT_POINTS];
+	double points[PTM_MAX_INPUT_POINTS][3];
+
+	int num_points = get_neighbours(nbrlist, atom_index, min_points, indices, numbers, points);
+	if (num_points < min_points)
+		return -1;
+
+	arb_index(points, &ptm::structure_fluorite_ca, &ptm::filter_fluorite_ca, res);
+	arb_index(points, &ptm::structure_fluorite_f, &ptm::filter_fluorite_f, res);
+}
+
 extern bool ptm_initialized;
 
 int ptm_index(ptm_local_handle_t local_handle, size_t atom_index,
@@ -213,6 +265,7 @@ int ptm_index(ptm_local_handle_t local_handle, size_t atom_index,
 	double ch_points[PTM_MAX_INPUT_POINTS][3];
 	int num_lpoints = 0;
 
+#if 0
 	if (flags & (PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO |
 	             PTM_CHECK_BCC)) {
 		int min_points = PTM_NUM_POINTS_SC;
@@ -260,6 +313,36 @@ int ptm_index(ptm_local_handle_t local_handle, size_t atom_index,
 		if (ret == 0) {
 			ret = match_graphene(gpoints, &res);
 		}
+	}
+#endif
+
+	{
+		size_t ordering[PTM_MAX_INPUT_POINTS];
+		int32_t numbers[PTM_MAX_INPUT_POINTS];
+		double points[PTM_MAX_INPUT_POINTS][3];
+
+		int num_shells = 2;
+		int shell_sizes[2] = {8, 12};
+		int template_size = PTM_NUM_POINTS_FLUORITE_CA;
+
+		ret = ptm::multishell_ordering(	(void*)local_handle, atom_index, get_neighbours, nbrlist,
+						template_size, num_shells, shell_sizes,
+						ordering, numbers, points);
+
+		arb_index(points, &ptm::structure_fluorite_ca, &ptm::filter_fluorite_ca, &res);
+		printf("rmsd: %f\n", res.rmsd);
+
+
+		int _num_shells = 3;
+		int _shell_sizes[3] = {4, 6, 12};
+		int _template_size = PTM_NUM_POINTS_FLUORITE_F;
+
+		ret = ptm::multishell_ordering(	(void*)local_handle, atom_index, get_neighbours, nbrlist,
+						_template_size, _num_shells, _shell_sizes,
+						ordering, numbers, points);
+
+		arb_index(points, &ptm::structure_fluorite_f, &ptm::filter_fluorite_f, &res);
+		printf("rmsd: %f\n", res.rmsd);
 	}
 
 	*p_type = PTM_MATCH_NONE;

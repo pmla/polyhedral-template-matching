@@ -444,7 +444,7 @@ static bool sorthelper_compare(sorthelper_t const& a, sorthelper_t const& b)
 	return a.dist < b.dist;
 }
 
-static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* output_indices, int32_t* output_numbers, double (*output_pos)[3])
+static int get_neighbours_unittest(void* vdata, size_t atom_index, int num, size_t* output_indices, int32_t* output_numbers, double (*output_pos)[3])
 {
 	unittest_nbrdata_t* nbrdata = (unittest_nbrdata_t*)vdata;
 
@@ -694,7 +694,7 @@ exit(3);*/
 				int32_t type, alloy_type;
 				double scale, rmsd, interatomic_distance, lattice_constant;
 				double q[4], F[9], F_res[3], U[9], P[9];
-				ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, tocheck, false,
+				ret = ptm_index(local_handle, 0, get_neighbours_unittest, (void*)&nbrlist, tocheck, false,
 						&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, output_indices);
 				if (ret != PTM_NO_ERROR)
 					CLEANUP("indexing failed", ret);
@@ -815,7 +815,7 @@ exit(3);*/
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4];
 
 			unittest_nbrdata_t nbrlist = {s->num_points, pdata[i], NULL};
-			ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, s->check, false,
+			ret = ptm_index(local_handle, 0, get_neighbours_unittest, (void*)&nbrlist, s->check, false,
 					&type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
@@ -849,7 +849,7 @@ exit(3);*/
 		memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
 		unittest_nbrdata_t nbrlist = {s->num_points, points, NULL};
 
-		ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, s->check, true,
+		ret = ptm_index(local_handle, 0, get_neighbours_unittest, (void*)&nbrlist, s->check, true,
 				&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
 		if (ret != PTM_NO_ERROR)
 			CLEANUP("indexing failed", ret);
@@ -887,7 +887,7 @@ exit(3);*/
 			memcpy(points, alt_templates[i], 3 * sizeof(double) * num_points[i]);
 			unittest_nbrdata_t nbrlist = {num_points[i], points, NULL};
 
-			ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, checks[i], true,
+			ret = ptm_index(local_handle, 0, get_neighbours_unittest, (void*)&nbrlist, checks[i], true,
 					&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);

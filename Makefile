@@ -20,8 +20,9 @@ CPP_FILES = main.cpp unittest.cpp\
 	ptm_quat.cpp \
 	ptm_polar.cpp \
 	ptm_initialize_data.cpp \
-	ptm_neighbour_ordering.cpp\
-	ptm_voronoi_cell.cpp
+	ptm_neighbour_ordering.cpp \
+	ptm_voronoi_cell.cpp \
+	ptm_arb_register_dfs.cpp
 
 #COBJS := $(patsubst %.c, %.o, $(C_FILES))
 CPPOBJS := $(patsubst %.cpp, %.o, $(CPP_FILES))
@@ -45,7 +46,10 @@ HEADER_FILES = ptm_alloy_types.h\
 	ptm_polar.h \
 	ptm_initialize_data.h \
 	ptm_neighbour_ordering.h \
-	ptm_voronoi_cell.h
+	ptm_voronoi_cell.h \
+	ptm_arb_register_dfs.h \
+	ptm_arb_register_dfs.h \
+	ptm_arb_treefilter.h
 
 OBJDIR = .
 

@@ -17,17 +17,20 @@ def get_distances(atoms, i):
 	indices, offsets = nl.get_neighbors(i)
 
 	nbrpos = []
+	numbers = []
 	for j, offset in zip(indices, offsets):
 		q = atoms.positions[j] + np.dot(offset, atoms.get_cell())
 		d = np.linalg.norm(p - q)
 		bonds += [(d, i, j, tuple(offset))]
 		nbrpos += [q - atoms.positions[i]]
+		numbers += [atoms.numbers[j]]
 
 	ds = np.array([e[0] for e in bonds])
 	indices = np.argsort(ds)
 	ds = ds[indices]
 	nbrpos = np.array(nbrpos)[indices]
-	return ds, nbrpos
+	numbers = np.array(numbers)[indices]
+	return ds, nbrpos, numbers
 
 def go():
 	a = 4.65327231
@@ -50,18 +53,25 @@ def go():
        [0.75, 0.75, 0.75],
        [0.25, 0.75, 0.25]], cellpar=[a, a, a, 90, 90, 90])
 
-	atoms = rutile
-	view(atoms)
-	return
+	atoms = fluorite
+	#view(atoms)
+	#return
 	print atoms.numbers
 
-	ds, nbrpos = get_distances(atoms, i=2)
+	ds, nbrpos, numbers = get_distances(atoms, i=4)
 	print ds[:4]
 	#print np.round(nbrpos[:22] / nbrpos[0,0]).astype(np.int)
 
-	ds = ds[:60]
+	m = {}
+	for i, e in enumerate(np.unique(numbers)):
+		m[e] = i
+	numbers = np.array([m[e] for e in numbers])
+
+	n = 60
+	numbers = numbers[:n]
+	ds = ds[:n]
 	print [(i + 1, e / ds[0]) for i, e in enumerate(ds[1:] - ds[:-1]) if e > 1E-3]
-	plt.scatter(range(1, len(ds) + 1), ds)
+	plt.scatter(range(1, len(ds) + 1), ds, c=numbers, cmap='viridis')
 	plt.xlim(0, len(ds) + 1)
 	plt.ylim(0, round(max(ds) + 1))
 	plt.show()

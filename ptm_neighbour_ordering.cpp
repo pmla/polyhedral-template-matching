@@ -227,6 +227,7 @@ int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int 
 	size_t nbr_indices[PTM_MAX_INPUT_POINTS];
 	int32_t nbr_numbers[PTM_MAX_INPUT_POINTS];
 	double nbr_pos[PTM_MAX_INPUT_POINTS][3];
+
 	int num_points = get_neighbours(nbrlist, atom_index, PTM_MAX_INPUT_POINTS, nbr_indices, nbr_numbers, nbr_pos);
 	if (num_points < min_points)
 		return -1;
@@ -245,6 +246,85 @@ int calculate_neighbour_ordering(	void* _voronoi_handle, size_t atom_index, int 
 	}
 
 	return num_points;
+}
+
+static int yep_ordering(	void* _voronoi_handle, int num_points, bool calc_solid_angles,
+				size_t* nbr_indices, double (*nbr_pos)[3], int32_t* nbr_numbers,
+				size_t* indices, double (*points)[3], int32_t* numbers)
+{
+	sorthelper_t data[PTM_MAX_INPUT_POINTS];
+	int ret = _calculate_neighbour_ordering(_voronoi_handle, num_points, nbr_pos, calc_solid_angles, data);
+	if (ret != 0)
+		return ret;
+
+	for (int i=0;i<num_points;i++)
+	{
+		int index = data[i].index;
+		indices[i] = nbr_indices[index];
+		numbers[i] = nbr_numbers[index];
+		memcpy(&points[i], nbr_pos[index], 3 * sizeof(double));
+	}
+
+	return num_points;
+}
+
+int multishell_ordering(	void* _voronoi_handle, size_t atom_index,
+				int(get_neighbours)(void *vdata, size_t atom_index, int num,
+							size_t *nbr_indices, int32_t *numbers,
+							double (*nbr_pos)[3]),
+				void *nbrlist,
+				int template_size, int num_shells, int* shell_sizes,
+				size_t* ordering, int32_t* numbers, double (*points)[3])
+{
+	size_t dordering[PTM_MAX_INPUT_POINTS];
+	int32_t dnumbers[PTM_MAX_INPUT_POINTS];
+	double dpoints[PTM_MAX_INPUT_POINTS][3];
+
+	size_t gordering[PTM_MAX_INPUT_POINTS];
+	int32_t gnumbers[PTM_MAX_INPUT_POINTS];
+	double gpoints[PTM_MAX_INPUT_POINTS][3];
+
+	int num_points = get_neighbours(nbrlist, atom_index, PTM_MAX_INPUT_POINTS, dordering, dnumbers, dpoints);
+	if (num_points < template_size)
+		return -1;
+
+	ordering[0] = dordering[0];
+	numbers[0] = dnumbers[0];
+	memcpy(points[0], dpoints[0], 3 * sizeof(double));
+
+	int num_lpoints = 0;
+	int num_left = num_points;
+	int num_found = 1;
+
+	for (int j=0;j<num_shells;j++)
+	{
+		num_lpoints = yep_ordering(	_voronoi_handle, num_left, false,
+						dordering, dpoints, dnumbers,
+						gordering, gpoints, gnumbers);
+		int num_inner = shell_sizes[j];
+		if (num_lpoints < num_inner + 1)
+			return -1;
+
+		for (int i=0;i<num_inner;i++) {
+			ordering[num_found + i] = gordering[1 + i];
+			numbers[num_found + i] = gnumbers[1 + i];
+			memcpy(points[num_found + i], gpoints[1 + i], 3 * sizeof(double));
+		}
+		num_found += num_inner;
+
+		for (int i=1;i<num_inner+1;i++) {
+			gordering[i] = gordering[num_left - 1];
+			gnumbers[i] = gnumbers[num_left - 1];
+			memcpy(gpoints[i], gpoints[num_left - 1], 3 * sizeof(double));
+			num_left--;
+		}
+
+		memcpy(dordering, gordering, num_left * sizeof(size_t));
+		memcpy(dnumbers, gnumbers, num_left * sizeof(int32_t));
+		memcpy(dpoints, gpoints, num_left * 3 * sizeof(double));
+	}
+
+	return 0;
 }
 
 static int find_diamond_neighbours(void* _voronoi_handle, int num_points, double (*_points)[3], size_t* nbr_indices, int32_t* nbr_numbers, int num_solid_nbrs, bool calc_solid_angles, solidnbr_t* nbrlist)
