@@ -222,6 +222,12 @@ int ptm_index(ptm_local_handle_t local_handle, size_t atom_index,
 	double ch_points[PTM_MAX_INPUT_POINTS][3];
 	int num_lpoints = 0;
 
+
+	if (output_indices != NULL)
+	{
+		memset(output_indices, -1, PTM_MAX_INPUT_POINTS * sizeof(size_t));
+	}
+
 	if (flags & (PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO |
 	             PTM_CHECK_BCC)) {
 		int min_points = PTM_NUM_POINTS_SC;
@@ -246,6 +252,9 @@ int ptm_index(ptm_local_handle_t local_handle, size_t atom_index,
 			if (flags & PTM_CHECK_BCC)
 				ret = match_general(&ptm::structure_bcc, ch_points, points, &ch, &res);
 		}
+
+		for (int i=0;i<num_lpoints;i++)
+			output_indices[i] = ordering[i];
 	}
 
 	if (flags & (PTM_CHECK_DCUB | PTM_CHECK_DHEX)) {
@@ -274,9 +283,6 @@ int ptm_index(ptm_local_handle_t local_handle, size_t atom_index,
 	*p_type = PTM_MATCH_NONE;
 	if (p_alloy_type != NULL)
 		*p_alloy_type = PTM_ALLOY_NONE;
-
-	if (output_indices != NULL)
-		memset(output_indices, -1, PTM_MAX_INPUT_POINTS * sizeof(size_t));
 
 	if (res.ref_struct == NULL)
 		return PTM_NO_ERROR;
