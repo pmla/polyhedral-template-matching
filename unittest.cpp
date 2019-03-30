@@ -390,7 +390,7 @@ static double nearest_neighbour_rmsd(int num, double scale, double* A, double (*
 	return sqrt(fabs(acc / num));
 }
 
-static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3], size_t* mapping)
+static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*input_points)[3], const double (*template_points)[3], int8_t* mapping)
 {
 	//transform template
 	double transformed_template[PTM_MAX_POINTS][3];
@@ -430,75 +430,6 @@ static double mapped_neighbour_rmsd(int num, double scale, double* A, double (*i
 }
 
 typedef double points_t[3];
-
-
-typedef struct
-{
-	int num_points;
-	double (*positions)[3];
-	int32_t* numbers;
-
-} unittest_nbrdata_t;
-
-typedef struct
-{
-	int index;
-	double dist;
-	double offset[3];
-	int32_t number;
-} sorthelper_t;
-
-static bool sorthelper_compare(sorthelper_t const& a, sorthelper_t const& b)
-{
-	return a.dist < b.dist;
-}
-
-static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* output_indices, int32_t* output_numbers, double (*output_pos)[3])
-{
-	unittest_nbrdata_t* nbrdata = (unittest_nbrdata_t*)vdata;
-
-	int num_points = nbrdata->num_points;
-	double (*positions)[3] = nbrdata->positions;
-	int32_t* numbers = nbrdata->numbers;
-
-	sorthelper_t data[PTM_MAX_POINTS];
-	for (int i=0;i<num_points;i++)
-	{
-		double x0 = positions[atom_index][0];
-		double y0 = positions[atom_index][1];
-		double z0 = positions[atom_index][2];
-
-		double x1 = positions[i][0];
-		double y1 = positions[i][1];
-		double z1 = positions[i][2];
-
-		double dx = x1 - x0;
-		double dy = y1 - y0;
-		double dz = z1 - z0;
-		double dist = dx*dx + dy*dy + dz*dz;
-
-		data[i].dist = dist;
-		data[i].index = i;
-		data[i].number = numbers == NULL ? -1 : numbers[i];
-
-		for (int j=0;j<3;j++)
-			data[i].offset[j] = positions[i][j] - positions[atom_index][j];
-	}
-
-	std::sort(data, data + num_points, &sorthelper_compare);
-
-	int n = std::min(num_points, num);
-	for (int i=0;i<n;i++)
-	{
-		output_indices[i] = data[i].index;
-		output_numbers[i] = data[i].number;
-
-		for (int j=0;j<3;j++)
-			output_pos[i][j] = data[i].offset[j];
-	}
-
-	return n;
-}
 
 uint64_t run_tests()
 {
@@ -697,14 +628,14 @@ exit(3);*/
 				if (numbers[0] == -1)
 					numbers = NULL;
 
-				unittest_nbrdata_t nbrlist = {s->num_points, points, numbers};
-
-				size_t output_indices[PTM_MAX_POINTS];
+				int8_t output_indices[PTM_MAX_INPUT_POINTS];
 				int32_t type, alloy_type;
 				double scale, rmsd, interatomic_distance, lattice_constant;
 				double q[4], F[9], F_res[3], U[9], P[9];
-				ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, tocheck, false,
-						&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, output_indices);
+				const double (*best_template)[3];
+
+				ret = ptm_index(local_handle, s->num_points, points, numbers, tocheck, false,
+						&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, &best_template, output_indices);
 				if (ret != PTM_NO_ERROR)
 					CLEANUP("indexing failed", ret);
 
@@ -822,10 +753,10 @@ exit(3);*/
 
 			int32_t type;
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4];
+			const double (*best_template)[3];
 
-			unittest_nbrdata_t nbrlist = {s->num_points, pdata[i], NULL};
-			ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, s->check, false,
-					&type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
+			ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false,
+					&type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, &interatomic_distance, &lattice_constant, &best_template, NULL);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 
@@ -853,13 +784,13 @@ exit(3);*/
 
 		int32_t type;
 		double scale, rmsd, interatomic_distance, lattice_constant, q[4], F[9], F_res[3];
+		const double (*best_template)[3];
 
 		double points[PTM_MAX_POINTS][3];
 		memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
-		unittest_nbrdata_t nbrlist = {s->num_points, points, NULL};
 
-		ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, s->check, true,
-				&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
+		ret = ptm_index(local_handle, s->num_points, points, NULL, s->check, true,
+				&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, &best_template, NULL);
 		if (ret != PTM_NO_ERROR)
 			CLEANUP("indexing failed", ret);
 
@@ -891,13 +822,13 @@ exit(3);*/
 		{
 			int32_t type;
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4], F[9], F_res[3];
+			const double (*best_template)[3];
 
 			double points[PTM_MAX_POINTS][3];
 			memcpy(points, alt_templates[i], 3 * sizeof(double) * num_points[i]);
-			unittest_nbrdata_t nbrlist = {num_points[i], points, NULL};
 
-			ret = ptm_index(local_handle, 0, get_neighbours, (void*)&nbrlist, checks[i], true,
-					&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, NULL);
+			ret = ptm_index(local_handle, num_points[i], points, NULL, checks[i], true,
+					&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, &best_template, NULL);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 

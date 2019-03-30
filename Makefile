@@ -21,6 +21,7 @@ CPP_FILES = main.cpp unittest.cpp\
 	ptm_polar.cpp \
 	ptm_initialize_data.cpp \
 	ptm_neighbour_ordering.cpp\
+	ptm_linear_assignment.cpp\
 	ptm_voronoi_cell.cpp
 
 #COBJS := $(patsubst %.c, %.o, $(C_FILES))
@@ -45,6 +46,7 @@ HEADER_FILES = ptm_alloy_types.h\
 	ptm_polar.h \
 	ptm_initialize_data.h \
 	ptm_neighbour_ordering.h \
+	ptm_linear_assignment.h \
 	ptm_voronoi_cell.h
 
 OBJDIR = .
