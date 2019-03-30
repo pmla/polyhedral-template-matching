@@ -10,9 +10,9 @@
 
 using namespace std;
 
-//#define _MAX_NBRS 50	//diamond
+#define _MAX_NBRS 50	//diamond
 //#define _MAX_NBRS 24	//fcc, other
-#define _MAX_NBRS 6	//graphene
+//#define _MAX_NBRS 6	//graphene
 
 
 static int read_file(const char* path, uint8_t** p_buf, size_t* p_fsize)
@@ -67,8 +67,7 @@ typedef struct
 
 } demonbrdata_t;
 
-
-static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
+static int get_neighbours(void* vdata, size_t central_index, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
 {
 	demonbrdata_t* data = (demonbrdata_t*)vdata;
 	double (*positions)[3] = data->positions;
@@ -107,15 +106,15 @@ int main()
 	double (*positions)[3] = NULL;
 	//int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/fcc_positions.dat", (uint8_t**)&positions, &fsize);
-	//int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
-	int ret = read_file((char*)"test_data/graphene_pos.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"test_data/graphene_pos.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
 	//ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	//ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	ret = read_file((char*)"test_data/graphene_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"test_data/graphene_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
 
