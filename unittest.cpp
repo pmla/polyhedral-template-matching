@@ -453,7 +453,7 @@ static bool sorthelper_compare(sorthelper_t const& a, sorthelper_t const& b)
 	return a.dist < b.dist;
 }
 
-static int get_neighbours(void* vdata, size_t atom_index, int num, size_t* output_indices, int32_t* output_numbers, double (*output_pos)[3])
+static int get_neighbours(void* vdata, size_t central_index, size_t atom_index, int num, size_t* output_indices, int32_t* output_numbers, double (*output_pos)[3])
 {
 	unittest_nbrdata_t* nbrdata = (unittest_nbrdata_t*)vdata;
 
