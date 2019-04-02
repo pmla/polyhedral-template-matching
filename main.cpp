@@ -18,8 +18,8 @@ using namespace std;
 //rmsd sum: 302846.681637
 
 
-#define _MAX_NBRS 50	//diamond
-//#define _MAX_NBRS 24	//fcc, other
+//#define _MAX_NBRS 50	//diamond
+#define _MAX_NBRS 24	//fcc, other
 //#define _MAX_NBRS 6	//graphene
 
 
@@ -80,16 +80,16 @@ int main()
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;
 	double (*positions)[3] = NULL;
-	//int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/fcc_positions.dat", (uint8_t**)&positions, &fsize);
-	int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/graphene_pos.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
-	//ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/graphene_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
@@ -130,10 +130,12 @@ int main()
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
+		int best_template_index = 0;
 		const double (*best_template)[3];
 
 		ptm_index(	local_handle, n, nbr_pos, NULL, PTM_CHECK_ALL, true,
-				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, &best_template, output_indices);
+				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance,
+				&lattice_constant, &best_template_index, &best_template, output_indices);
 //{
 //	printf("#scale %f\n", scale);
 //	printf("#quat %f %f %f %f\n", q[0], q[1], q[2], q[3]);

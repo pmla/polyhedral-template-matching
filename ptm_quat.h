@@ -19,6 +19,7 @@ int rotate_quaternion_into_hcp_fundamental_zone(double* q);
 int rotate_quaternion_into_hcp_conventional_fundamental_zone(double* q);
 int rotate_quaternion_into_diamond_hexagonal_fundamental_zone(double* q);
 
+void quat_rot(double* r, double* a, double* b);
 void normalize_quaternion(double* q);
 void quaternion_to_rotation_matrix(double* q, double* U);
 void rotation_matrix_to_quaternion(double* u, double* q);

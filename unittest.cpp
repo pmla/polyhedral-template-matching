@@ -632,10 +632,12 @@ exit(3);*/
 				int32_t type, alloy_type;
 				double scale, rmsd, interatomic_distance, lattice_constant;
 				double q[4], F[9], F_res[3], U[9], P[9];
+				int best_template_index = 0;
 				const double (*best_template)[3];
 
 				ret = ptm_index(local_handle, s->num_points, points, numbers, tocheck, false,
-						&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, &best_template, output_indices);
+						&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance,
+						&lattice_constant, &best_template_index, &best_template, output_indices);
 				if (ret != PTM_NO_ERROR)
 					CLEANUP("indexing failed", ret);
 
@@ -753,10 +755,12 @@ exit(3);*/
 
 			int32_t type;
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4];
+			int best_template_index = 0;
 			const double (*best_template)[3];
 
 			ret = ptm_index(local_handle, s->num_points, pdata[i], NULL, s->check, false,
-					&type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, &interatomic_distance, &lattice_constant, &best_template, NULL);
+					&type, NULL, &scale, &rmsd, q, NULL, NULL, NULL, NULL, &interatomic_distance,
+					&lattice_constant, &best_template_index, &best_template, NULL);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 
@@ -784,13 +788,15 @@ exit(3);*/
 
 		int32_t type;
 		double scale, rmsd, interatomic_distance, lattice_constant, q[4], F[9], F_res[3];
+		int best_template_index = 0;
 		const double (*best_template)[3];
 
 		double points[PTM_MAX_POINTS][3];
 		memcpy(points, s->points, 3 * sizeof(double) * s->num_points);
 
 		ret = ptm_index(local_handle, s->num_points, points, NULL, s->check, true,
-				&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, &best_template, NULL);
+				&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance,
+				&lattice_constant, &best_template_index, &best_template, NULL);
 		if (ret != PTM_NO_ERROR)
 			CLEANUP("indexing failed", ret);
 
@@ -822,13 +828,15 @@ exit(3);*/
 		{
 			int32_t type;
 			double scale, rmsd, interatomic_distance, lattice_constant, q[4], F[9], F_res[3];
+			int best_template_index = 0;
 			const double (*best_template)[3];
 
 			double points[PTM_MAX_POINTS][3];
 			memcpy(points, alt_templates[i], 3 * sizeof(double) * num_points[i]);
 
 			ret = ptm_index(local_handle, num_points[i], points, NULL, checks[i], true,
-					&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance, &lattice_constant, &best_template, NULL);
+					&type, NULL, &scale, &rmsd, q, F, F_res, NULL, NULL, &interatomic_distance,
+					&lattice_constant, &best_template_index, &best_template, NULL);
 			if (ret != PTM_NO_ERROR)
 				CLEANUP("indexing failed", ret);
 

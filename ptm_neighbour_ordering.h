@@ -14,12 +14,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace ptm {
 
-int calculate_neighbour_ordering(	void* _voronoi_handle, int num_input_points, double (*input_points)[3], int32_t* input_numbers,
-					int* output_ordering, double (*output_points)[3], int32_t* output_numbers);
+typedef struct
+{
+	int ordering[PTM_MAX_INPUT_POINTS];
+	int32_t numbers[PTM_MAX_INPUT_POINTS];
+	double points[PTM_MAX_INPUT_POINTS][3];
+} atomicenv_t;
 
-int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, int num_input_points, double (*points)[3], int32_t* numbers, int* ordering,
-						int num_inner, int num_outer,
-						int* output_ordering, double (*output_points)[3], int32_t* output_numbers);
+
+int calculate_neighbour_ordering(void* _voronoi_handle, int num_input_points, double (*input_points)[3], int32_t* input_numbers, ptm::atomicenv_t* output);
+
+int calculate_two_shell_neighbour_ordering(void* _voronoi_handle, int num_input_points, int num_inner, int num_outer, ptm::atomicenv_t* input, ptm::atomicenv_t* output);
 
 void* voronoi_initialize_local();
 void voronoi_uninitialize_local(void* ptr);

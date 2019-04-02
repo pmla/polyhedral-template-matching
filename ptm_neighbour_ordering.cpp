@@ -216,8 +216,7 @@ static int _calculate_neighbour_ordering(void* _voronoi_handle, int num_selected
 	return ret;
 }
 
-int calculate_neighbour_ordering(	void* _voronoi_handle, int num_input_points, double (*input_points)[3], int32_t* input_numbers,
-					int* output_ordering, double (*output_points)[3], int32_t* output_numbers)
+int calculate_neighbour_ordering(	void* _voronoi_handle, int num_input_points, double (*input_points)[3], int32_t* input_numbers, ptm::atomicenv_t* output)
 {
 	sorthelper_t data[PTM_MAX_INPUT_POINTS];
 
@@ -230,23 +229,23 @@ int calculate_neighbour_ordering(	void* _voronoi_handle, int num_input_points, d
 	if (ret != 0)
 		return ret;
 
-	memcpy(output_points[0], input_points[0], 3 * sizeof(double));
-	output_ordering[0] = 0;
-	output_numbers[0] = input_numbers[0];
+	memcpy(output->points[0], input_points[0], 3 * sizeof(double));
+	output->ordering[0] = 0;
+	output->numbers[0] = input_numbers[0];
 
 	for (int i=0;i<num_selected;i++)
 	{
 		int index = selected[data[i].index];
-		output_ordering[1+i] = index;
-		output_numbers[1+i] = input_numbers[index];
-		memcpy(output_points[1+i], input_points[index], 3 * sizeof(double));
+		output->ordering[1+i] = index;
+		output->numbers[1+i] = input_numbers[index];
+		memcpy(output->points[1+i], input_points[index], 3 * sizeof(double));
 	}
 
 	for (int i=1+num_selected;i<num_input_points;i++)
 	{
-		output_ordering[i] = i;
-		output_numbers[i] = input_numbers[i];
-		memcpy(output_points[i], input_points[i], 3 * sizeof(double));
+		output->ordering[i] = i;
+		output->numbers[i] = input_numbers[i];
+		memcpy(output->points[i], input_points[i], 3 * sizeof(double));
 	}
 
 	return num_input_points;
@@ -299,12 +298,12 @@ static int euclidean_argsort(int num_input_points, double (*points)[3], int cent
 
 #define MAX_INNER 4
 
-int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, int num_input_points, double (*input_points)[3], int32_t* input_numbers, int* input_ordering,
-						int num_inner, int num_outer,
-						int* output_ordering, double (*output_points)[3], int32_t* output_numbers)
+int calculate_two_shell_neighbour_ordering(	void* _voronoi_handle, int num_input_points, int num_inner, int num_outer,
+						ptm::atomicenv_t* input, ptm::atomicenv_t* output)
 {
 	assert(num_inner <= MAX_INNER);
 
+//TODO: use rectangular assignment
 	//int n = num_inner * num_outer;
 int nc = num_input_points - num_inner - 1;
 
@@ -317,11 +316,11 @@ int nc = num_input_points - num_inner - 1;
 		int inner_index = 1+i;
 
 		int selected[PTM_MAX_INPUT_POINTS];
-		int num_found = euclidean_argsort(num_input_points, input_points, inner_index, num_inner, selected);
+		int num_found = euclidean_argsort(num_input_points, input->points, inner_index, num_inner, selected);
 		int num_selected = std::min(num_found, 6);
 
 		sorthelper_t data[PTM_MAX_INPUT_POINTS];
-		int ret = _calculate_neighbour_ordering(_voronoi_handle, num_selected, selected, input_points, inner_index, data);
+		int ret = _calculate_neighbour_ordering(_voronoi_handle, num_selected, selected, input->points, inner_index, data);
 		if (ret != 0)
 			return ret;
 
@@ -341,9 +340,9 @@ int nc = num_input_points - num_inner - 1;
 
 	for (int i=0;i<num_inner+1;i++)
 	{
-		output_ordering[i] = input_ordering[i];
-		output_numbers[i] = input_numbers[i];
-		memcpy(output_points[i], input_points[i], 3 * sizeof(double));
+		output->ordering[i] = input->ordering[i];
+		output->numbers[i] = input->numbers[i];
+		memcpy(output->points[i], input->points[i], 3 * sizeof(double));
 	}
 
 	for (int i=0;i<num_inner;i++)
@@ -352,9 +351,9 @@ int nc = num_input_points - num_inner - 1;
 		{
 			int index = lmate[i * num_outer + j] + 1 + num_inner;
 
-			output_ordering[1 + num_inner + i * num_outer + j] = input_ordering[index];
-			output_numbers[1 + num_inner + i * num_outer + j] = input_numbers[index];
-			memcpy(output_points[1 + num_inner + i * num_outer + j], input_points[index], 3 * sizeof(double));
+			output->ordering[1 + num_inner + i * num_outer + j] = input->ordering[index];
+			output->numbers[1 + num_inner + i * num_outer + j] = input->numbers[index];
+			memcpy(output->points[1 + num_inner + i * num_outer + j], input->points[index], 3 * sizeof(double));
 		}
 	}
 

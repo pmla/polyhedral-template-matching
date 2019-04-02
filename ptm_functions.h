@@ -27,8 +27,10 @@ extern "C" {
 int ptm_index(	ptm_local_handle_t local_handle,
 		int num_points, double (*input_points)[3], int32_t* input_numbers, int32_t flags, bool output_conventional_orientation, //inputs
 		int32_t* p_type, int32_t* p_alloy_type, double* p_scale, double* p_rmsd, double* q, double* F, double* F_res, double* U, double* P, double* p_interatomic_distance, double* p_lattice_constant,
-		const double (**p_best_template)[3], int8_t* output_indices);	//outputs
+		int* p_best_template_index, const double (**p_best_template)[3], int8_t* output_indices);	//outputs
 
+
+int ptm_remap_template(int type, double* qtarget, double* q, double* qres, double* p_disorientation, int8_t* mapping);
 
 #ifdef __cplusplus
 }

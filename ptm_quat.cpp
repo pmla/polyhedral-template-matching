@@ -155,7 +155,7 @@ const double generator_icosahedral[60][4] = {
 };
 
 
-static void quat_rot(double* r, double* a, double* b)
+void quat_rot(double* r, double* a, double* b)
 {
         b[0] = (r[0] * a[0] - r[1] * a[1] - r[2] * a[2] - r[3] * a[3]);
         b[1] = (r[0] * a[1] + r[1] * a[0] + r[2] * a[3] - r[3] * a[2]);
