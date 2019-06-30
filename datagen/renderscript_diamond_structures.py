@@ -115,8 +115,8 @@ def get_templates():
 		[  0.            ,  0.782983254107, -0.782983254107 ],
 		[  0.782983254107,  0.            , -0.782983254107 ]	]
 
-	k7 = 2*sqrt(3)-1
-	k8 = 6-sqrt(3)
+	k7 = (6*sqrt(3) - 3) / 22
+	k8 = (18-3*sqrt(3)) / 22
 	GRP =  np.array(
 	       [[     0,     0,  0 ],
                 [     0,  2*k7,  0 ],
@@ -127,7 +127,7 @@ def get_templates():
                 [  2*k8,     0,  0 ],
                 [    k8, -3*k7,  0 ],
                 [   -k8, -3*k7,  0 ],
-                [ -2*k8,     0,  0 ]	]) * 3 / 22
+                [ -2*k8,     0,  0 ]	])
 
 	return [np.array(e) for e in [SC, FCC, HCP, ICO, BCC, DCUB, DHEX, GRP]]
 
