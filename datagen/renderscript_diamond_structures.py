@@ -268,7 +268,8 @@ def render_scene(folder, name):
 	#vp.camera_pos = (0, 0, 0)
 	#vp.camera_dir = (-0.3, 0.9, -0.3)
 	vp.fov = 20
-	#vp.zoom_all()
+	if name == 'grp':
+		vp.fov = 22
 
 	size = (126, 126)
 	vp.render(RenderSettings(filename = "ptm_schematic_%s.png" % name, size=size))
