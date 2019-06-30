@@ -7,16 +7,25 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PTM_NEIGHBOUR_ORDERING_H
-#define PTM_NEIGHBOUR_ORDERING_H
+#ifndef PTM_MULTISHELL_H
+#define PTM_MULTISHELL_H
 
 #include <cstddef>
 
 namespace ptm {
 
-void* voronoi_initialize_local();
-void voronoi_uninitialize_local(void* ptr);
+typedef struct
+{
+	int ordering[PTM_MAX_INPUT_POINTS];
+	size_t nbr_indices[PTM_MAX_INPUT_POINTS];
+	int32_t numbers[PTM_MAX_INPUT_POINTS];
+	double points[PTM_MAX_INPUT_POINTS][3];
+} atomicenv_t;
 
+
+int calculate_two_shell_neighbour_ordering(	int num_inner, int num_outer,
+						size_t atom_index, int (get_neighbours)(void* vdata, size_t _unused_lammps_variable, size_t atom_index, int num, int* ordering, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3]), void* nbrlist,
+						ptm::atomicenv_t* output);
 }
 
 #endif

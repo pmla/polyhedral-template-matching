@@ -15,45 +15,45 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //------------------------------------
 //    definitions
 //------------------------------------
-#define PTM_NO_ERROR        0
+#define PTM_NO_ERROR            0
 
 
-#define PTM_CHECK_FCC                (1 << 0)
-#define PTM_CHECK_HCP                (1 << 1)
-#define PTM_CHECK_BCC                (1 << 2)
-#define PTM_CHECK_ICO                (1 << 3)
-#define PTM_CHECK_SC                (1 << 4)
-#define PTM_CHECK_DCUB                (1 << 5)
-#define PTM_CHECK_DHEX                (1 << 6)
-#define PTM_CHECK_GRAPHENE        (1 << 7)
-#define PTM_CHECK_DEFAULT        (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC)
-#define PTM_CHECK_ALL        (PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC | PTM_CHECK_DCUB | PTM_CHECK_DHEX | PTM_CHECK_GRAPHENE)
+#define PTM_CHECK_FCC           (1 << 0)
+#define PTM_CHECK_HCP           (1 << 1)
+#define PTM_CHECK_BCC           (1 << 2)
+#define PTM_CHECK_ICO           (1 << 3)
+#define PTM_CHECK_SC            (1 << 4)
+#define PTM_CHECK_DCUB          (1 << 5)
+#define PTM_CHECK_DHEX          (1 << 6)
+#define PTM_CHECK_GRAPHENE      (1 << 7)
+#define PTM_CHECK_DEFAULT       (PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC)
+#define PTM_CHECK_ALL           (PTM_CHECK_SC | PTM_CHECK_FCC | PTM_CHECK_HCP | PTM_CHECK_ICO | PTM_CHECK_BCC | PTM_CHECK_DCUB | PTM_CHECK_DHEX | PTM_CHECK_GRAPHENE)
 
-#define PTM_MATCH_NONE                0
-#define PTM_MATCH_FCC                1
-#define PTM_MATCH_HCP                2
-#define PTM_MATCH_BCC                3
-#define PTM_MATCH_ICO                4
-#define PTM_MATCH_SC                5
-#define PTM_MATCH_DCUB                6
-#define PTM_MATCH_DHEX                7
-#define PTM_MATCH_GRAPHENE        8
+#define PTM_MATCH_NONE          0
+#define PTM_MATCH_FCC           1
+#define PTM_MATCH_HCP           2
+#define PTM_MATCH_BCC           3
+#define PTM_MATCH_ICO           4
+#define PTM_MATCH_SC            5
+#define PTM_MATCH_DCUB          6
+#define PTM_MATCH_DHEX          7
+#define PTM_MATCH_GRAPHENE      8
 
-#define PTM_ALLOY_NONE                0
-#define PTM_ALLOY_PURE                1
-#define PTM_ALLOY_L10                2
+#define PTM_ALLOY_NONE          0
+#define PTM_ALLOY_PURE          1
+#define PTM_ALLOY_L10           2
 #define PTM_ALLOY_L12_CU        3
 #define PTM_ALLOY_L12_AU        4
-#define PTM_ALLOY_B2                5
-#define PTM_ALLOY_SIC                6
-#define PTM_ALLOY_BN                7
+#define PTM_ALLOY_B2            5
+#define PTM_ALLOY_SIC           6
+#define PTM_ALLOY_BN            7
 
 
-#define PTM_MAX_INPUT_POINTS 19
-#define PTM_MAX_NBRS        16
-#define PTM_MAX_POINTS        (PTM_MAX_NBRS + 1)
-#define PTM_MAX_FACETS        28        //2 * PTM_MAX_NBRS - 4
-#define PTM_MAX_EDGES   42        //3 * PTM_MAX_NBRS - 6
+#define PTM_MAX_INPUT_POINTS    19
+#define PTM_MAX_NBRS            16
+#define PTM_MAX_POINTS          (PTM_MAX_NBRS + 1)
+#define PTM_MAX_FACETS          28        //2 * PTM_MAX_NBRS - 4
+#define PTM_MAX_EDGES           42        //3 * PTM_MAX_NBRS - 6
 
 
 //------------------------------------

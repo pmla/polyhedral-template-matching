@@ -10,8 +10,8 @@
 
 using namespace std;
 
-#define _MAX_NBRS 50	//diamond
-//#define _MAX_NBRS 24	//fcc, other
+//#define _MAX_NBRS 50	//diamond
+#define _MAX_NBRS 24	//fcc, other
 //#define _MAX_NBRS 6	//graphene
 
 
@@ -67,7 +67,7 @@ typedef struct
 
 } demonbrdata_t;
 
-static int get_neighbours(void* vdata, size_t central_index, size_t atom_index, int num, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
+static int get_neighbours(void* vdata, size_t central_index, size_t atom_index, int num, int* ordering, size_t* nbr_indices, int32_t* numbers, double (*nbr_pos)[3])
 {
 	demonbrdata_t* data = (demonbrdata_t*)vdata;
 	double (*positions)[3] = data->positions;
@@ -104,16 +104,16 @@ int main()
 	size_t fsize = 0;
 	int32_t* nbrs = NULL;
 	double (*positions)[3] = NULL;
-	//int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
+	int ret = read_file((char*)"test_data/FeCu_positions.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/fcc_positions.dat", (uint8_t**)&positions, &fsize);
-	int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
+	//int ret = read_file((char*)"test_data/diamond_pos.dat", (uint8_t**)&positions, &fsize);
 	//int ret = read_file((char*)"test_data/graphene_pos.dat", (uint8_t**)&positions, &fsize);
 	if (ret != 0)
 		return -1;
 
-	//ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	ret = read_file((char*)"test_data/FeCu_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/fcc_nbrs.dat", (uint8_t**)&nbrs, &fsize);
-	ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
+	//ret = read_file((char*)"test_data/diamond_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	//ret = read_file((char*)"test_data/graphene_nbrs.dat", (uint8_t**)&nbrs, &fsize);
 	if (ret != 0)
 		return -1;
@@ -134,12 +134,12 @@ int main()
 	double rmsd_sum = 0.0;
 	for (int i=0;i<num_atoms;i++)
 	{
-		size_t output_indices[PTM_MAX_INPUT_POINTS];
+		int8_t output_indices[PTM_MAX_INPUT_POINTS];
 		int32_t type, alloy_type;
 		double scale, rmsd, interatomic_distance, lattice_constant;
 		double q[4], F[9], F_res[3], U[9], P[9];
 		ptm_index(	local_handle, i, get_neighbours, (void*)&nbrlist, PTM_CHECK_ALL, true,
-				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, output_indices);
+				&type, &alloy_type, &scale, &rmsd, q, F, F_res, U, P, &interatomic_distance, &lattice_constant, NULL, NULL, output_indices);
 //{
 //	printf("#scale %f\n", scale);
 //	printf("#quat %f %f %f %f\n", q[0], q[1], q[2], q[3]);

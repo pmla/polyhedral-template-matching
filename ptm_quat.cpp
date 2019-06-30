@@ -155,12 +155,26 @@ const double generator_icosahedral[60][4] = {
 };
 
 
-static void quat_rot(double* r, double* a, double* b)
+void quat_rot(double* r, double* a, double* b)
 {
         b[0] = (r[0] * a[0] - r[1] * a[1] - r[2] * a[2] - r[3] * a[3]);
         b[1] = (r[0] * a[1] + r[1] * a[0] + r[2] * a[3] - r[3] * a[2]);
         b[2] = (r[0] * a[2] - r[1] * a[3] + r[2] * a[0] + r[3] * a[1]);
         b[3] = (r[0] * a[3] + r[1] * a[2] - r[2] * a[1] + r[3] * a[0]);
+}
+
+static void rotate_and_flip(double* q, double* r)
+{
+	double temp[4];
+        quat_rot(q, r, temp);
+	memcpy(q, temp, 4 * sizeof(double));
+        if (q[0] < 0)
+        {
+		q[0] = -q[0];
+		q[1] = -q[1];
+		q[2] = -q[2];
+		q[3] = -q[3];
+        }
 }
 
 static int rotate_quaternion_into_fundamental_zone(int num_generators, const double (*generator)[4], double* q)
@@ -221,6 +235,46 @@ int rotate_quaternion_into_diamond_hexagonal_fundamental_zone(double* q)
 {
         return rotate_quaternion_into_fundamental_zone(3, generator_diamond_hexagonal, q);
 }
+
+
+
+int map_quaternion_cubic(double* q, int i)
+{
+	rotate_and_flip(q, (double*)generator_cubic[i]);
+	return 0;
+}
+
+int map_quaternion_diamond_cubic(double* q, int i)
+{
+	rotate_and_flip(q, (double*)generator_diamond_cubic[i]);
+	return 0;
+}
+
+int map_quaternion_icosahedral(double* q, int i)
+{
+	rotate_and_flip(q, (double*)generator_icosahedral[i]);
+	return 0;
+}
+
+int map_quaternion_hcp(double* q, int i)
+{
+	rotate_and_flip(q, (double*)generator_hcp[i]);
+	return 0;
+}
+
+int map_quaternion_hcp_conventional(double* q, int i)
+{
+	rotate_and_flip(q, (double*)generator_hcp_conventional[i]);
+	return 0;
+}
+
+int map_quaternion_diamond_hexagonal(double* q, int i)
+{
+	rotate_and_flip(q, (double*)generator_diamond_hexagonal[i]);
+	return 0;
+}
+
+
 
 double quat_dot(double* a, double* b)
 {

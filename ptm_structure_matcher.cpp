@@ -303,7 +303,6 @@ int match_dcub_dhex(double (*ch_points)[3], double (*points)[3], int32_t flags, 
         return PTM_NO_ERROR;
 }
 
-
 static void check_graphs_graphene(        const refdata_t* s,
                                         int num_points,
                                         const double (*ideal_points)[3],

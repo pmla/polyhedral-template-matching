@@ -8,19 +8,20 @@ endif
 
 PROGRAM = benchmark
 CPP_FILES = main.cpp unittest.cpp\
-	ptm_graph_data.cpp\
-	ptm_convex_hull_incremental.cpp \
-	ptm_index.cpp\
 	ptm_alloy_types.cpp\
-	ptm_deformation_gradient.cpp \
-	ptm_normalize_vertices.cpp \
-	ptm_structure_matcher.cpp \
 	ptm_canonical_coloured.cpp \
+	ptm_convex_hull_incremental.cpp \
+	ptm_deformation_gradient.cpp \
+	ptm_graph_data.cpp\
 	ptm_graph_tools.cpp \
-	ptm_quat.cpp \
-	ptm_polar.cpp \
+	ptm_index.cpp\
 	ptm_initialize_data.cpp \
+	ptm_multishell.cpp\
 	ptm_neighbour_ordering.cpp\
+	ptm_normalize_vertices.cpp \
+	ptm_polar.cpp \
+	ptm_quat.cpp \
+	ptm_structure_matcher.cpp \
 	ptm_voronoi_cell.cpp
 
 #COBJS := $(patsubst %.c, %.o, $(C_FILES))
@@ -32,19 +33,20 @@ LDLIBS = -lm #-fno-omit-frame-pointer -fsanitize=address
 CPP = g++
 
 HEADER_FILES = ptm_alloy_types.h\
+	ptm_canonical_coloured.h \
 	ptm_convex_hull_incremental.h \
 	ptm_deformation_gradient.h\
-	ptm_graph_data.h\
-	ptm_index.h \
-	ptm_normalize_vertices.h \
-	ptm_structure_matcher.h \
-	ptm_canonical_coloured.h \
-	ptm_graph_tools.h \
 	ptm_fundamental_mappings.h \
-	ptm_quat.h \
-	ptm_polar.h \
+	ptm_graph_data.h\
+	ptm_graph_tools.h \
+	ptm_index.h \
 	ptm_initialize_data.h \
+	ptm_multishell.h\
 	ptm_neighbour_ordering.h \
+	ptm_normalize_vertices.h \
+	ptm_polar.h \
+	ptm_quat.h \
+	ptm_structure_matcher.h \
 	ptm_voronoi_cell.h
 
 OBJDIR = .
@@ -54,7 +56,7 @@ CPP_OBJECT_FILES = $(CPP_SRC_FILES:%.cpp=$(OBJDIR)/%.o)
 C_OBJECT_MODULE_FILE = $(C_SRC_MODULE_FILE:%.c=$(OBJDIR)/%.o) 
 
 #CFLAGS = -std=c99 -g -O3 -Wall -Wextra
-CPPFLAGS = -g -O3 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
+CPPFLAGS = -g -O3 -std=c++11 -Wall -Wextra -Wvla -pedantic #-fno-omit-frame-pointer -fsanitize=address
 
 
 all: $(PROGRAM)
