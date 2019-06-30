@@ -10,6 +10,9 @@ import itertools
 
 
 def get_templates():
+
+	sqrt = np.sqrt
+
 	SC = [	[  0.            ,  0.            ,  0.             ],
 		[  0.            ,  0.            , -1.             ],
 		[  0.            ,  0.            ,  1.             ],
@@ -112,7 +115,18 @@ def get_templates():
 		[  0.            ,  0.782983254107, -0.782983254107 ],
 		[  0.782983254107,  0.            , -0.782983254107 ]	]
 
-	return [np.array(e) for e in [SC, FCC, HCP, ICO, BCC, DCUB, DHEX]]
+	GRP =  [[                    0,                    0,                    0 ],
+                [                    0,  -3./11+6*sqrt(3)/11,                    0 ],
+                [  -3*sqrt(3)/22+9./11,  -3*sqrt(3)/11+3./22,                    0 ],
+                [  -9./11+3*sqrt(3)/22,  -3*sqrt(3)/11+3./22,                    0 ],
+                [  -9./11+3*sqrt(3)/22,  -9./22+9*sqrt(3)/11,                    0 ],
+                [  -3*sqrt(3)/22+9./11,  -9./22+9*sqrt(3)/11,                    0 ],
+                [ -3*sqrt(3)/11+18./11,                    0,                    0 ],
+                [  -3*sqrt(3)/22+9./11,  -9*sqrt(3)/11+9./22,                    0 ],
+                [  -9./11+3*sqrt(3)/22,  -9*sqrt(3)/11+9./22,                    0 ],
+                [ -18./11+3*sqrt(3)/11,                    0,                    0 ]	]
+
+	return [np.array(e) for e in [SC, FCC, HCP, ICO, BCC, DCUB, DHEX, GRP]]
 
 def find_plane(positions):
 
@@ -153,7 +167,7 @@ def project(positions, indices):
 def render_scene(folder, name):
 
 	nameindex = dict()
-	names = ['SC', 'FCC', 'HCP', 'ICO', 'BCC', 'DCUB', 'DHEX']
+	names = ['SC', 'FCC', 'HCP', 'ICO', 'BCC', 'DCUB', 'DHEX', 'GRP']
 	for i, n in enumerate(names):
 		nameindex[n.lower()] = i
 
@@ -217,8 +231,12 @@ def render_scene(folder, name):
 	modifier = ovito.modifiers.CreateBondsModifier(mode=ovito.modifiers.CreateBondsModifier.Mode.Pairwise)
 	modifier.bonds_display.color = (166/255.,206/255.,227/255.)
 
-	modifier.set_pairwise_cutoff(type_prop.type_list[0].name, type_prop.type_list[0].name, 0)
-	modifier.set_pairwise_cutoff(type_prop.type_list[0].name, type_prop.type_list[1].name, 0)
+	if name == 'grp':
+		modifier.set_pairwise_cutoff(type_prop.type_list[0].name, type_prop.type_list[0].name, cutoff)
+		modifier.set_pairwise_cutoff(type_prop.type_list[0].name, type_prop.type_list[1].name, cutoff)
+	else:
+		modifier.set_pairwise_cutoff(type_prop.type_list[0].name, type_prop.type_list[0].name, 0)
+		modifier.set_pairwise_cutoff(type_prop.type_list[0].name, type_prop.type_list[1].name, 0)
 
 	if len(indices) == 0:
 		modifier.set_pairwise_cutoff(type_prop.type_list[1].name, type_prop.type_list[1].name, cutoff)
@@ -245,6 +263,8 @@ def render_scene(folder, name):
 
 	vp.camera_pos = (0, 0, 0)
 	vp.camera_dir = (0.8, -0.6, -0.1667)
+	if name == 'grp':
+		vp.camera_dir = (0, 0, -1)
 	#vp.camera_pos = (0, 0, 0)
 	#vp.camera_dir = (-0.3, 0.9, -0.3)
 	vp.fov = 20
@@ -255,12 +275,15 @@ def render_scene(folder, name):
 
 import sys
 def go():
+	if len(sys.argv) < 2:
+		raise Exception("must provide a template index")
+
 	index = int(sys.argv[1])
-	if index not in range(7):
+	if index not in range(8):
 		raise Exception("oh dear")
 
 	folder = '.'
-	names = ['SC', 'FCC', 'HCP', 'ICO', 'BCC', 'DCUB', 'DHEX']
+	names = ['SC', 'FCC', 'HCP', 'ICO', 'BCC', 'DCUB', 'DHEX', 'GRP']
 	for i, name in enumerate(names):
 		if i != index: continue
 		name = name.lower()
