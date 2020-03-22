@@ -13,8 +13,8 @@ ASAP PTM documentation: https://wiki.fysik.dtu.dk/asap/Local%20crystalline%20ord
 
 If you use PTM in a publication, please cite:
 
-Peter Mahler Larsen and Søren Schmidt and Jakob Schiøtz
-Robust structural identification via polyhedral template matching
+Peter Mahler Larsen and Søren Schmidt and Jakob Schiøtz;
+"Robust structural identification via polyhedral template matching";
 Modelling Simul. Mater. Sci. Eng. 24 (2016) 055007
 
 Article available at:
