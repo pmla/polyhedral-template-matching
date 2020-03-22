@@ -18,7 +18,7 @@ Robust structural identification via polyhedral template matching
 Modelling Simul. Mater. Sci. Eng. 24 (2016) 055007
 
 Article available at:
-http://stacks.iop.org/0965-0393/24/i=5/a=055007
+https://doi.org/10.1088/0965-0393/24/5/055007
 
 Preprint available at:
 http://arxiv.org/abs/1603.05143
